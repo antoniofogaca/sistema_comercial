@@ -1,0 +1,255 @@
+{# core/templates/core/convenio_emissao_form.html #}
+
+{% extends 'core/base.html' %}
+{% load widget_tweaks %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="card shadow mb-4">
+    <div class="card-header py-3">
+        <h6 class="m-0 font-weight-bold text-primary">{{ title }}</h6>
+    </div>
+    <div class="card-body">
+        <form method="post" class="needs-validation" novalidate>
+            {% csrf_token %}
+
+            <div class="mb-4">
+                <h5 class="text-primary">Dados da Emissão</h5>
+            </div>
+
+            <div class="row">
+                {# Campo CPF do Cliente (Input para busca) #}
+                <div class="col-md-3 mb-3">
+                    <label for="{{ form.CPF.id_for_label }}" class="form-label">CPF do Cliente<span class="text-danger">*</span></label>
+                    {% render_field form.CPF class="form-control" placeholder="Ex: 000.000.000-00" %}
+                    <small class="form-text text-muted">Digite o CPF do cliente para buscar seus dados.</small>
+                    {% if form.CPF.errors %}
+                        {% for error in form.CPF.errors %}
+                            <div class="invalid-feedback d-block">{{ error }}</div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+
+                {# Campo Nome do Cliente (ReadOnly, preenchido via JS/AJAX) #}
+                <div class="col-md-5 mb-3">
+                    <label for="id_nome_cliente" class="form-label">Nome do Cliente</label>
+                    <input type="text" id="id_nome_cliente" class="form-control" readonly placeholder="Preenchido automaticamente">
+                </div>
+
+                {# Campo Saldo Disponível (ReadOnly, preenchido via JS/AJAX) #}
+                <div class="col-md-2 mb-3">
+                    <label for="{{ form.SALDO.id_for_label }}" class="form-label">Saldo Disponível</label>
+                    {% render_field form.SALDO class="form-control" readonly="readonly" placeholder="0.00" %}
+                    {% if form.SALDO.errors %}
+                        {% for error in form.SALDO.errors %}
+                            <div class="invalid-feedback d-block">{{ error }}</div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+
+                {# Campo Mês de Referência #}
+                <div class="col-md-2 mb-3">
+                    <label for="{{ form.MES_REFERENCIA.id_for_label }}" class="form-label">Mês de Referência<span class="text-danger">*</span></label>
+                    {% render_field form.MES_REFERENCIA class="form-control" placeholder="AAAA_MM (Ex: 202312)" %}
+                    <small class="form-text text-muted">Informe o mês e ano de referência (ex: 12/2025).</small>
+                    {% if form.MES_REFERENCIA.errors %}
+                        {% for error in form.MES_REFERENCIA.errors %}
+                            <div class="invalid-feedback d-block">{{ error }}</div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="row">
+                {# Campo Convênio (Dropdown) #}
+                <div class="col-md-6 mb-3">
+                    <label for="{{ form.ID_CONVENIO.id_for_label }}" class="form-label">Convênio<span class="text-danger">*</span></label>
+                    {% render_field form.ID_CONVENIO class="form-control" %}
+                    <small class="form-text text-muted">Selecione o convênio para esta emissão.</small>
+                    {% if form.ID_CONVENIO.errors %}
+                        {% for error in form.ID_CONVENIO.errors %}
+                            <div class="invalid-feedback d-block">{{ error }}</div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+
+                {# Campo Parcelas (Input, preenchido via JS/AJAX ou model) #}
+                <div class="col-md-2 mb-3">
+                    <label for="{{ form.QTD_PARCELA.id_for_label }}" class="form-label">Parcelas</label>
+                    {% render_field form.QTD_PARCELA class="form-control" readonly="readonly" placeholder="Automático" %}
+                    {% if form.QTD_PARCELA.errors %}
+                        {% for error in form.QTD_PARCELA.errors %}
+                            <div class="invalid-feedback d-block">{{ error }}</div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+
+                {# Campo Valor Total da Transação #}
+                <div class="col-md-4 mb-3">
+                    <label for="{{ form.VALOR.id_for_label }}" class="form-label">Valor Total da Transação<span class="text-danger">*</span></label>
+                    {% render_field form.VALOR class="form-control" placeholder="0.00" %}
+                    <small class="form-text text-muted">Informe o valor total do convênio a ser parcelado.</small>
+                    {% if form.VALOR.errors %}
+                        {% for error in form.VALOR.errors %}
+                            <div class="invalid-feedback d-block">{{ error }}</div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+            </div>
+
+            {# Hidden field for ID_CLIENTE (actual ForeignKey) #}
+            {# This field will be updated by JavaScript after CPF search #}
+            {% render_field form.ID_CLIENTE type="hidden" %}
+            {% if form.ID_CLIENTE.errors %}
+                {% for error in form.ID_CLIENTE.errors %}
+                    <div class="invalid-feedback d-block">{{ error }}</div>
+                {% endfor %}
+            {% endif %}
+
+
+            <div class="mt-4">
+                <button type="submit" class="btn btn-success me-2"><i class="fas fa-save"></i> Gravar</button>
+                <button type="button" class="btn btn-info me-2"><i class="fas fa-file-alt"></i> Relatório</button>
+                <a href="{% url 'convenio_emissao_list' %}" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Voltar à Lista</a>
+                <button type="reset" class="btn btn-danger me-2"><i class="fas fa-times"></i> Cancelar</button>
+                <button type="button" class="btn btn-primary me-2"><i class="fas fa-plus"></i> Novo</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const cpfInput = document.getElementById('id_CPF');
+        const nomeClienteInput = document.getElementById('id_nome_cliente');
+        const saldoInput = document.getElementById('id_SALDO');
+        const idClienteHiddenInput = document.getElementById('id_ID_CLIENTE');
+        const convenioSelect = document.getElementById('id_ID_CONVENIO');
+        const qtdParcelaInput = document.getElementById('id_QTD_PARCELA');
+
+        let debounceTimeout;
+
+        // Function to format CPF
+        function formatCpf(value) {
+            value = value.replace(/\D/g, ''); // Remove non-digits
+            if (value.length > 9) {
+                value = value.replace(/^(\d{3})(\d{3})(\d{3})(\d{2})$/, '$1.$2.$3-$4');
+            } else if (value.length > 6) {
+                value = value.replace(/^(\d{3})(\d{3})(\d{3})$/, '$1.$2.$3');
+            } else if (value.length > 3) {
+                value = value.replace(/^(\d{3})(\d{3})$/, '$1.$2');
+            }
+            return value;
+        }
+
+        // Apply CPF formatting on input
+        if (cpfInput) {
+            cpfInput.addEventListener('input', function(e) {
+                e.target.value = formatCpf(e.target.value);
+            });
+
+            cpfInput.addEventListener('keyup', function() {
+                clearTimeout(debounceTimeout);
+                debounceTimeout = setTimeout(() => {
+                    const cpf = cpfInput.value.replace(/\D/g, ''); // Clean CPF for search
+                    if (cpf.length === 11) { // Only search if CPF is complete
+                        fetchClientData(cpf);
+                    } else {
+                        // Clear fields if CPF is incomplete or invalid
+                        nomeClienteInput.value = '';
+                        saldoInput.value = '';
+                        idClienteHiddenInput.value = '';
+                    }
+                }, 500); // Debounce for 500ms
+            });
+        }
+
+        // Function to fetch client data via AJAX
+        function fetchClientData(cpf) {
+            // VERIFIQUE ESTA URL: Certifique-se de que esta URL corresponde à sua view Django para buscar clientes por CPF
+            // Exemplo de URL em urls.py: path('api/clientes/search_by_cpf/', views.search_client_by_cpf, name='search_client_by_cpf'),
+            fetch(`/api/clientes/search_by_cpf/?cpf=${cpf}`)
+                .then(response => {
+                    if (!response.ok) {
+                        // Handle HTTP errors, e.g., 404 Not Found
+                        if (response.status === 404) {
+                            return { error: 'Cliente não encontrado.' };
+                        }
+                        throw new Error('Erro de rede: ' + response.statusText);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.error) {
+                        nomeClienteInput.value = data.error;
+                        saldoInput.value = '';
+                        idClienteHiddenInput.value = ''; // Clear hidden ID_CLIENTE
+                        // Opcional: exiba uma mensagem de erro mais proeminente ao usuário
+                        alert(data.error);
+                    } else {
+                        // Assumindo que sua API retorna um objeto como { id: ..., nome_completo: ..., saldo_cliente: ... }
+                        nomeClienteInput.value = data.nome_completo || '';
+                        saldoInput.value = data.saldo_cliente ? parseFloat(data.saldo_cliente).toFixed(2) : '0.00';
+                        idClienteHiddenInput.value = data.id || ''; // Definir o ID da ForeignKey oculta
+                    }
+                })
+                .catch(error => {
+                    console.error('Erro ao buscar dados do cliente:', error);
+                    nomeClienteInput.value = 'Erro ao buscar cliente.';
+                    saldoInput.value = '';
+                    idClienteHiddenInput.value = '';
+                    alert('Ocorreu um erro ao buscar os dados do cliente. Verifique o console para mais detalhes.');
+                });
+        }
+
+        // Function to fetch convenio data and update QTD_PARCELA
+        if (convenioSelect) {
+            convenioSelect.addEventListener('change', function() {
+                const convenioId = this.value;
+                if (convenioId) {
+                    // VERIFIQUE ESTA URL: Certifique-se de que esta URL corresponde à sua view Django para buscar detalhes do convênio por ID
+                    // Exemplo de URL em urls.py: path('api/convenios/get_details/', views.get_convenio_details, name='get_convenio_details'),
+                    fetch(`/api/convenios/get_details/?id=${convenioId}`)
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error('Erro de rede: ' + response.statusText);
+                            }
+                            return response.json();
+                        })
+                        .then(data => {
+                            // Assumindo que sua API retorna um objeto como { qtd_parc_permi: ... }
+                            qtdParcelaInput.value = data.qtd_parc_permi || 0;
+                        })
+                        .catch(error => {
+                            console.error('Erro ao buscar dados do convênio:', error);
+                            qtdParcelaInput.value = '0'; // Default para 0 em caso de erro
+                            alert('Ocorreu um erro ao buscar os detalhes do convênio.');
+                        });
+                } else {
+                    qtdParcelaInput.value = ''; // Limpa se nenhum convênio for selecionado
+                }
+            });
+
+            // Dispara o evento change no carregamento se um convênio já estiver selecionado (para a view de edição)
+            if (convenioSelect.value) {
+                convenioSelect.dispatchEvent(new Event('change'));
+            }
+        }
+
+        // Initialize form validation (if using Bootstrap's built-in validation)
+        const forms = document.querySelectorAll('.needs-validation');
+        Array.from(forms).forEach(form => {
+            form.addEventListener('submit', function(event) {
+                if (!form.checkValidity()) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            }, false);
+        });
+    });
+</script>
+{% endblock %}
+{% endblock %}

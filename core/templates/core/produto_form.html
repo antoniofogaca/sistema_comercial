@@ -1,0 +1,341 @@
+{# core/templates/core/produto_form.html #}
+
+{% extends 'core/base.html' %}
+{% load widget_tweaks %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="card shadow mb-4">
+    <div class="card-header py-3">
+        <h6 class="m-0 font-weight-bold text-primary">{{ title }}</h6>
+    </div>
+    <div class="card-body">
+        <form method="post" class="needs-validation" novalidate>
+            {% csrf_token %}
+
+            {# Mensagens de sucesso/erro gerais (ex: messages.success) #}
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+
+            {# Erros que não são de campo (ex: form.non_field_errors) #}
+            {% if form.non_field_errors %}
+                <div class="alert alert-danger" role="alert">
+                    <p>Por favor, corrija os erros gerais do formulário:</p>
+                    <ul>
+                        {% for error in form.non_field_errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endif %}
+
+            <div class="row">
+                {# Código EAN/DUN #}
+                <div class="col-md-3 mb-3">
+                    <label for="{{ form.codigo_ean_dun.id_for_label }}" class="form-label">{{ form.codigo_ean_dun.label }}</label>
+                    {% render_field form.codigo_ean_dun class="form-control" %}
+                    {% if form.codigo_ean_dun.errors %}
+                        {% for error in form.codigo_ean_dun.errors %}
+                            <div class="invalid-feedback d-block">{{ error }}</div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+                {# Descrição Produto #}
+                <div class="col-md-5 mb-3">
+                    <label for="{{ form.descricao_produto.id_for_label }}" class="form-label">{{ form.descricao_produto.label }}</label>
+                    {% render_field form.descricao_produto class="form-control" %}
+                    {% if form.descricao_produto.errors %}
+                        {% for error in form.descricao_produto.errors %}
+                            <div class="invalid-feedback d-block">{{ error }}</div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+                {# Descrição Produto PDV #}
+                <div class="col-md-4 mb-3">
+                    <label for="{{ form.descricao_pdv.id_for_label }}" class="form-label">{{ form.descricao_pdv.label }}</label>
+                    {% render_field form.descricao_pdv class="form-control" %}
+                    {% if form.descricao_pdv.errors %}
+                        {% for error in form.descricao_pdv.errors %}
+                            <div class="invalid-feedback d-block">{{ error }}</div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="row">
+                {# Unidade Venda (SELECT/DROPDOWN - a linha em branco aqui é controlada por 'required' no forms.py/models.py) #}
+                <div class="col-md-2 mb-3">
+                    <label for="{{ form.unidade_venda.id_for_label }}" class="form-label">{{ form.unidade_venda.label }}</label>
+                    {% render_field form.unidade_venda class="form-select" %}
+                    {% if form.unidade_venda.errors %}
+                        {% for error in form.unidade_venda.errors %}
+                            <div class="invalid-feedback d-block">{{ error }}</div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+                {# Qtd Por Embalagem #}
+                <div class="col-md-2 mb-3">
+                    <label for="{{ form.qtd_por_embalagem.id_for_label }}" class="form-label">{{ form.qtd_por_embalagem.label }}</label>
+                    {% render_field form.qtd_por_embalagem class="form-control" %}
+                    {% if form.qtd_por_embalagem.errors %}
+                        {% for error in form.qtd_por_embalagem.errors %}
+                            <div class="invalid-feedback d-block">{{ error }}</div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+                {# Peso (Radio) #}
+                <div class="col-md-2 mb-3">
+                    <label class="form-label d-block">{{ form.peso.label }}</label>
+                    {% for radio in form.peso %}
+                        <div class="form-check form-check-inline">
+                            {{ radio.tag }}
+                            <label class="form-check-label" for="{{ radio.id_for_label }}">{{ radio.choice_label }}</label>
+                        </div>
+                    {% endfor %}
+                    {% if form.peso.errors %}
+                        {% for error in form.peso.errors %}
+                            <div class="invalid-feedback d-block">{{ error }}</div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+
+                {# Pode Multiplicar (Radio) #}
+                <div class="col-md-3 mb-3">
+                    <label class="form-label d-block">{{ form.pode_multiplicar.label }}</label>
+                    {% for radio in form.pode_multiplicar %}
+                        <div class="form-check form-check-inline">
+                            {{ radio.tag }}
+                            <label class="form-check-label" for="{{ radio.id_for_label }}">{{ radio.choice_label }}</label>
+                        </div>
+                    {% endfor %}
+                    {% if form.pode_multiplicar.errors %}
+                        {% for error in form.pode_multiplicar.errors %}
+                            <div class="invalid-feedback d-block">{{ error }}</div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+
+                {# Uso/Consumo (Radio) #}
+                <div class="col-md-3 mb-3">
+                    <label class="form-label d-block">{{ form.uso_consumo.label }}</label>
+                    {% for radio in form.uso_consumo %}
+                        <div class="form-check form-check-inline">
+                            {{ radio.tag }}
+                            <label class="form-check-label" for="{{ radio.id_for_label }}">{{ radio.choice_label }}</label>
+                        </div>
+                    {% endfor %}
+                    {% if form.uso_consumo.errors %}
+                        {% for error in form.uso_consumo.errors %}
+                            <div class="invalid-feedback d-block">{{ error }}</div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="row">
+                {# Tipo Produto (Radio) - ÚNICA RENDERIZAÇÃO #}
+                <div class="col-md-3 mb-3">
+                    <label class="form-label d-block">{{ form.tipo_produto.label }}</label>
+                    {% for radio in form.tipo_produto %}
+                        <div class="form-check form-check-inline">
+                            {{ radio.tag }}
+                            <label class="form-check-label" for="{{ radio.id_for_label }}">{{ radio.choice_label }}</label>
+                        </div>
+                    {% endfor %}
+                    {% if form.tipo_produto.errors %}
+                        {% for error in form.tipo_produto.errors %}
+                            <div class="invalid-feedback d-block">{{ error }}</div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+                {# Situação (Radio) - ÚNICA RENDERIZAÇÃO #}
+                <div class="col-md-3 mb-3">
+                    <label class="form-label d-block">{{ form.situacao.label }}</label>
+                    {% for radio in form.situacao %}
+                        <div class="form-check form-check-inline">
+                            {{ radio.tag }}
+                            <label class="form-check-label" for="{{ radio.id_for_label }}">{{ radio.choice_label }}</label>
+                        </div>
+                    {% endfor %}
+                    {% if form.situacao.errors %}
+                        {% for error in form.situacao.errors %}
+                            <div class="invalid-feedback d-block">{{ error }}</div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+                {# %ICMS Venda #}
+                <div class="col-md-3 mb-3">
+                    <label for="{{ form.percentual_icms_venda.id_for_label }}" class="form-label">{{ form.percentual_icms_venda.label }}</label>
+                    {% render_field form.percentual_icms_venda class="form-control" %}
+                    {% if form.percentual_icms_venda.errors %}
+                        {% for error in form.percentual_icms_venda.errors %}
+                            <div class="invalid-feedback d-block">{{ error }}</div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+                {# Estoque Atual #}
+                <div class="col-md-3 mb-3">
+                    <label for="{{ form.estoque_atual.id_for_label }}" class="form-label">{{ form.estoque_atual.label }}</label>
+                    {% render_field form.estoque_atual class="form-control" %}
+                    {% if form.estoque_atual.errors %}
+                        {% for error in form.estoque_atual.errors %}
+                            <div class="invalid-feedback d-block">{{ error }}</div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="row">
+                {# Peso Líquido #}
+                <div class="col-md-3 mb-3">
+                    <label for="{{ form.peso_liquido.id_for_label }}" class="form-label">{{ form.peso_liquido.label }}</label>
+                    {% render_field form.peso_liquido class="form-control" %}
+                    {% if form.peso_liquido.errors %}
+                        {% for error in form.peso_liquido.errors %}
+                            <div class="invalid-feedback d-block">{{ error }}</div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+                {# Peso Bruto #}
+                <div class="col-md-3 mb-3">
+                    <label for="{{ form.peso_bruto.id_for_label }}" class="form-label">{{ form.peso_bruto.label }}</label>
+                    {% render_field form.peso_bruto class="form-control" %}
+                    {% if form.peso_bruto.errors %}
+                        {% for error in form.peso_bruto.errors %}
+                            <div class="invalid-feedback d-block">{{ error }}</div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+                {# Setor (SELECT/DROPDOWN) #}
+                <div class="col-md-3 mb-3">
+                    <label for="{{ form.id_setor.id_for_label }}" class="form-label">{{ form.id_setor.label }}</label>
+                    {% render_field form.id_setor class="form-select" %}
+                    {% if form.id_setor.errors %}
+                        {% for error in form.id_setor.errors %}
+                            <div class="invalid-feedback d-block">{{ error }}</div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+                {# Grupo (SELECT/DROPDOWN) #}
+                <div class="col-md-3 mb-3">
+                    <label for="{{ form.id_grupo.id_for_label }}" class="form-label">{{ form.id_grupo.label }}</label>
+                    {% render_field form.id_grupo class="form-select" %}
+                    {% if form.id_grupo.errors %}
+                        {% for error in form.id_grupo.errors %}
+                            <div class="invalid-feedback d-block">{{ error }}</div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="row">
+                {# Sub-Grupo (SELECT/DROPDOWN) #}
+                <div class="col-md-3 mb-3">
+                    <label for="{{ form.id_sub_grupo.id_for_label }}" class="form-label">{{ form.id_sub_grupo.label }}</label>
+                    {% render_field form.id_sub_grupo class="form-select" %}
+                    {% if form.id_sub_grupo.errors %}
+                        {% for error in form.id_sub_grupo.errors %}
+                            <div class="invalid-feedback d-block">{{ error }}</div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+                {# Classificação #}
+                <div class="col-md-3 mb-3">
+                    <label for="{{ form.classificacao.id_for_label }}" class="form-label">{{ form.classificacao.label }}</label>
+                    {% render_field form.classificacao class="form-control" %}
+                    {% if form.classificacao.errors %}
+                        {% for error in form.classificacao.errors %}
+                            <div class="invalid-feedback d-block">{{ error }}</div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label for="{{ form.tipo_tributacao.id_for_label }}" class="form-label">{{ form.tipo_tributacao.label }}</label>
+                    {% render_field form.tipo_tributacao class="form-select" %}
+                    {% if form.tipo_tributacao.errors %}
+                        {% for error in form.tipo_tributacao.errors %}
+                            <div class="invalid-feedback d-block">{{ error }}</div>
+                        {% endfor %}
+                    {% endif %}
+
+                    <!--<label class="form-label d-block">{{ form.tipo_tributacao.label }}</label>
+                    {% for radio in form.tipo_tributacao %}
+                        <div class="form-check form-check-inline">
+                            {{ radio.tag }}
+                            <label class="form-check-label" for="{{ radio.id_for_label }}">{{ radio.choice_label }}</label>
+                        </div>
+                    {% endfor %}
+                    {% if form.tipo_tributacao.errors %}
+                        {% for error in form.tipo_tributacao.errors %}
+                            <div class="invalid-feedback d-block">{{ error }}</div>
+                        {% endfor %}
+                    {% endif %}-->
+                </div>
+                {# CFOP (SELECT/DROPDOWN) #}
+                <div class="col-md-3 mb-3">
+                    <label for="{{ form.id_cfop.id_for_label }}" class="form-label">{{ form.id_cfop.label }}</label>
+                    {% render_field form.id_cfop class="form-select" %}
+                    {% if form.id_cfop.errors %}
+                        {% for error in form.id_cfop.errors %}
+                            <div class="invalid-feedback d-block">{{ error }}</div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="row">
+                {# CST/CSOSN (SELECT/DROPDOWN) #}
+                <div class="col-md-3 mb-3">
+                    <label for="{{ form.id_cstcson.id_for_label }}" class="form-label">{{ form.id_cstcson.label }}</label>
+                    {% render_field form.id_cstcson class="form-select" %}
+                    {% if form.id_cstcson.errors %}
+                        {% for error in form.id_cstcson.errors %}
+                            <div class="invalid-feedback d-block">{{ error }}</div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+                {# NCM (SELECT/DROPDOWN) #}
+                <div class="col-md-3 mb-3">
+                    <label for="{{ form.id_ncm.id_for_label }}" class="form-label">{{ form.id_ncm.label }}</label>
+                    {% render_field form.id_ncm class="form-select" %}
+                    {% if form.id_ncm.errors %}
+                        {% for error in form.id_ncm.errors %}
+                            <div class="invalid-feedback d-block">{{ error }}</div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+                {# CEST (SELECT/DROPDOWN) #}
+                <div class="col-md-3 mb-3">
+                    <label for="{{ form.id_cest.id_for_label }}" class="form-label">{{ form.id_cest.label }}</label>
+                    {% render_field form.id_cest class="form-select" %}
+                    {% if form.id_cest.errors %}
+                        {% for error in form.id_cest.errors %}
+                            <div class="invalid-feedback d-block">{{ error }}</div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+                {# Valor Venda #}
+                <div class="col-md-3 mb-3">
+                    <label for="{{ form.valor_venda.id_for_label }}" class="form-label">{{ form.valor_venda.label }}</label>
+                    {% render_field form.valor_venda class="form-control" %}
+                    {% if form.valor_venda.errors %}
+                        {% for error in form.valor_venda.errors %}
+                            <div class="invalid-feedback d-block">{{ error }}</div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary mt-3">Salvar</button>
+            <a href="{% url 'produto_list' %}" class="btn btn-secondary mt-3">Cancelar</a>
+        </form>
+    </div>
+</div>
+{% endblock %}

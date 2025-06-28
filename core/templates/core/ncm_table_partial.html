@@ -1,0 +1,121 @@
+{# core/templates/core/ncm_table_partial.html #}
+
+<table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+    <thead>
+        <tr>
+            {# Coluna NCM #}
+            <th>
+                <a href="?sort_by={% if sort_by == 'ncm' %}-{% endif %}ncm" class="sort-link">NCM</a>
+            </th>
+            {# Coluna Descrição #}
+            <th>
+                <a href="?sort_by={% if sort_by == 'descricao' %}-{% endif %}descricao" class="sort-link">Descrição</a>
+            </th>
+            {# Coluna Início Vigência #}
+            <th>
+                <a href="?sort_by={% if sort_by == 'inicio_vigencia' %}-{% endif %}inicio_vigencia" class="sort-link">Início Vigência</a>
+            </th>
+            {# Coluna Fim Vigência #}
+            <th>
+                <a href="?sort_by={% if sort_by == 'fim_vigencia' %}-{% endif %}fim_vigencia" class="sort-link">Fim Vigência</a>
+            </th>
+            {# Coluna Ano #}
+            <th>
+                <a href="?sort_by={% if sort_by == 'ano' %}-{% endif %}ano" class="sort-link">Ano</a>
+            </th>
+            {# Coluna Número #}
+            <th>
+                <a href="?sort_by={% if sort_by == 'numero' %}-{% endif %}numero" class="sort-link">Número</a>
+            </th>
+            {# Coluna Status (Cancelado) #}
+            <th>
+                <a href="?sort_by={% if sort_by == 'cancelado' %}-{% endif %}cancelado" class="sort-link">Status</a>
+            </th>
+            {# Coluna Segmento #}
+            <th>
+                <a href="?sort_by={% if sort_by == 'segmento' %}-{% endif %}segmento" class="sort-link">Segmento</a>
+            </th>
+            <th>Ações</th>
+        </tr>
+    </thead>
+    <tbody>
+        {# Iteramos sobre 'page_obj' que a view está passando #}
+        {% for ncm_item in page_obj %}
+        <tr>
+            <td>{{ ncm_item.ncm }}</td>
+            <td>{{ ncm_item.descricao }}</td>
+            {# Formatando datas e usando default_if_none para valores nulos #}
+            <td>{{ ncm_item.inicio_vigencia|date:"d/m/Y"|default_if_none:"N/A" }}</td>
+            <td>{{ ncm_item.fim_vigencia|date:"d/m/Y"|default_if_none:"N/A" }}</td>
+            <td>{{ ncm_item.ano|default_if_none:"N/A" }}</td>
+            <td>{{ ncm_item.numero|default_if_none:"N/A" }}</td>
+            <td>
+                {# Exibindo o status de Cancelado #}
+                {% if ncm_item.cancelado %}
+                    <span class="badge bg-danger">Cancelado</span>
+                {% else %}
+                    <span class="badge bg-success">Ativo</span>
+                {% endif %}
+            </td>
+            <td>{{ ncm_item.segmento|default_if_none:"N/A" }}</td>
+            <td>
+                {# Links de Ações - apontando para as URLs de NCM #}
+                <a href="{% url 'ncm_update' ncm_item.pk %}" class="btn btn-warning btn-sm" title="Editar">
+                    <i class="fas fa-edit"></i>
+                </a>
+                <a href="{% url 'ncm_confirm_delete' ncm_item.pk %}" class="btn btn-danger btn-sm" title="Excluir">
+                    <i class="fas fa-trash-alt"></i>
+                </a>
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            {# Colspan ajustado para o número total de colunas #}
+            <td colspan="9" class="text-center">Nenhum NCM encontrado.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{# Paginação - Adaptada para usar os parâmetros de busca, status, per_page e sort_by #}
+<nav aria-label="Page navigation">
+    <ul class="pagination justify-content-center">
+        {% if page_obj.has_previous %}
+            <li class="page-item">
+                {# Passa todos os parâmetros da URL atual para manter filtros e busca #}
+                <a class="page-link page-link"
+                   href="?page={{ page_obj.previous_page_number }}&search={{ search }}&status={{ status_filter }}&per_page={{ per_page }}&sort_by={{ sort_by }}">
+                   Anterior
+                </a>
+            </li>
+        {% else %}
+            <li class="page-item disabled">
+                <span class="page-link">Anterior</span>
+            </li>
+        {% endif %}
+
+        {% for num in page_obj.paginator.page_range %}
+            <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+                {# Passa todos os parâmetros da URL atual para manter filtros e busca #}
+                <a class="page-link page-link"
+                   href="?page={{ num }}&search={{ search }}&status={{ status_filter }}&per_page={{ per_page }}&sort_by={{ sort_by }}">
+                   {{ num }}
+                </a>
+            </li>
+        {% endfor %}
+
+        {% if page_obj.has_next %}
+            <li class="page-item">
+                {# Passa todos os parâmetros da URL atual para manter filtros e busca #}
+                <a class="page-link page-link"
+                   href="?page={{ page_obj.next_page_number }}&search={{ search }}&status={{ status_filter }}&per_page={{ per_page }}&sort_by={{ sort_by }}">
+                   Próxima
+                </a>
+            </li>
+        {% else %}
+            <li class="page-item disabled">
+                <span class="page-link">Próxima</span>
+            </li>
+        {% endif %}
+    </ul>
+</nav>

@@ -1,0 +1,172 @@
+{% extends 'core/base.html' %}
+{% load widget_tweaks %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4">
+        <i class="bi bi-person-lines-fill me-2"></i>{{ title }}
+    </h2>
+
+    <form method="post" class="row g-3">
+        {% csrf_token %}
+
+        <div class="col-md-4">
+            <label for="{{ form.codigo_interno.id_for_label }}" class="form-label">Código Interno</label>
+            {{ form.codigo_interno|add_class:"form-control" }}
+        </div>
+
+        <div class="col-md-4">
+            <label for="{{ form.matricula.id_for_label }}" class="form-label">Matrícula</label>
+            {{ form.matricula|add_class:"form-control" }}
+        </div>
+
+        <div class="col-md-4 form-check align-self-end">
+            {{ form.cancelado|add_class:"form-check-input" }}
+            <label class="form-check-label" for="{{ form.cancelado.id_for_label }}">Cancelado</label>
+        </div>
+
+        <div class="col-md-6">
+            <label for="{{ form.nome_completo.id_for_label }}" class="form-label">Nome Completo</label>
+            {{ form.nome_completo|add_class:"form-control" }}
+        </div>
+
+        <div class="col-md-6">
+            <label for="{{ form.cpf_cnpj.id_for_label }}" class="form-label">CPF/CNPJ</label>
+            {{ form.cpf_cnpj|add_class:"form-control" }}
+        </div>
+
+        <div class="col-md-6">
+            <label for="{{ form.rg.id_for_label }}" class="form-label">RG</label>
+            {{ form.rg|add_class:"form-control" }}
+        </div>
+
+        <div class="col-md-6">
+            <label for="{{ form.telefone.id_for_label }}" class="form-label">Telefone</label>
+            {{ form.telefone|add_class:"form-control" }}
+        </div>
+
+        <div class="col-md-6">
+            <label for="{{ form.email.id_for_label }}" class="form-label">E-mail</label>
+            {{ form.email|add_class:"form-control" }}
+        </div>
+
+        <div class="col-md-6">
+            <label for="{{ form.cep.id_for_label }}" class="form-label">CEP</label>
+            {{ form.cep|add_class:"form-control" }}
+        </div>
+
+        <div class="col-md-6">
+            <label for="{{ form.logradouro.id_for_label }}" class="form-label">Logradouro</label>
+            {{ form.logradouro|add_class:"form-control" }}
+        </div>
+
+        <div class="col-md-6">
+            <label for="{{ form.cidade.id_for_label }}" class="form-label">Cidade</label>
+            {{ form.cidade|add_class:"form-control" }}
+        </div>
+
+        <div class="col-md-2">
+            <label for="{{ form.uf.id_for_label }}" class="form-label">UF</label>
+            {{ form.uf|add_class:"form-control" }}
+        </div>
+
+        <div class="col-md-4">
+            <label for="{{ form.salario.id_for_label }}" class="form-label">Salário</label>
+            {{ form.salario|add_class:"form-control" }} {# Adicionado classe aqui #}
+        </div>
+
+        <div class="col-md-3">
+            <label for="{{ form.percentual.id_for_label }}" class="form-label">Percentual</label>
+            {{ form.percentual|add_class:"form-control" }} {# Adicionado classe aqui #}
+        </div>
+
+        <div class="col-md-3">
+            <label for="{{ form.saldo.id_for_label }}" class="form-label">Saldo</label>
+            {{ form.saldo|add_class:"form-control" }} {# Adicionado classe aqui #}
+        </div>
+
+        <div class="col-12 mt-4">
+            <button type="submit" class="btn btn-primary me-2">
+                <i class="bi bi-save"></i> Salvar
+            </button>
+            <a href="{% url 'clientes_list' %}" class="btn btn-secondary">
+                <i class="bi bi-x-circle"></i> Cancelar
+            </a>
+        </div>
+    </form>
+</div>
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const cepInput = document.getElementById('id_cep');
+        const logradouroInput = document.getElementById('id_logradouro');
+        const cidadeInput = document.getElementById('id_cidade');
+        const ufInput = document.getElementById('id_uf');
+
+        const salarioInput = document.getElementById('id_salario');
+        const percentualInput = document.getElementById('id_percentual');
+        const saldoInput = document.getElementById('id_saldo');
+
+        // 1. Função para buscar endereço por CEP
+        if (cepInput) {
+            cepInput.addEventListener('blur', function() {
+                let cep = this.value.replace(/\D/g, ''); // Remove non-digits
+                if (cep.length === 8) {
+                    fetch(`https://viacep.com.br/ws/${cep}/json/`)
+                        .then(response => response.json())
+                        .then(data => {
+                            if (!data.erro) {
+                                if (logradouroInput) logradouroInput.value = data.logradouro;
+                                if (cidadeInput) cidadeInput.value = data.localidade;
+                                if (ufInput) ufInput.value = data.uf;
+                            } else {
+                                // Clear fields if CEP not found
+                                if (logradouroInput) logradouroInput.value = '';
+                                if (cidadeInput) cidadeInput.value = '';
+                                if (ufInput) ufInput.value = '';
+                                console.error('CEP não encontrado.');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Erro ao buscar CEP:', error);
+                        });
+                } else {
+                     // Clear fields if CEP is not 8 digits
+                    if (logradouroInput) logradouroInput.value = '';
+                    if (cidadeInput) cidadeInput.value = '';
+                    if (ufInput) ufInput.value = '';
+                }
+            });
+        }
+
+        // 2. Função para calcular o saldo
+        function calcularSaldo() {
+            let salario = parseFloat(salarioInput ? salarioInput.value.replace(',', '.') : '0');
+            let percentual = parseFloat(percentualInput ? percentualInput.value.replace(',', '.') : '0');
+
+            if (isNaN(salario)) salario = 0;
+            if (isNaN(percentual)) percentual = 0;
+
+            let saldo = salario * (percentual / 100);
+            if (saldoInput) {
+                saldoInput.value = saldo.toFixed(2); // Formata para 2 casas decimais
+            }
+        }
+
+        // Adiciona event listeners para Salário e Percentual
+        if (salarioInput) {
+            salarioInput.addEventListener('input', calcularSaldo);
+        }
+        if (percentualInput) {
+            percentualInput.addEventListener('input', calcularSaldo);
+        }
+
+        // Calcula o saldo inicialmente caso já haja valores preenchidos (em edição)
+        calcularSaldo();
+    });
+</script>
+{% endblock %}
+{% endblock %}

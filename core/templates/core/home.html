@@ -1,0 +1,85 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Início{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <h2 class="mb-4">Painel Geral</h2>
+
+    <div class="row g-3">
+        <!-- Card 1 -->
+        <div class="col-md-6 col-xl-3">
+            <div class="card text-white bg-primary shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="card-title mb-1">Clientes</h5>
+                            <h3>134</h3>
+                        </div>
+                        <i class="bi bi-people-fill fs-1"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Card 2 -->
+        <div class="col-md-6 col-xl-3">
+            <div class="card text-white bg-success shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="card-title mb-1">Usuários</h5>
+                            <h3>18</h3>
+                        </div>
+                        <i class="bi bi-person-fill-check fs-1"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Card 3 -->
+        <div class="col-md-6 col-xl-3">
+            <div class="card text-white bg-warning shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="card-title mb-1">Convênios Ativos</h5>
+                            <h3>27</h3>
+                        </div>
+                        <i class="bi bi-journal-check fs-1"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Card 4 -->
+        <div class="col-md-6 col-xl-3">
+            <div class="card text-white bg-danger shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="card-title mb-1">Empresas</h5>
+                            <h3>9</h3>
+                        </div>
+                        <i class="bi bi-building fs-1"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Se quiser incluir um gráfico futuramente -->
+    <!--
+    <div class="row mt-4">
+        <div class="col">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">Gráfico de desempenho</h5>
+                    <canvas id="grafico"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    -->
+</div>
+{% endblock %}

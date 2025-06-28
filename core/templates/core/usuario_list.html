@@ -1,0 +1,107 @@
+{% extends 'core/base.html' %}
+{% load static %}
+{% load widget_tweaks %}
+
+{% block title %}Lista de Usuários{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3 mb-0 text-gray-800">Lista de Usuários</h1>
+    <a href="{% url 'usuario_create' %}" class="btn btn-primary">
+        <i class="fas fa-plus"></i> Novo Usuário
+    </a>
+</div>
+
+{% for message in messages %}
+    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+{% endfor %}
+
+<div class="card shadow mb-4">
+    <div class="card-header py-3">
+        <h6 class="m-0 font-weight-bold text-primary">Usuários Cadastrados</h6>
+    </div>
+    <div class="card-body">
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <input type="text" id="searchInput" class="form-control" ">
+            </div>
+            <div class="col-md-3">
+                <select id="statusFilter" class="form-select">
+                    <option value="">Todos os Status</option>
+                    <option value="ativo" {% if status_filter == 'ativo' %}selected{% endif %}>Ativos</option>
+                    <option value="cancelado" {% if status_filter == 'cancelado' %}selected{% endif %}>Cancelados</option>
+                </select>
+            </div>
+        </div>
+        <div class="table-responsive" id="usuarioTableContainer">
+            {% include 'core/usuario_list_table.html' %}
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchInput = document.getElementById('searchInput');
+        const statusFilter = document.getElementById('statusFilter');
+        const usuarioTableContainer = document.getElementById('usuarioTableContainer');
+        let debounceTimeout;
+
+        function fetchUsuarios(page = 1) {
+            clearTimeout(debounceTimeout);
+            debounceTimeout = setTimeout(() => {
+                const query = searchInput.value;
+                const status = statusFilter.value;
+                const url = new URL(window.location.href);
+                url.pathname = '{% url "usuarios_list" %}';
+                url.searchParams.set('page', page);
+                if (query) {
+                    url.searchParams.set('q', query);
+                } else {
+                    url.searchParams.delete('q');
+                }
+                if (status) {
+                    url.searchParams.set('status', status);
+                } else {
+                    url.searchParams.delete('status');
+                }
+
+                fetch(url.toString(), {
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    usuarioTableContainer.innerHTML = data.html;
+                    // Re-attach event listeners for pagination links
+                    attachPaginationListeners();
+                })
+                .catch(error => console.error('Erro ao carregar usuários:', error));
+            }, 300); // Debounce de 300ms
+        }
+
+        function attachPaginationListeners() {
+            usuarioTableContainer.querySelectorAll('.pagination a').forEach(link => {
+                link.removeEventListener('click', handlePaginationClick); // Remove old listener
+                link.addEventListener('click', handlePaginationClick); // Add new listener
+            });
+        }
+
+        function handlePaginationClick(event) {
+            event.preventDefault();
+            const pageUrl = new URL(this.href);
+            const pageNum = pageUrl.searchParams.get('page');
+            fetchUsuarios(pageNum);
+        }
+
+        searchInput.addEventListener('keyup', () => fetchUsuarios(1)); // Reset to page 1 on search
+        statusFilter.addEventListener('change', () => fetchUsuarios(1)); // Reset to page 1 on filter change
+
+        // Initial attachment of pagination listeners
+        attachPaginationListeners();
+    });
+</script>
+{% endblock %}

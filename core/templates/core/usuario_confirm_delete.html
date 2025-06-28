@@ -1,0 +1,27 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}Excluir Usuário{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3 mb-0 text-gray-800">Confirmar Exclusão de Usuário</h1>
+    <a href="{% url 'usuarios_list' %}" class="btn btn-secondary">
+        <i class="fas fa-arrow-left"></i> Cancelar
+    </a>
+</div>
+
+<div class="card shadow mb-4">
+    <div class="card-body">
+        <p class="lead">Tem certeza de que deseja excluir o usuário "<strong>{{ object.nome }}</strong>"?</p>
+        <p class="text-danger">Esta ação não pode ser desfeita.</p>
+
+        <form method="post">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger mt-3">
+                <i class="fas fa-trash-alt"></i> Confirmar Exclusão
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}

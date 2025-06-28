@@ -1,0 +1,68 @@
+{# core/templates/core/cest_form.html #}
+
+{% extends 'core/base.html' %}
+{% load widget_tweaks %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="card shadow mb-4">
+    <div class="card-header py-3">
+        <h6 class="m-0 font-weight-bold text-primary">{{ title }}</h6>
+    </div>
+    <div class="card-body">
+        <form method="post" class="needs-validation" novalidate>
+            {% csrf_token %}
+
+            {# Campo Código CEST #}
+            <div class="mb-3">
+                <label for="{{ form.cd_cest.id_for_label }}" class="form-label">Código CEST</label>
+                {% render_field form.cd_cest class="form-control" %}
+                {% if form.cd_cest.errors %}
+                    {% for error in form.cd_cest.errors %}
+                        <div class="invalid-feedback d-block">{{ error }}</div>
+                    {% endfor %}
+                {% endif %}
+            </div>
+
+            {# Campo Descrição #}
+            <div class="mb-3">
+                <label for="{{ form.descricao.id_for_label }}" class="form-label">Descrição</label>
+                {% render_field form.descricao class="form-control" %}
+                {% if form.descricao.errors %}
+                    {% for error in form.descricao.errors %}
+                        <div class="invalid-feedback d-block">{{ error }}</div>
+                    {% endfor %}
+                {% endif %}
+            </div>
+
+            {# Campo Código NCM #}
+            <div class="mb-3">
+                <label for="{{ form.cd_ncm.id_for_label }}" class="form-label">Código NCM (Opcional)</label>
+                {% render_field form.cd_ncm class="form-control" %}
+                {% if form.cd_ncm.errors %}
+                    {% for error in form.cd_ncm.errors %}
+                        <div class="invalid-feedback d-block">{{ error }}</div>
+                    {% endfor %}
+                {% endif %}
+            </div>
+            
+            {# Campo Cancelado (Checkbox) - NOVO CAMPO AQUI #}
+            <div class="form-check mb-3">
+                {% render_field form.cancelado class="form-check-input" %}
+                <label class="form-check-label" for="{{ form.cancelado.id_for_label }}">
+                    Cancelado
+                </label>
+                {% if form.cancelado.errors %}
+                    {% for error in form.cancelado.errors %}
+                        <div class="invalid-feedback d-block">{{ error }}</div>
+                    {% endfor %}
+                {% endif %}
+            </div>
+
+            <button type="submit" class="btn btn-primary">Salvar</button>
+            <a href="{% url 'cest_list' %}" class="btn btn-secondary">Cancelar</a>
+        </form>
+    </div>
+</div>
+{% endblock %}

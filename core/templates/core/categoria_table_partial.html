@@ -1,0 +1,76 @@
+{# core/templates/core/categoria_table_partial.html #}
+
+<table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+    <thead>
+        <tr>
+            <th><a href="?sort_by={% if sort_by == 'id_cat' %}-{% endif %}id_cat" class="sort-link">Código</a></th>
+            <th><a href="?sort_by={% if sort_by == 'descricao' %}-{% endif %}descricao" class="sort-link">Descrição</a></th>
+            <th><a href="?sort_by={% if sort_by == 'cancelado' %}-{% endif %}cancelado" class="sort-link">Status</a></th>
+            <th>Ações</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for categoria in categorias %}
+        <tr>
+            <td>{{ categoria.id_cat }}</td>
+            <td>{{ categoria.descricao }}</td>
+            <td>
+                {% if categoria.cancelado %}
+                    <span class="badge bg-danger">Cancelado</span>
+                {% else %}
+                    <span class="badge bg-success">Ativo</span>
+                {% endif %}
+            </td>
+            <td>
+                <a href="{% url 'categoria_update' categoria.pk %}" class="btn btn-warning btn-sm" title="Editar">
+                    <i class="fas fa-edit"></i>
+                </a>
+                <a href="{% url 'categoria_confirm_delete' categoria.pk %}" class="btn btn-danger btn-sm" title="Excluir">
+                    <i class="fas fa-trash-alt"></i>
+                </a>
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="4" class="text-center">Nenhuma categoria encontrada.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{# Paginação - Adapte conforme o seu estilo Bootstrap #}
+<nav aria-label="Page navigation">
+    <ul class="pagination justify-content-center">
+        {% if categorias.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ categorias.previous_page_number }}" data-page="{{ categorias.previous_page_number }}">Anterior</a>
+            </li>
+        {% else %}
+            <li class="page-item disabled">
+                <span class="page-link">Anterior</span>
+            </li>
+        {% endif %}
+
+        {% for i in categorias.paginator.page_range %}
+            {% if categorias.number == i %}
+                <li class="page-item active" aria-current="page">
+                    <span class="page-link">{{ i }}</span>
+                </li>
+            {% else %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ i }}" data-page="{{ i }}">{{ i }}</a>
+                </li>
+            {% endif %}
+        {% endfor %}
+
+        {% if categorias.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ categorias.next_page_number }}" data-page="{{ categorias.next_page_number }}">Próximo</a>
+            </li>
+        {% else %}
+            <li class="page-item disabled">
+                <span class="page-link">Próximo</span>
+            </li>
+        {% endif %}
+    </ul>
+</nav>

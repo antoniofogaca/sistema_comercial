@@ -1,0 +1,166 @@
+{% extends 'core/base.html' %}
+{% load static %}
+{% load widget_tweaks %}
+
+{% block title %}Lista de Aberturas de Convênio{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3 mb-0 text-gray-800">Lista de Aberturas de Convênio</h1>
+    <a href="{% url 'convenio_abertura_create' %}" class="btn btn-primary">
+        <i class="fas fa-plus"></i> Nova Abertura de Convênio
+    </a>
+</div>
+
+<div class="card shadow mb-4">
+    <div class="card-header py-3">
+        <h6 class="m-0 font-weight-bold text-primary">Convênios Cadastrados</h6>
+    </div>
+    <div class="card-body">
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <input type="text" id="searchInput" class="form-control" placeholder="Buscar por Mês/Ano ou Status..." value="{{ search|default_if_none:'' }}">
+            </div>
+            <div class="col-md-3">
+                <select id="statusFilter" class="form-select">
+                    <option value="all" {% if status_filter == 'all' %}selected{% endif %}>Todos os Status</option>
+                    <option value="A" {% if status_filter == 'A' %}selected{% endif %}>Ativo</option>
+                    <option value="F" {% if status_filter == 'F' %}selected{% endif %}>Fechado</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <select id="perPageSelect" class="form-select">
+                    <option value="5" {% if per_page == 5 %}selected{% endif %}>5 por página</option>
+                    <option value="10" {% if per_page == 10 %}selected{% endif %}>10 por página</option>
+                    <option value="20" {% if per_page == 20 %}selected{% endif %}>20 por página</option>
+                    <option value="50" {% if per_page == 50 %}selected{% endif %}>50 por página</option>
+                </select>
+            </div>
+        </div>
+        <div class="table-responsive" id="convenioAberturaTableContainer">
+            {% include 'core/convenio_abertura_table_partial.html' %}
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchInput = document.getElementById('searchInput');
+        const statusFilter = document.getElementById('statusFilter');
+        const perPageSelect = document.getElementById('perPageSelect');
+        const convenioAberturaTableContainer = document.getElementById('convenioAberturaTableContainer');
+        let debounceTimeout;
+
+        function fetchConvenios(params = {}) {
+            clearTimeout(debounceTimeout);
+            debounceTimeout = setTimeout(() => {
+                const url = new URL(window.location.origin + window.location.pathname);
+                const currentParams = new URLSearchParams(window.location.search);
+
+                currentParams.forEach((value, key) => {
+                    if (!(key in params)) {
+                        url.searchParams.set(key, value);
+                    }
+                });
+
+                Object.keys(params).forEach(key => url.searchParams.set(key, params[key]));
+
+                url.searchParams.forEach((value, key) => {
+                    if (value === '' || (key === 'status' && value === 'all')) {
+                        url.searchParams.delete(key);
+                    }
+                });
+
+                console.log("Fetching URL:", url.toString()); // Log para depuração
+
+                fetch(url.toString(), {
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok ' + response.statusText);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (convenioAberturaTableContainer) {
+                        convenioAberturaTableContainer.innerHTML = data.html;
+                        window.history.pushState({}, '', url);
+                    } else {
+                        console.error("Element with ID 'convenioAberturaTableContainer' not found.");
+                    }
+                })
+                .catch(error => console.error('Erro ao carregar convênios:', error));
+            }, 300); // Debounce de 300ms
+        }
+
+        // Adiciona event listeners
+        if (searchInput) {
+            searchInput.addEventListener('input', function() {
+                fetchConvenios({
+                    search: this.value,
+                    status: statusFilter ? statusFilter.value : 'all',
+                    per_page: perPageSelect ? perPageSelect.value : 10,
+                    page: 1
+                });
+            });
+        }
+        if (statusFilter) {
+            statusFilter.addEventListener('change', function() {
+                fetchConvenios({
+                    search: searchInput ? searchInput.value : '',
+                    status: this.value,
+                    per_page: perPageSelect ? perPageSelect.value : 10,
+                    page: 1
+                });
+            });
+        }
+        if (perPageSelect) {
+            perPageSelect.addEventListener('change', function() {
+                fetchConvenios({
+                    search: searchInput ? searchInput.value : '',
+                    status: statusFilter ? statusFilter.value : 'all',
+                    per_page: this.value,
+                    page: 1
+                });
+            });
+        }
+
+        // Delegação de clique para ordenação e paginação
+        document.addEventListener('click', function(e) {
+            if (e.target && e.target.matches('.sort-link, .page-link')) {
+                e.preventDefault();
+
+                const currentSearch = searchInput ? searchInput.value : '';
+                const currentStatus = statusFilter ? statusFilter.value : 'all';
+                const currentPerPage = perPageSelect ? perPageSelect.value : 10;
+
+
+                const url = new URL(e.target.href);
+                const params = Object.fromEntries(url.searchParams.entries());
+
+                if (currentSearch) params.search = currentSearch;
+                if (currentStatus && currentStatus !== 'all') params.status = currentStatus;
+                if (currentPerPage) params.per_page = currentPerPage;
+
+
+                fetchConvenios(params);
+            }
+        });
+
+        // Define o valor inicial dos selects com base no contexto do Django
+        const initialStatus = '{{ status_filter }}';
+        if (statusFilter && initialStatus) {
+            statusFilter.value = initialStatus;
+        }
+        const initialPerPage = '{{ per_page }}';
+        if (perPageSelect && initialPerPage) {
+            perPageSelect.value = initialPerPage;
+        }
+    });
+</script>
+{% endblock %}
+{% endblock %}

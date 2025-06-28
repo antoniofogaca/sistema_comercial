@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}Sistema de Convênio{% endblock %}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        .wrapper {
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .sidebar {
+            width: 250px;
+            background-color: #343a40;
+            color: white;
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+            transition: width 0.3s;
+        }
+
+        .sidebar.collapsed {
+            width: 70px;
+        }
+
+        .sidebar h4 {
+            padding: 20px;
+            text-align: center;
+            border-bottom: 1px solid #495057;
+            font-size: 1.2rem;
+        }
+
+        .sidebar a {
+            color: white;
+            text-decoration: none;
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: background-color 0.2s;
+        }
+
+        .sidebar a span {
+            transition: opacity 0.3s ease;
+        }
+
+        .sidebar.collapsed a span {
+            display: none;
+        }
+
+        .sidebar a:hover {
+            background-color: #495057;
+        }
+
+        .sidebar a.active {
+            background-color: #0d6efd;
+        }
+
+        .content {
+            flex-grow: 1;
+            padding: 20px;
+            background-color: #f8f9fa;
+            overflow-y: auto;
+        }
+
+        .toggle-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            margin-left: auto;
+        }
+
+        /* --- Estilos para os itens dentro do acordeão "Auxiliares" e "Convênios" --- */
+        /* Garante que o fundo dos itens seja transparente e que o texto seja branco */
+        .list-group-flush .list-group-item { /* Aplicado a todos os list-group-item dentro de list-group-flush */
+            background-color: transparent !important; /* Sobrescreve o estilo padrão do Bootstrap */
+            color: white !important; /* Garante que o texto seja visível no fundo escuro */
+            border-color: rgba(255, 255, 255, 0.1) !important; /* Torna a borda sutil e visível no fundo escuro */
+        }
+
+        /* Estilo para o hover nos itens do acordeão */
+        .list-group-flush .list-group-item:hover {
+            background-color: #495057 !important; /* Usa a mesma cor de hover do menu principal */
+        }
+
+        /* Estilo para o item ativo dentro do acordeão */
+        .list-group-flush .list-group-item.active {
+            background-color: #0d6efd !important; /* Mantém a cor azul para o item ativo */
+        }
+
+
+        @media (max-width: 768px) {
+            .wrapper {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                flex-direction: row;
+                overflow-x: auto;
+            }
+
+            .sidebar.collapsed {
+                width: 100%;
+            }
+
+            .sidebar h4 {
+                display: none;
+            }
+
+            .sidebar a {
+                flex: 1;
+                justify-content: center;
+            }
+
+            .sidebar a span {
+                display: inline;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="wrapper">
+        <nav class="sidebar" id="sidebar">
+            <div class="d-flex align-items-center justify-content-between px-3">
+                <h4 class="my-2">Sistema de Convênio</h4>
+            </div>
+            <div class="d-flex align-items-center justify-content-between px-3">
+                <h4 class="my-2">Menu</h4>
+                <button class="toggle-btn" onclick="toggleSidebar()"><i class="bi bi-list"></i></button>
+            </div>
+            {# Menu Auxiliares #}
+            <a class="list-group-item list-group-item-action py-2 ripple {% if request.path|slice:'0:8' == '/setores' or request.path|slice:'0:10' == '/categorias' or request.path|slice:'0:7' == '/grupos' or request.path|slice:'0:6' == '/cfop' or request.path|slice:'0:9' == '/cstcson' or request.path|slice:'0:6' == '/ncm' or request.path|slice:'0:6' == '/cest' %}active{% else %}collapsed{% endif %}" data-bs-toggle="collapse" href="#collapseAuxiliares" role="button" aria-expanded="{% if request.path|slice:'0:8' == '/setores' or request.path|slice:'0:10' == '/categorias' or request.path|slice:'0:7' == '/grupos' or request.path|slice:'0:6' == '/cfop' or request.path|slice:'0:9' == '/cstcson' or request.path|slice:'0:6' == '/ncm' or request.path|slice:'0:6' == '/cest' %}true{% else %}false{% endif %}" aria-controls="collapseAuxiliares">
+                <i class="fas fa-toolbox fa-fw me-3"></i><span>Auxiliares</span>
+                <i class="fas fa-chevron-down ms-auto" style="font-size: 0.8em;"></i> {# Ícone de seta para indicar colapso #}
+            </a>
+            <div class="collapse {% if request.path|slice:'0:8' == '/setores' or request.path|slice:'0:10' == '/categorias' or request.path|slice:'0:7' == '/grupos' or request.path|slice:'0:6' == '/cfop' or request.path|slice:'0:9' == '/cstcson' or request.path|slice:'0:6' == '/ncm' or request.path|slice:'0:6' == '/cest' %}show{% endif %}" id="collapseAuxiliares" data-bs-parent="#sidebar" style="background-color: #343a40;">
+                <div class="list-group list-group-flush border-bottom border-top">
+                    <a href="{% url 'categoria_list' %}" class="list-group-item list-group-item-action py-2 ripple ps-5 {% if request.path|slice:'0:10' == '/categorias' %}active{% endif %}">
+                        <i class="fas fa-tags fa-fw me-3"></i><span>Categoria</span>
+                    </a>
+                    <a href="{% url 'setor_list' %}" class="list-group-item list-group-item-action py-2 ripple ps-5 {% if request.path|slice:'0:8' == '/setores' %}active{% endif %}">
+                        <i class="fas fa-folder fa-fw me-3"></i><span>Setor</span>
+                    </a>
+                    <a href="{% url 'grupo_list' %}" class="list-group-item list-group-item-action py-2 ripple ps-5 {% if request.path|slice:'0:7' == '/grupos' %}active{% endif %}">
+                        <i class="fas fa-folder fa-fw me-3"></i><span>Grupo</span>
+                    </a>
+                    <a href="{% url 'cfop_list' %}" class="list-group-item list-group-item-action py-2 ripple ps-5 {% if request.path|slice:'0:6' == '/cfop' %}active{% endif %}">
+                        <i class="fas fa-folder fa-fw me-3"></i><span>Cfop</span>
+                    </a>
+                    <a href="{% url 'cstcson_list' %}" class="list-group-item list-group-item-action py-2 ripple ps-5 {% if request.path|slice:'0:9' == '/cstcson' %}active{% endif %}">
+                        <i class="fas fa-folder fa-fw me-3"></i><span>Cst-Csosn</span>
+                    </a>
+                    <a href="{% url 'ncm_list' %}" class="list-group-item list-group-item-action py-2 ripple ps-5 {% if request.path|slice:'0:6' == '/ncm' %}active{% endif %}">
+                        <i class="fas fa-folder fa-fw me-3"></i><span>Ncm</span>
+                    </a>
+                    <a href="{% url 'cest_list' %}" class="list-group-item list-group-item-action py-2 ripple ps-5 {% if request.path|slice:'0:6' == '/cest' %}active{% endif %}">
+                        <i class="fas fa-folder fa-fw me-3"></i><span>Cest</span>
+                    </a>
+                </div>
+            </div>
+
+            {# Menu principal para Convênios (agrupador) - AJUSTADO AQUI #}
+            {# A lógica `active` aqui foi ajustada para cobrir qualquer URL que comece com '/convenio' #}
+            <a class="list-group-item list-group-item-action py-2 ripple
+                {% if request.path|slice:'0:9' == '/convenio' %}active{% else %}collapsed{% endif %}"
+                data-bs-toggle="collapse" href="#collapseConvenios" role="button"
+                aria-expanded="{% if request.path|slice:'0:9' == '/convenio' %}true{% else %}false{% endif %}"
+                aria-controls="collapseConvenios">
+                <i class="fas fa-file-contract fa-fw me-3"></i><span>Convênios</span>
+                <i class="fas fa-chevron-down ms-auto" style="font-size: 0.8em;"></i>
+            </a>
+            <div class="collapse {% if request.path|slice:'0:9' == '/convenio' %}show{% endif %}"
+                 id="collapseConvenios" data-bs-parent="#sidebar" style="background-color: #343a40;">
+                <div class="list-group list-group-flush border-bottom border-top">
+                    {# Sub-item para Abertura de Convênio #}
+                    <a href="{% url 'convenio_abertura_list' %}" class="list-group-item list-group-item-action py-2 ripple ps-5
+                        {% if request.path|slice:'0:17' == '/convenio/abertura' %}active{% endif %}">
+                        <i class="fas fa-calendar-check fa-fw me-3"></i><span>Abertura de Convênio</span>
+                    </a>
+
+                    {# NOVO SUB-ITEM: Incluir Convênio (listagem de convênios em si) #}
+                    <a href="{% url 'convenio_list' %}" class="list-group-item list-group-item-action py-2 ripple ps-5
+                        {% if request.path == '/convenio/' or request.path|slice:'0:17' == '/convenio/editar' %}active{% endif %}">
+                        <i class="fas fa-list-alt fa-fw me-3"></i><span>Incluir Convênio</span>
+                    </a>
+
+                    {# NOVO SUB-ITEM: Emissão de Convênio #}
+                    <a href="{% url 'convenio_emissao_list' %}" class="list-group-item list-group-item-action py-2 ripple ps-5
+                        {% if request.path|slice:'0:17' == '/convenio/emissao' %}active{% endif %}">
+                        <i class="fas fa-money-check-alt fa-fw me-3"></i><span>Emissão de Convênio</span>
+                    </a>
+                </div>
+            </div>
+
+            {# Itens de menu simples #}
+            <a href="{% url 'usuarios_list' %}" class="list-group-item list-group-item-action py-2 ripple {% if request.path|slice:'0:9' == '/usuarios' %}active{% endif %}">
+                <i class="fas fa-users fa-fw me-3"></i><span>Usuários</span>
+            </a>
+            <a href="{% url 'clientes_list' %}" class="list-group-item list-group-item-action py-2 ripple {% if request.path|slice:'0:9' == '/clientes' %}active{% endif %}">
+                <i class="fas fa-handshake fa-fw me-3"></i><span>Clientes</span>
+            </a>
+            <a href="{% url 'empresas_list' %}" class="list-group-item list-group-item-action py-2 ripple {% if request.path|slice:'0:9' == '/empresas' %}active{% endif %}">
+                <i class="fas fa-building fa-fw me-3"></i><span>Empresas</span>
+            </a>
+            <a href="{% url 'produto_list' %}" class="list-group-item list-group-item-action py-2 ripple {% if request.path == '/produtos/' %}active{% endif %}">
+                <i class="fas fa-box fa-fw me-3"></i><span>Produtos</span>
+            </a>
+
+            {# Autenticação (Login/Logout) #}
+            {% if user.is_authenticated %}
+                <a href="{% url 'logout' %}" class="list-group-item list-group-item-action py-2 ripple">
+                    <i class="bi bi-box-arrow-right"></i> <span>Sair</span>
+                </a>
+            {% else %}
+                <a href="{% url 'login' %}" class="list-group-item list-group-item-action py-2 ripple">
+                    <i class="bi bi-box-arrow-in-right"></i> <span>Entrar</span>
+                </a>
+            {% endif %}
+        </nav>
+
+        <main class="content">
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    {% block extra_js %}{% endblock %} {# Adicionado para scripts específicos de cada página #}
+    <script>
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('collapsed');
+            // Store the state in local storage
+            if (sidebar.classList.contains('collapsed')) {
+                localStorage.setItem('sidebarCollapsed', 'true');
+            } else {
+                localStorage.setItem('sidebarCollapsed', 'false');
+            }
+        }
+
+        // Restore sidebar state on load
+        document.addEventListener('DOMContentLoaded', (event) => {
+            const sidebar = document.getElementById('sidebar');
+            if (localStorage.getItem('sidebarCollapsed') === 'true') {
+                sidebar.classList.add('collapsed');
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,24 @@
+# Ignorar ambiente virtual
+.venv/
+
+# Ignorar banco de dados SQLite local
+db.sqlite3
+
+# Ignorar arquivos de configuração local e chaves sensíveis
+.env
+settings_local.py
+
+# Compilados Python
+__pycache__/
+*.py[cod]
+
+# IDEs
+.idea/
+.vscode/
+
+# Logs
+*.log
+
+# macOS / Windows
+.DS_Store
+Thumbs.db

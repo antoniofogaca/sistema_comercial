@@ -1,0 +1,178 @@
+{# core/clientes_list.html #}
+{% extends 'core/base.html' %}
+{% load humanize %}
+{% load static %}
+
+{% block title %}Lista de Clientes{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2><i class="bi bi-people-fill me-2"></i>Lista de Clientes</h2>
+        <a href="{% url 'cliente_create' %}" class="btn btn-success">
+            <i class="bi bi-plus-lg"></i> Novo Cliente
+        </a>
+    </div>
+
+    {% if messages %}
+        <div class="messages mb-3">
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <div class="row mb-3">
+        <div class="col-md-5">
+            <input type="text" id="searchInput" class="form-control" placeholder="🔍 Buscar por nome ou CPF/CNPJ" value="{{ search|default_if_none:'' }}">
+        </div>
+        <div class="col-md-3">
+            <select id="statusFilterSelect" class="form-select">
+                <option value="all" {% if status_filter == 'all' %}selected{% endif %}>Todos os Status</option>
+                <option value="ativo" {% if status_filter == 'ativo' %}selected{% endif %}>Ativo</option>
+                <option value="cancelado" {% if status_filter == 'cancelado' %}selected{% endif %}>Cancelado</option>
+            </select>
+        </div>
+        <div class="col-md-2">
+            <select id="perPageSelect" class="form-select">
+                <option value="5" {% if per_page == 5 %}selected{% endif %}>5 por página</option>
+                <option value="10" {% if per_page == 10 %}selected{% endif %}>10 por página</option>
+                <option value="20" {% if per_page == 20 %}selected{% endif %}>20 por página</option>
+                <option value="50" {% if per_page == 50 %}selected{% endif %}>50 por página</option>
+            </select>
+        </div>
+    </div>
+
+    <div id="clientesTable">
+        {% include 'core/clientes_table_partial.html' %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Referências aos elementos do filtro
+    const searchInput = document.getElementById('searchInput');
+    const perPageSelect = document.getElementById('perPageSelect');
+    const statusFilterSelect = document.getElementById('statusFilterSelect');
+    const clientesTable = document.getElementById('clientesTable');
+
+    // Função para carregar clientes via AJAX
+    function loadClientes(params = {}) {
+        // Cria uma nova URL baseada no caminho atual para evitar problemas com parâmetros antigos
+        const url = new URL(window.location.origin + window.location.pathname);
+
+        // Pega os parâmetros atuais da URL para persistir filtros não alterados
+        const currentParams = new URLSearchParams(window.location.search);
+        currentParams.forEach((value, key) => {
+            // Se o parâmetro não foi sobrescrito pela nova chamada, adiciona
+            if (!(key in params)) {
+                url.searchParams.set(key, value);
+            }
+        });
+
+        // Adiciona/sobrescreve os novos parâmetros
+        Object.keys(params).forEach(key => url.searchParams.set(key, params[key]));
+
+        // Limpa parâmetros vazios ou com valor 'all' (para status) para manter a URL limpa
+        url.searchParams.forEach((value, key) => {
+            if (value === '' || (key === 'status' && value === 'all')) {
+                url.searchParams.delete(key);
+            }
+        });
+
+        console.log("Fetching URL:", url.toString()); // Log para depuração
+        fetch(url, {
+            headers: {'X-Requested-With': 'XMLHttpRequest'}
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok ' + response.statusText);
+            }
+            return response.text();
+        })
+        .then(html => {
+            if (clientesTable) { // Verifica se o elemento existe antes de manipular
+                clientesTable.innerHTML = html;
+                window.history.pushState({}, '', url);
+            } else {
+                console.error("Element with ID 'clientesTable' not found.");
+            }
+        })
+        .catch(error => console.error('Erro ao carregar clientes:', error));
+    }
+
+    // Adiciona event listeners APENAS SE OS ELEMENTOS EXISTIREM
+    if (searchInput) {
+        searchInput.addEventListener('input', function() {
+            loadClientes({
+                search: this.value,
+                per_page: perPageSelect ? perPageSelect.value : 10, // Default se não encontrar
+                status: statusFilterSelect ? statusFilterSelect.value : 'all', // Default se não encontrar
+                page: 1
+            });
+        });
+    } else {
+        console.error("Element with ID 'searchInput' not found.");
+    }
+
+    if (perPageSelect) {
+        perPageSelect.addEventListener('change', function() {
+            loadClientes({
+                search: searchInput ? searchInput.value : '',
+                per_page: this.value,
+                status: statusFilterSelect ? statusFilterSelect.value : 'all',
+                page: 1
+            });
+        });
+    } else {
+        console.error("Element with ID 'perPageSelect' not found.");
+    }
+
+    if (statusFilterSelect) {
+        statusFilterSelect.addEventListener('change', function() {
+            loadClientes({
+                search: searchInput ? searchInput.value : '',
+                per_page: perPageSelect ? perPageSelect.value : 10,
+                status: this.value,
+                page: 1
+            });
+        });
+    } else {
+        console.error("Element with ID 'statusFilterSelect' not found.");
+    }
+
+    // Delegação de clique para ordenação e paginação (permanece igual, mas verifica eixos)
+    document.addEventListener('click', function(e) {
+        // Verifica se o clique foi em um link de ordenação ou paginação E se o elemento existe
+        if (e.target && e.target.matches('.sort-link, .page-link')) {
+            e.preventDefault();
+
+            const currentSearch = searchInput ? searchInput.value : '';
+            const currentPerPage = perPageSelect ? perPageSelect.value : 10;
+            const currentStatus = statusFilterSelect ? statusFilterSelect.value : 'all';
+
+            const url = new URL(e.target.href);
+            const params = Object.fromEntries(url.searchParams.entries());
+
+            if (currentSearch) params.search = currentSearch;
+            if (currentPerPage) params.per_page = currentPerPage;
+            if (currentStatus && currentStatus !== 'all') params.status = currentStatus;
+
+            loadClientes(params);
+        }
+    });
+
+    // Define o valor inicial do select de status com base no contexto do Django
+    // Esta parte já estava correta, mas a validação 'if (statusFilterSelect)' é importante.
+    const initialStatus = '{{ status_filter }}';
+    if (statusFilterSelect && initialStatus) {
+        statusFilterSelect.value = initialStatus;
+    }
+});
+</script>
+{% endblock %}

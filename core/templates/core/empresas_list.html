@@ -1,0 +1,171 @@
+{# core/empresas_list.html #}
+{% extends 'core/base.html' %}
+{% load humanize %}
+{% load static %} {# Pode ser útil para CSS/JS estático se você tiver #}
+
+{% block title %}Lista de Empresas{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2><i class="bi bi-building me-2"></i>Lista de Empresas</h2>
+        <a href="{% url 'empresa_create' %}" class="btn btn-success">
+            <i class="bi bi-plus-lg"></i> Nova Empresa
+        </a>
+    </div>
+
+    {% if messages %}
+        <div class="messages mb-3">
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <div class="row mb-3">
+        <div class="col-md-5">
+            <input type="text" id="searchInput" class="form-control" placeholder="🔍 Buscar por fantasia, CNPJ ou logradouro" value="{{ search|default_if_none:'' }}">
+        </div>
+        <div class="col-md-3">
+            <select id="statusFilterSelect" class="form-select">
+                <option value="all" {% if status_filter == 'all' %}selected{% endif %}>Todos os Status</option>
+                <option value="ativo" {% if status_filter == 'ativo' %}selected{% endif %}>Ativa</option>
+                <option value="cancelado" {% if status_filter == 'cancelado' %}selected{% endif %}>Cancelada</option>
+            </select>
+        </div>
+        <div class="col-md-2">
+            <select id="perPageSelect" class="form-select">
+                <option value="5" {% if per_page == 5 %}selected{% endif %}>5 por página</option>
+                <option value="10" {% if per_page == 10 %}selected{% endif %}>10 por página</option>
+                <option value="20" {% if per_page == 20 %}selected{% endif %}>20 por página</option>
+                <option value="50" {% if per_page == 50 %}selected{% endif %}>50 por página</option>
+            </select>
+        </div>
+    </div>
+
+    <div id="empresasTable">
+        {% include 'core/empresas_table_partial.html' %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Referências aos elementos do filtro
+    const searchInput = document.getElementById('searchInput');
+    const perPageSelect = document.getElementById('perPageSelect');
+    const statusFilterSelect = document.getElementById('statusFilterSelect');
+    const empresasTable = document.getElementById('empresasTable'); // ID da div que contém a tabela
+
+    // Função para carregar empresas via AJAX
+    function loadEmpresas(params = {}) {
+        const url = new URL(window.location.origin + window.location.pathname);
+        const currentParams = new URLSearchParams(window.location.search);
+
+        currentParams.forEach((value, key) => {
+            if (!(key in params)) {
+                url.searchParams.set(key, value);
+            }
+        });
+
+        Object.keys(params).forEach(key => url.searchParams.set(key, params[key]));
+
+        url.searchParams.forEach((value, key) => {
+            if (value === '' || (key === 'status' && value === 'all')) {
+                url.searchParams.delete(key);
+            }
+        });
+
+        console.log("Fetching URL:", url.toString()); // Log para depuração
+        fetch(url, {
+            headers: {'X-Requested-With': 'XMLHttpRequest'}
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok ' + response.statusText);
+            }
+            return response.text();
+        })
+        .then(html => {
+            if (empresasTable) {
+                empresasTable.innerHTML = html;
+                window.history.pushState({}, '', url);
+            } else {
+                console.error("Element with ID 'empresasTable' not found.");
+            }
+        })
+        .catch(error => console.error('Erro ao carregar empresas:', error));
+    }
+
+    // Adiciona event listeners APENAS SE OS ELEMENTOS EXISTIREM
+    if (searchInput) {
+        searchInput.addEventListener('input', function() {
+            loadEmpresas({
+                search: this.value,
+                per_page: perPageSelect ? perPageSelect.value : 10,
+                status: statusFilterSelect ? statusFilterSelect.value : 'all',
+                page: 1
+            });
+        });
+    } else {
+        console.error("Element with ID 'searchInput' not found.");
+    }
+
+    if (perPageSelect) {
+        perPageSelect.addEventListener('change', function() {
+            loadEmpresas({
+                search: searchInput ? searchInput.value : '',
+                per_page: this.value,
+                status: statusFilterSelect ? statusFilterSelect.value : 'all',
+                page: 1
+            });
+        });
+    } else {
+        console.error("Element with ID 'perPageSelect' not found.");
+    }
+
+    if (statusFilterSelect) {
+        statusFilterSelect.addEventListener('change', function() {
+            loadEmpresas({
+                search: searchInput ? searchInput.value : '',
+                per_page: perPageSelect ? perPageSelect.value : 10,
+                status: this.value,
+                page: 1
+            });
+        });
+    } else {
+        console.error("Element with ID 'statusFilterSelect' not found.");
+    }
+
+    // Delegação de clique para ordenação e paginação
+    document.addEventListener('click', function(e) {
+        if (e.target && e.target.matches('.sort-link, .page-link')) {
+            e.preventDefault();
+
+            const currentSearch = searchInput ? searchInput.value : '';
+            const currentPerPage = perPageSelect ? perPageSelect.value : 10;
+            const currentStatus = statusFilterSelect ? statusFilterSelect.value : 'all';
+
+            const url = new URL(e.target.href);
+            const params = Object.fromEntries(url.searchParams.entries());
+
+            if (currentSearch) params.search = currentSearch;
+            if (currentPerPage) params.per_page = currentPerPage;
+            if (currentStatus && currentStatus !== 'all') params.status = currentStatus;
+
+            loadEmpresas(params);
+        }
+    });
+
+    // Define o valor inicial do select de status com base no contexto do Django
+    const initialStatus = '{{ status_filter }}';
+    if (statusFilterSelect && initialStatus) {
+        statusFilterSelect.value = initialStatus;
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,170 @@
+{# core/empresas_form.html #}
+{% extends 'core/base.html' %}
+{% load widget_tweaks %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2><i class="bi bi-building me-2"></i>{{ title }}</h2>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <form method="post">
+                {% csrf_token %}
+
+                {# Identificação da Empresa #}
+                <fieldset class="mb-4 p-3 border rounded">
+                    <legend class="float-none w-auto px-2 fs-5">Identificação da Empresa</legend>
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label for="{{ form.codigo_loja.id_for_label }}" class="form-label">{{ form.codigo_loja.label }}</label>
+                            {% render_field form.codigo_loja class="form-control" %}
+                        </div>
+                        <div class="col-md-4">
+                            <label for="{{ form.cnpj.id_for_label }}" class="form-label">{{ form.cnpj.label }}</label>
+                            {% render_field form.cnpj class="form-control" placeholder="XX.XXX.XXX/XXXX-XX" %}
+                        </div>
+                        <div class="col-md-4">
+                            <label for="{{ form.inscricao_estadual.id_for_label }}" class="form-label">{{ form.inscricao_estadual.label }}</label>
+                            {% render_field form.inscricao_estadual class="form-control" %}
+                        </div>
+                        <div class="col-md-4">
+                            <label for="{{ form.porte.id_for_label }}" class="form-label">{{ form.porte.label }}</label>
+                            {% render_field form.porte class="form-select" %}
+                        </div>
+                        <div class="col-md-4">
+                            <label for="{{ form.situacao.id_for_label }}" class="form-label">{{ form.situacao.label }}</label>
+                            {% render_field form.situacao class="form-select" %}
+                        </div>
+                        <div class="col-md-4">
+                            <label for="{{ form.data_abertura.id_for_label }}" class="form-label">{{ form.data_abertura.label }}</label>
+                            {% render_field form.data_abertura class="form-control" type="date" %}
+                        </div>
+                        <div class="col-md-12">
+                            <label for="{{ form.nome_empresa.id_for_label }}" class="form-label">{{ form.nome_empresa.label }}</label>
+                            {% render_field form.nome_empresa class="form-control" %}
+                        </div>
+                        <div class="col-md-6">
+                            <label for="{{ form.razao_social.id_for_label }}" class="form-label">{{ form.razao_social.label }}</label>
+                            {% render_field form.razao_social class="form-control" %}
+                        </div>
+                        <div class="col-md-6">
+                            <label for="{{ form.fantasia.id_for_label }}" class="form-label">{{ form.fantasia.label }}</label>
+                            {% render_field form.fantasia class="form-control" %}
+                        </div>
+                    </div>
+                </fieldset>
+
+                {# Contato #}
+                <fieldset class="mb-4 p-3 border rounded">
+                    <legend class="float-none w-auto px-2 fs-5">Contato</legend>
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label for="{{ form.contato.id_for_label }}" class="form-label">{{ form.contato.label }}</label>
+                            {% render_field form.contato class="form-control" %}
+                        </div>
+                        <div class="col-md-4">
+                            <label for="{{ form.telefone.id_for_label }}" class="form-label">{{ form.telefone.label }}</label>
+                            {% render_field form.telefone class="form-control" %}
+                        </div>
+                        <div class="col-md-4">
+                            <label for="{{ form.email.id_for_label }}" class="form-label">{{ form.email.label }}</label>
+                            {% render_field form.email class="form-control" %}
+                        </div>
+                    </div>
+                </fieldset>
+
+                {# Endereço #}
+                <fieldset class="mb-4 p-3 border rounded">
+                    <legend class="float-none w-auto px-2 fs-5">Endereço</legend>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="{{ form.logradouro.id_for_label }}" class="form-label">{{ form.logradouro.label }}</label>
+                            {% render_field form.logradouro class="form-control" %}
+                        </div>
+                        <div class="col-md-2">
+                            <label for="{{ form.numero.id_for_label }}" class="form-label">{{ form.numero.label }}</label>
+                            {% render_field form.numero class="form-control" %}
+                        </div>
+                        <div class="col-md-4">
+                            <label for="{{ form.bairro.id_for_label }}" class="form-label">{{ form.bairro.label }}</label>
+                            {% render_field form.bairro class="form-control" %}
+                        </div>
+                        <div class="col-md-4">
+                            <label for="{{ form.cidade.id_for_label }}" class="form-label">{{ form.cidade.label }}</label>
+                            {% render_field form.cidade class="form-control" %}
+                        </div>
+                        <div class="col-md-2">
+                            <label for="{{ form.uf.id_for_label }}" class="form-label">{{ form.uf.label }}</label>
+                            {% render_field form.uf class="form-control" %}
+                        </div>
+                        <div class="col-md-2">
+                            <label for="{{ form.cep.id_for_label }}" class="form-label">{{ form.cep.label }}</label>
+                            {% render_field form.cep class="form-control" %}
+                        </div>
+                    </div>
+                </fieldset>
+
+                {# Dados Fiscais #}
+                <fieldset class="mb-4 p-3 border rounded">
+                    <legend class="float-none w-auto px-2 fs-5">Dados Fiscais</legend>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="{{ form.cnae_principal.id_for_label }}" class="form-label">{{ form.cnae_principal.label }}</label>
+                            {% render_field form.cnae_principal class="form-control" %}
+                            {# Se CNAE fosse um select, seria: {% render_field form.cnae_principal class="form-select" %} #}
+                        </div>
+                        <div class="col-md-3">
+                            <label for="{{ form.aliquota_simples.id_for_label }}" class="form-label">{{ form.aliquota_simples.label }}</label>
+                            {% render_field form.aliquota_simples class="form-control" %}
+                        </div>
+                        <div class="col-md-12">
+                            <label class="form-label d-block">{{ form.codigo_regime_tributario.label }}</label>
+                            <div class="d-flex flex-column"> {# Use flex-column for vertical radios #}
+                                {% for radio in form.codigo_regime_tributario %}
+                                    <div class="form-check">
+                                        {{ radio.tag }}
+                                        <label class="form-check-label" for="{{ radio.id_for_label }}">{{ radio.choice_label }}</label>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        <div class="col-md-12">
+                            <div class="form-check">
+                                {% render_field form.cancelado class="form-check-input" %}
+                                <label class="form-check-label" for="{{ form.cancelado.id_for_label }}">
+                                    {{ form.cancelado.label }}
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </fieldset>
+
+                {% if form.errors %}
+                    <div class="alert alert-danger mt-3">
+                        <strong>Por favor, corrija os seguintes erros:</strong>
+                        <ul>
+                            {% for field in form %}
+                                {% if field.errors %}
+                                    <li>{{ field.label }}: {{ field.errors }}</li>
+                                {% endif %}
+                            {% endfor %}
+                            {% if form.non_field_errors %}
+                                <li>{{ form.non_field_errors }}</li>
+                            {% endif %}
+                        </ul>
+                    </div>
+                {% endif %}
+
+                <div class="mt-4">
+                    <button type="submit" class="btn btn-primary me-2"><i class="bi bi-save me-1"></i>Salvar</button>
+                    <a href="{% url 'empresas_list' %}" class="btn btn-secondary"><i class="bi bi-x-circle me-1"></i>Cancelar</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

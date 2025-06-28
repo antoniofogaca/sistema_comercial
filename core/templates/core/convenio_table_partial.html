@@ -1,0 +1,134 @@
+{# core/templates/core/convenio_table_partial.html #}
+
+<table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+    <thead>
+        <tr>
+            {# Coluna Código da Loja #}
+            <th>
+                <a href="?sort_by={% if sort_by == 'cd_loja' %}-{% endif %}cd_loja" class="sort-link">Cód. Loja</a>
+            </th>
+            {# Coluna Nome do Convênio #}
+            <th>
+                <a href="?sort_by={% if sort_by == 'nome_convenio' %}-{% endif %}nome_convenio" class="sort-link">Nome Convênio</a>
+            </th>
+            {# Coluna CNPJ #}
+            <th>
+                <a href="?sort_by={% if sort_by == 'cnpj' %}-{% endif %}cnpj" class="sort-link">CNPJ</a>
+            </th>
+            {# Coluna Contato #}
+            <th>
+                <a href="?sort_by={% if sort_by == 'contato' %}-{% endif %}contato" class="sort-link">Contato</a>
+            </th>
+            {# Coluna E-mail #}
+            <th>
+                <a href="?sort_by={% if sort_by == 'email' %}-{% endif %}email" class="sort-link">E-mail</a>
+            </th>
+            {# Coluna Telefone #}
+            <th>
+                <a href="?sort_by={% if sort_by == 'telefone' %}-{% endif %}telefone" class="sort-link">Telefone</a>
+            </th>
+            {# Coluna Status (Ativo) #}
+            <th>
+                <a href="?sort_by={% if sort_by == 'ativo' %}-{% endif %}ativo" class="sort-link">Status</a>
+            </th>
+            {# Coluna Parcelas Permitidas #}
+            <th>
+                <a href="?sort_by={% if sort_by == 'qtd_parc_permi' %}-{% endif %}qtd_parc_permi" class="sort-link">Parcelas</a>
+            </th>
+            {# Coluna Código do Evento #}
+            <th>
+                <a href="?sort_by={% if sort_by == 'cod_evento' %}-{% endif %}cod_evento" class="sort-link">Cód. Evento</a>
+            </th>
+            {# Coluna Logo #}
+            <th>Logo</th>
+            <th>Ações</th>
+        </tr>
+    </thead>
+    <tbody>
+        {# Iteramos sobre 'page_obj' que a view está passando #}
+        {% for convenio_item in page_obj %}
+        <tr>
+            <td>{{ convenio_item.cd_loja|default_if_none:"N/A" }}</td>
+            <td>{{ convenio_item.nome_convenio }}</td>
+            <td>{{ convenio_item.cnpj }}</td>
+            <td>{{ convenio_item.contato|default_if_none:"N/A" }}</td>
+            <td>{{ convenio_item.email|default_if_none:"N/A" }}</td>
+            <td>{{ convenio_item.telefone|default_if_none:"N/A" }}</td>
+            <td>
+                {# Exibindo o status de Ativo #}
+                {% if convenio_item.ativo %}
+                    <span class="badge bg-success">Ativo</span>
+                {% else %}
+                    <span class="badge bg-danger">Inativo</span>
+                {% endif %}
+            </td>
+            <td>{{ convenio_item.qtd_parc_permi }}</td>
+            <td>{{ convenio_item.cod_evento|default_if_none:"N/A" }}</td>
+            <td>
+                {% if convenio_item.logo %}
+                    <img src="{{ convenio_item.logo.url }}" alt="Logo" style="max-width: 50px; max-height: 50px;">
+                {% else %}
+                    N/A
+                {% endif %}
+            </td>
+            <td>
+                {# Links de Ações - apontando para as URLs de Convênio #}
+                <a href="{% url 'convenio_update' convenio_item.pk %}" class="btn btn-warning btn-sm" title="Editar">
+                    <i class="fas fa-edit"></i>
+                </a>
+                <a href="{% url 'convenio_confirm_delete' convenio_item.pk %}" class="btn btn-danger btn-sm" title="Excluir">
+                    <i class="fas fa-trash-alt"></i>
+                </a>
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            {# Colspan ajustado para o número total de colunas #}
+            <td colspan="11" class="text-center">Nenhum Convênio encontrado.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{# Paginação - Adaptada para usar os parâmetros de busca, status, per_page e sort_by #}
+<nav aria-label="Page navigation">
+    <ul class="pagination justify-content-center">
+        {% if page_obj.has_previous %}
+            <li class="page-item">
+                {# Passa todos os parâmetros da URL atual para manter filtros e busca #}
+                <a class="page-link page-link"
+                   href="?page={{ page_obj.previous_page_number }}&search={{ search }}&status={{ status_filter }}&per_page={{ per_page }}&sort_by={{ sort_by }}">
+                   Anterior
+                </a>
+            </li>
+        {% else %}
+            <li class="page-item disabled">
+                <span class="page-link">Anterior</span>
+            </li>
+        {% endif %}
+
+        {% for num in page_obj.paginator.page_range %}
+            <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+                {# Passa todos os parâmetros da URL atual para manter filtros e busca #}
+                <a class="page-link page-link"
+                   href="?page={{ num }}&search={{ search }}&status={{ status_filter }}&per_page={{ per_page }}&sort_by={{ sort_by }}">
+                   {{ num }}
+                </a>
+            </li>
+        {% endfor %}
+
+        {% if page_obj.has_next %}
+            <li class="page-item">
+                {# Passa todos os parâmetros da URL atual para manter filtros e busca #}
+                <a class="page-link page-link"
+                   href="?page={{ page_obj.next_page_number }}&search={{ search }}&status={{ status_filter }}&per_page={{ per_page }}&sort_by={{ sort_by }}">
+                   Próxima
+                </a>
+            </li>
+        {% else %}
+            <li class="page-item disabled">
+                <span class="page-link">Próxima</span>
+            </li>
+        {% endif %}
+    </ul>
+</nav>

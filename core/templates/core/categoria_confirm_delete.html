@@ -1,0 +1,23 @@
+{# core/templates/core/categoria_confirm_delete.html #}
+
+{% extends 'core/base.html' %}
+
+{% block title %}Confirmar Exclusão{% endblock %}
+
+{% block content %}
+<div class="card shadow mb-4">
+    <div class="card-header py-3">
+        <h6 class="m-0 font-weight-bold text-danger">Confirmar Exclusão da Categoria</h6>
+    </div>
+    <div class="card-body">
+        <p>Você tem certeza que deseja excluir a categoria **"{{ categoria.id_cat }} - {{ categoria.descricao }}"**?</p>
+        <p class="text-danger">Esta ação não pode ser desfeita.</p>
+
+        <form method="post" action="{% url 'categoria_delete' categoria.pk %}">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger me-2">Sim, Excluir</button>
+            <a href="{% url 'categoria_list' %}" class="btn btn-secondary">Cancelar</a>
+        </form>
+    </div>
+</div>
+{% endblock %}

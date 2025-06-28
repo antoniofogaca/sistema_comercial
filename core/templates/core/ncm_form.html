@@ -1,0 +1,115 @@
+{# core/templates/core/ncm_form.html #}
+
+{% extends 'core/base.html' %}
+{% load widget_tweaks %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="card shadow mb-4">
+    <div class="card-header py-3">
+        <h6 class="m-0 font-weight-bold text-primary">{{ title }}</h6>
+    </div>
+    <div class="card-body">
+        <form method="post" class="needs-validation" novalidate>
+            {% csrf_token %}
+
+            {# Campo NCM #}
+            <div class="mb-3">
+                <label for="{{ form.ncm.id_for_label }}" class="form-label">NCM</label>
+                {% render_field form.ncm class="form-control" %}
+                {% if form.ncm.errors %}
+                    {% for error in form.ncm.errors %}
+                        <div class="invalid-feedback d-block">{{ error }}</div>
+                    {% endfor %}
+                {% endif %}
+            </div>
+
+            {# Campo Descrição #}
+            <div class="mb-3">
+                <label for="{{ form.descricao.id_for_label }}" class="form-label">Descrição</label>
+                {% render_field form.descricao class="form-control" %}
+                {% if form.descricao.errors %}
+                    {% for error in form.descricao.errors %}
+                        <div class="invalid-feedback d-block">{{ error }}</div>
+                    {% endfor %}
+                {% endif %}
+            </div>
+
+            {# Campo Início Vigência #}
+            <div class="mb-3">
+                <label for="{{ form.inicio_vigencia.id_for_label }}" class="form-label">Início da Vigência</label>
+                {# Usando type="date" para um picker de data HTML5 #}
+                {% render_field form.inicio_vigencia class="form-control" type="date" %}
+                {% if form.inicio_vigencia.errors %}
+                    {% for error in form.inicio_vigencia.errors %}
+                        <div class="invalid-feedback d-block">{{ error }}</div>
+                    {% endfor %}
+                {% endif %}
+            </div>
+
+            {# Campo Fim Vigência #}
+            <div class="mb-3">
+                <label for="{{ form.fim_vigencia.id_for_label }}" class="form-label">Fim da Vigência</label>
+                {# Usando type="date" para um picker de data HTML5 #}
+                {% render_field form.fim_vigencia class="form-control" type="date" %}
+                {% if form.fim_vigencia.errors %}
+                    {% for error in form.fim_vigencia.errors %}
+                        <div class="invalid-feedback d-block">{{ error }}</div>
+                    {% endfor %}
+                {% endif %}
+            </div>
+
+            {# Campo Ano #}
+            <div class="mb-3">
+                <label for="{{ form.ano.id_for_label }}" class="form-label">Ano</label>
+                {% render_field form.ano class="form-control" %}
+                {% if form.ano.errors %}
+                    {% for error in form.ano.errors %}
+                        <div class="invalid-feedback d-block">{{ error }}</div>
+                    {% endfor %}
+                {% endif %}
+            </div>
+
+            {# Campo Número #}
+            <div class="mb-3">
+                <label for="{{ form.numero.id_for_label }}" class="form-label">Número</label>
+                {% render_field form.numero class="form-control" %}
+                {% if form.numero.errors %}
+                    {% for error in form.numero.errors %}
+                        <div class="invalid-feedback d-block">{{ error }}</div>
+                    {% endfor %}
+                {% endif %}
+            </div>
+            
+            {# Campo Cancelado (Checkbox) #}
+            <div class="form-check mb-3">
+                {% render_field form.cancelado class="form-check-input" %}
+                <label class="form-check-label" for="{{ form.cancelado.id_for_label }}">
+                    Cancelado
+                </label>
+                {% if form.cancelado.errors %}
+                    {% for error in form.cancelado.errors %}
+                        <div class="invalid-feedback d-block">{{ error }}</div>
+                    {% endfor %}
+                {% endif %}
+            </div>
+
+            {# Campo Segmento #}
+            <div class="mb-3">
+                <label for="{{ form.segmento.id_for_label }}" class="form-label">Segmento</label>
+                {% render_field form.segmento class="form-control" %}
+                {% if form.segmento.errors %}
+                    {% for error in form.segmento.errors %}
+                        <div class="invalid-feedback d-block">{{ error }}</div>
+                    {% endfor %}
+                {% endif %}
+            </div>
+
+
+            <button type="submit" class="btn btn-primary">Salvar</button>
+            <a href="{% url 'ncm_list' %}" class="btn btn-secondary">Cancelar</a>
+        </form>
+    </div>
+</div>
+{% endblock %}

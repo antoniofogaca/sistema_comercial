@@ -1,0 +1,78 @@
+{# core/templates/core/cstcson_table_partial.html #}
+
+<table class="table table-bordered" id="dataTableCstCson" width="100%" cellspacing="0">
+    <thead>
+        <tr>
+            <th><a href="?sort_by={% if sort_by == 'cd_cst_cson' %}-{% endif %}cd_cst_cson" class="sort-link">Código CST/CSOSN</a></th>
+            <th><a href="?sort_by={% if sort_by == 'descricao' %}-{% endif %}descricao" class="sort-link">Descrição</a></th>
+            <th><a href="?sort_by={% if sort_by == 'cd_regime_trib' %}-{% endif %}cd_regime_trib" class="sort-link">Regime Tributário</a></th>
+            <th><a href="?sort_by={% if sort_by == 'cancelado' %}-{% endif %}cancelado" class="sort-link">Status</a></th>
+            <th>Ações</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for cstcson in page_obj.object_list %}
+        <tr>
+            <td>{{ cstcson.cd_cst_cson }}</td>
+            <td>{{ cstcson.descricao }}</td>
+            <td>{{ cstcson.cd_regime_trib }}</td>
+            <td>
+                {% if cstcson.cancelado %}
+                    <span class="badge bg-danger">Cancelado</span>
+                {% else %}
+                    <span class="badge bg-success">Ativo</span>
+                {% endif %}
+            </td>
+            <td>
+                <a href="{% url 'cstcson_update' cstcson.pk %}" class="btn btn-warning btn-sm" title="Editar">
+                    <i class="fas fa-edit"></i>
+                </a>
+                <a href="{% url 'cstcson_confirm_delete' cstcson.pk %}" class="btn btn-danger btn-sm" title="Excluir">
+                    <i class="fas fa-trash-alt"></i>
+                </a>
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="5" class="text-center">Nenhum CST/CSOSN encontrado.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{# Paginação - Adapte conforme o seu estilo Bootstrap #}
+<nav aria-label="Page navigation">
+    <ul class="pagination justify-content-center">
+        {% if page_obj.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.previous_page_number }}" data-page="{{ page_obj.previous_page_number }}">Anterior</a>
+            </li>
+        {% else %}
+            <li class="page-item disabled">
+                <span class="page-link">Anterior</span>
+            </li>
+        {% endif %}
+
+        {% for i in page_obj.paginator.page_range %}
+            {% if page_obj.number == i %}
+                <li class="page-item active" aria-current="page">
+                    <span class="page-link">{{ i }}</span>
+                </li>
+            {% else %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ i }}" data-page="{{ i }}">{{ i }}</a>
+                </li>
+            {% endif %}
+        {% endfor %}
+
+        {% if page_obj.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.next_page_number }}" data-page="{{ page_obj.next_page_number }}">Próximo</a>
+            </li>
+        {% else %}
+            <li class="page-item disabled">
+                <span class="page-link">Próximo</span>
+            </li>
+        {% endif %}
+    </ul>
+</nav>
