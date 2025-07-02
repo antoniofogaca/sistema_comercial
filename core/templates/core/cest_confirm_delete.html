@@ -13,10 +13,10 @@
         <p>Você tem certeza que deseja excluir o CEST **"{{ cest.cd_cest }} - {{ cest.descricao }}"**?</p>
         <p class="text-danger">Esta ação não pode ser desfeita.</p>
 
-        <form method="post" action="{% url 'cest_delete' cest.pk %}">
+        <form method="post" action="{% url 'core:cest_delete' cest.pk %}">
             {% csrf_token %}
             <button type="submit" class="btn btn-danger me-2">Sim, Excluir</button>
-            <a href="{% url 'cest_list' %}" class="btn btn-secondary">Cancelar</a>
+            <a href="{% url 'core:cest_list' %}" class="btn btn-secondary">Cancelar</a>
         </form>
     </div>
 </div>

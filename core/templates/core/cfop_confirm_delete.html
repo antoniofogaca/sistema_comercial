@@ -13,10 +13,10 @@
         <p>Você tem certeza que deseja excluir o CFOP **"{{ cfop.cfop }} - {{ cfop.descricao }}"**?</p>
         <p class="text-danger">Esta ação não pode ser desfeita.</p>
 
-        <form method="post" action="{% url 'cfop_delete' cfop.pk %}">
+        <form method="post" action="{% url 'core:cfop_delete' cfop.pk %}">
             {% csrf_token %}
             <button type="submit" class="btn btn-danger me-2">Sim, Excluir</button>
-            <a href="{% url 'cfop_list' %}" class="btn btn-secondary">Cancelar</a>
+            <a href="{% url 'core:cfop_list' %}" class="btn btn-secondary">Cancelar</a>
         </form>
     </div>
 </div>

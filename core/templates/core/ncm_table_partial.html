@@ -60,10 +60,10 @@
             <td>{{ ncm_item.segmento|default_if_none:"N/A" }}</td>
             <td>
                 {# Links de Ações - apontando para as URLs de NCM #}
-                <a href="{% url 'ncm_update' ncm_item.pk %}" class="btn btn-warning btn-sm" title="Editar">
+                <a href="{% url 'core:ncm_update' ncm_item.pk %}" class="btn btn-warning btn-sm" title="Editar">
                     <i class="fas fa-edit"></i>
                 </a>
-                <a href="{% url 'ncm_confirm_delete' ncm_item.pk %}" class="btn btn-danger btn-sm" title="Excluir">
+                <a href="{% url 'core:ncm_confirm_delete' ncm_item.pk %}" class="btn btn-danger btn-sm" title="Excluir">
                     <i class="fas fa-trash-alt"></i>
                 </a>
             </td>

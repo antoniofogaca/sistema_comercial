@@ -13,10 +13,10 @@
         <p>Você tem certeza que deseja excluir a categoria **"{{ categoria.id_cat }} - {{ categoria.descricao }}"**?</p>
         <p class="text-danger">Esta ação não pode ser desfeita.</p>
 
-        <form method="post" action="{% url 'categoria_delete' categoria.pk %}">
+        <form method="post" action="{% url 'core:categoria_delete' categoria.pk %}">
             {% csrf_token %}
             <button type="submit" class="btn btn-danger me-2">Sim, Excluir</button>
-            <a href="{% url 'categoria_list' %}" class="btn btn-secondary">Cancelar</a>
+            <a href="{% url 'core:categoria_list' %}" class="btn btn-secondary">Cancelar</a>
         </form>
     </div>
 </div>

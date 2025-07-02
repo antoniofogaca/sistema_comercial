@@ -13,10 +13,10 @@
         <p>Você tem certeza que deseja excluir o CST/CSOSN **"{{ cstcson.cd_cst_cson }} - {{ cstcson.descricao }}"**?</p>
         <p class="text-danger">Esta ação não pode ser desfeita.</p>
 
-        <form method="post" action="{% url 'cstcson_delete' cstcson.pk %}">
+        <form method="post" action="{% url 'core:cstcson_delete' cstcson.pk %}">
             {% csrf_token %}
             <button type="submit" class="btn btn-danger me-2">Sim, Excluir</button>
-            <a href="{% url 'cstcson_list' %}" class="btn btn-secondary">Cancelar</a>
+            <a href="{% url 'core:cstcson_list' %}" class="btn btn-secondary">Cancelar</a>
         </form>
     </div>
 </div>

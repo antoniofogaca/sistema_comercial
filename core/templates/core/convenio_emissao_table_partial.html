@@ -1,11 +1,12 @@
 {# core/templates/core/convenio_emissao_table_partial.html #}
+{% load static %}
 
 <table class="table table-bordered" id="dataTableConvenioEmissao" width="100%" cellspacing="0">
     <thead>
         <tr>
-            <th><a href="?sort_by={% if sort_by == 'pk' %}-{% endif %}pk" class="sort-link">ID</a></th>
-            <th><a href="?sort_by={% if sort_by == 'CPF' %}-{% endif %}CPF" class="sort-link">CPF</a></th>
-            {# Changed to display Cliente's name and Convenio's name #}
+            {# Note: 'id' é a PK padrão do Django. Se seu modelo ConvenioEmissao tem um campo ID diferente, ajuste. #}
+            <th><a href="?sort_by={% if sort_by == 'id' %}-{% endif %}id" class="sort-link">ID</a></th>
+            <th><a href="?sort_by={% if sort_by == 'ID_CLIENTE__cpf_cnpj' %}-{% endif %}ID_CLIENTE__cpf_cnpj" class="sort-link">CPF</a></th>
             <th><a href="?sort_by={% if sort_by == 'ID_CLIENTE__nome_completo' %}-{% endif %}ID_CLIENTE__nome_completo" class="sort-link">Cliente</a></th>
             <th><a href="?sort_by={% if sort_by == 'ID_CONVENIO__nome_convenio' %}-{% endif %}ID_CONVENIO__nome_convenio" class="sort-link">Convênio</a></th>
             <th><a href="?sort_by={% if sort_by == 'VALOR' %}-{% endif %}VALOR" class="sort-link">Valor</a></th>
@@ -16,39 +17,42 @@
         </tr>
     </thead>
     <tbody>
-        {% for convenioEmissao in page_obj %} {# Use page_obj directly as it's already an iterable of ConvenioEmissao objects #}
+        {# CORREÇÃO: Iterando sobre 'emissoes' que vem do contexto da view #}
+        {% for emissao in emissoes %}
         <tr>
-            <td>{{ convenioEmissao.pk }}</td>
-            <td>{{ convenioEmissao.CPF }}</td>
-            <td>{{ convenioEmissao.ID_CLIENTE.nome_completo }}</td> {# Access related Cliente's name #}
-            <td>{{ convenioEmissao.ID_CONVENIO.nome_convenio }}</td> {# Access related Convenio's name #}
-            <td>{{ convenioEmissao.VALOR|floatformat:2 }}</td> {# Format as currency if needed #}
-            <td>{{ convenioEmissao.QTD_PARCELA }}</td>
-            <td>{{ convenioEmissao.MES_REFERENCIA }}</td>
-            <td>{{ convenioEmissao.DATA_TRANSACAO|date:"d/m/Y" }}</td>
+            <td>{{ emissao.id }}</td>
+            <td>{{ emissao.ID_CLIENTE.cpf_cnpj|default:"N/A" }}</td> {# Exibe CPF do cliente relacionado #}
+            <td>{{ emissao.ID_CLIENTE.nome_completo|default:"N/A" }}</td> {# Exibe nome do cliente relacionado #}
+            <td>{{ emissao.ID_CONVENIO.nome_convenio|default:"N/A" }}</td> {# Exibe nome do convênio relacionado #}
+            <td>R$ {{ emissao.VALOR|floatformat:2 }}</td>
+            <td>{{ emissao.QTD_PARCELA }}</td>
+            <td>{{ emissao.MES_REFERENCIA }}</td>
+            <td>{{ emissao.DATA_TRANSACAO|date:"d/m/Y" }} {{ emissao.HORA_TRANSACAO|time:"H:i" }}</td>
             <td>
-                <a href="{% url 'convenio_emissao_update' convenioEmissao.pk %}" class="btn btn-warning btn-sm" title="Editar">
+                {# CORREÇÃO: Usando 'core:convenio_emissao_update' #}
+                <a href="{% url 'core:convenio_emissao_update' emissao.pk %}" class="btn btn-warning btn-sm" title="Editar">
                     <i class="fas fa-edit"></i>
                 </a>
-                <a href="{% url 'convenio_emissao_confirm_delete' convenioEmissao.pk %}" class="btn btn-danger btn-sm" title="Excluir">
+                {# CORREÇÃO: Usando 'core:convenio_emissao_confirm_delete' #}
+                <a href="{% url 'core:convenio_emissao_confirm_delete' emissao.pk %}" class="btn btn-danger btn-sm" title="Excluir">
                     <i class="fas fa-trash-alt"></i>
                 </a>
             </td>
         </tr>
         {% empty %}
         <tr>
-            <td colspan="9" class="text-center">Nenhuma Emissão de Convênio encontrada.</td> {# Updated colspan #}
+            <td colspan="9" class="text-center">Nenhuma emissão de convênio encontrada.</td>
         </tr>
         {% endfor %}
     </tbody>
 </table>
 
-{# Paginação - Sem alterações aqui, pois já usa page_obj #}
+{# Paginação - Note que agora usa 'emissoes' #}
 <nav aria-label="Page navigation">
     <ul class="pagination justify-content-center">
-        {% if page_obj.has_previous %}
+        {% if emissoes.has_previous %}
             <li class="page-item">
-                <a class="page-link" href="?page={{ page_obj.previous_page_number }}" data-page="{{ page_obj.previous_page_number }}">Anterior</a>
+                <a class="page-link" href="?page={{ emissoes.previous_page_number }}{% if search %}&search={{ search }}{% endif %}{% if status_filter != 'all' %}&status={{ status_filter }}{% endif %}{% if per_page %}&per_page={{ per_page }}{% endif %}{% if sort_by %}&sort_by={{ sort_by }}{% endif %}" data-page="{{ emissoes.previous_page_number }}">Anterior</a>
             </li>
         {% else %}
             <li class="page-item disabled">
@@ -56,21 +60,21 @@
             </li>
         {% endif %}
 
-        {% for i in page_obj.paginator.page_range %}
-            {% if page_obj.number == i %}
+        {% for i in emissoes.paginator.page_range %}
+            {% if emissoes.number == i %}
                 <li class="page-item active" aria-current="page">
                     <span class="page-link">{{ i }}</span>
                 </li>
             {% else %}
                 <li class="page-item">
-                    <a class="page-link" href="?page={{ i }}" data-page="{{ i }}">{{ i }}</a>
+                    <a class="page-link" href="?page={{ i }}{% if search %}&search={{ search }}{% endif %}{% if status_filter != 'all' %}&status={{ status_filter }}{% endif %}{% if per_page %}&per_page={{ per_page }}{% endif %}{% if sort_by %}&sort_by={{ sort_by }}{% endif %}" data-page="{{ i }}">{{ i }}</a>
                 </li>
             {% endif %}
         {% endfor %}
 
-        {% if page_obj.has_next %}
+        {% if emissoes.has_next %}
             <li class="page-item">
-                <a class="page-link" href="?page={{ page_obj.next_page_number }}" data-page="{{ page_obj.next_page_number }}">Próximo</a>
+                <a class="page-link" href="?page={{ emissoes.next_page_number }}{% if search %}&search={{ search }}{% endif %}{% if status_filter != 'all' %}&status={{ status_filter }}{% endif %}{% if per_page %}&per_page={{ per_page }}{% endif %}{% if sort_by %}&sort_by={{ sort_by }}{% endif %}" data-page="{{ emissoes.next_page_number }}">Próximo</a>
             </li>
         {% else %}
             <li class="page-item disabled">

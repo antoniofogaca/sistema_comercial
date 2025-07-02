@@ -13,10 +13,10 @@
         <p>Você tem certeza que deseja excluir o grupo **"{{ grupo.codigo }} - {{ grupo.descricao }}"**?</p>
         <p class="text-danger">Esta ação não pode ser desfeita.</p>
 
-        <form method="post" action="{% url 'grupo_delete' grupo.pk %}">
+        <form method="post" action="{% url 'core:grupo_delete' grupo.pk %}">
             {% csrf_token %}
             <button type="submit" class="btn btn-danger me-2">Sim, Excluir</button>
-            <a href="{% url 'grupo_list' %}" class="btn btn-secondary">Cancelar</a>
+            <a href="{% url 'core:grupo_list' %}" class="btn btn-secondary">Cancelar</a>
         </form>
     </div>
 </div>

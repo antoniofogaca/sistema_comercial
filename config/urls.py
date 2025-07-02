@@ -30,7 +30,7 @@ from django.conf.urls.static import static # Importe static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include('core.urls')),  # Redireciona tudo para core/urls.py
+    path('', include('core.urls', namespace='core')),
 ]
 
 # Configuração para servir arquivos de mídia apenas em ambiente de desenvolvimento

@@ -73,10 +73,10 @@
             </td>
             <td>
                 {# Links de Ações - apontando para as URLs de Convênio #}
-                <a href="{% url 'convenio_update' convenio_item.pk %}" class="btn btn-warning btn-sm" title="Editar">
+                <a href="{% url 'core:convenio_update' convenio_item.pk %}" class="btn btn-warning btn-sm" title="Editar">
                     <i class="fas fa-edit"></i>
                 </a>
-                <a href="{% url 'convenio_confirm_delete' convenio_item.pk %}" class="btn btn-danger btn-sm" title="Excluir">
+                <a href="{% url 'core:convenio_confirm_delete' convenio_item.pk %}" class="btn btn-danger btn-sm" title="Excluir">
                     <i class="fas fa-trash-alt"></i>
                 </a>
             </td>

@@ -14,10 +14,10 @@
         <p>Você tem certeza que deseja excluir o convênio **"{{ object.nome_convenio }} ({{ object.cnpj }})"**?</p> {# Variável e campos ajustados #}
         <p class="text-danger">Esta ação não pode ser desfeita.</p>
 
-        <form method="post" action="{% url 'convenio_delete' object.pk %}"> {# URL e variável ajustadas #}
+        <form method="post" action="{% url 'core:convenio_delete' object.pk %}"> {# URL e variável ajustadas #}
             {% csrf_token %}
             <button type="submit" class="btn btn-danger me-2">Sim, Excluir</button>
-            <a href="{% url 'convenio_list' %}" class="btn btn-secondary">Cancelar</a> {# URL ajustada #}
+            <a href="{% url 'core:convenio_list' %}" class="btn btn-secondary">Cancelar</a> {# URL ajustada #}
         </form>
     </div>
 </div>

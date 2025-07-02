@@ -528,7 +528,8 @@ class ConvenioAbertura(models.Model):
     def __str__(self):
         return f"Convênio Ref.: {self.mes_referencia} - Status: {self.get_status_display()}"
 
-# MODELO PARA CONVÊNIOS
+#------------------------------------------ MODELO PARA CONVÊNIOS ------------------------------------------------------
+
 class Convenio(models.Model):
     """
     Model para armazenar os dados dos convênios com clientes.
@@ -624,7 +625,7 @@ class ConvenioEmissao(models.Model):
         ordering = ['-DATA_TRANSACAO', '-HORA_TRANSACAO'] # Ordenar pelas transações mais recentes
 
     def __str__(self):
-        return f"Emissão ID: {self.pk} - Cliente: {self.ID_CLIENTE.cpf} - Convênio: {self.ID_CONVENIO.nome_convenio}"
+        return f"Emissão ID: {self.pk} - Cliente: {self.ID_CLIENTE.cpf_cnpj} - Convênio: {self.ID_CONVENIO.nome_convenio}"
 
     # Adicione este método para garantir que o ID da emissão possa ser referenciado
     def get_id(self):

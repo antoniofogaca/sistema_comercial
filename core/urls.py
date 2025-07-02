@@ -3,6 +3,8 @@ from django.urls import path
 from django.contrib.auth.views import LogoutView, LoginView
 from . import views
 
+app_name = 'core'
+
 urlpatterns = [
     path('', views.home, name='home'),  # Página inicial
     path('logout/', LogoutView.as_view(next_page='home'), name='logout'),
@@ -39,11 +41,11 @@ urlpatterns = [
     path('produtos/excluir/<int:pk>/', views.produto_delete, name='produto_delete'),
 
     # --- NOVOS PATHS: CST_CSON ---
-    path('cstcson/', views.cst_cson_list, name='cstcson_list'),
-    path('cstcson/novo/', views.cst_cson_create, name='cstcson_create'),
-    path('cstcson/editar/<int:pk>/', views.cst_cson_update, name='cstcson_update'),
-    path('cstcson/excluir/<int:pk>/', views.cst_cson_delete, name='cstcson_delete'),
-    path('cstcson/confirmar-exclusao/<int:pk>/', views.cst_cson_confirm_delete, name='cstcson_confirm_delete'),
+    path('cstcson/', views.cst_cson_list, name='cst_cson_list'),
+    path('cstcson/novo/', views.cst_cson_create, name='cst_cson_create'),
+    path('cstcson/editar/<int:pk>/', views.cst_cson_update, name='cst_cson_update'),
+    path('cstcson/excluir/<int:pk>/', views.cst_cson_delete, name='cst_cson_delete'),
+    path('cstcson/confirmar-exclusao/<int:pk>/', views.cst_cson_confirm_delete, name='cst_cson_confirm_delete'),
 
     # --- NOVOS PATHS: CEST ---
     path('cest/', views.cest_list, name='cest_list'),

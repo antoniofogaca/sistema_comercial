@@ -22,10 +22,10 @@
                 {% endif %}
             </td>
             <td>
-                <a href="{% url 'usuario_update' usuario.pk %}" class="btn btn-sm btn-info me-2" title="Editar">
+                <a href="{% url 'core:usuario_update' usuario.pk %}" class="btn btn-sm btn-info me-2" title="Editar">
                     <i class="bi bi-pencil-fill"></i>
                 </a>
-                <a href="{% url 'usuario_delete' usuario.pk %}" class="btn btn-sm btn-danger" title="Excluir">
+                <a href="{% url 'core:usuario_delete' usuario.pk %}" class="btn btn-sm btn-danger" title="Excluir">
                     <i class="bi bi-trash"></i> {# Use bi bi-trash se for Bootstrap Icons #}
                 </a>
             </td>

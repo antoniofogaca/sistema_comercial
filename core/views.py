@@ -16,7 +16,7 @@ from django.views.decorators.csrf import csrf_exempt  # Cuidado com CSRF em APIs
 from django.utils import timezone
 from datetime import timedelta, date
 import calendar  # Para calcular o último dia do mês
-
+from django.views.decorators.http import require_http_methods, require_GET
 
 # Páginas estáticas
 def home(request):
@@ -33,7 +33,7 @@ def convenios(request):
 
 # Redirecionamento antigo
 def clientes(request):
-    return redirect('clientes_list')
+    return redirect('core:clientes_list')
 
 # View dinâmica com filtro, ordenação e paginação
 def clientes_list(request):
@@ -108,7 +108,7 @@ def cliente_create(request):
             # Adicionar mensagem de sucesso
             from django.contrib import messages
             messages.success(request, 'Cliente criado com sucesso!')
-            return redirect('clientes_list')
+            return redirect('core:clientes_list')
     else:
         form = ClienteForm()
     return render(request, 'core/clientes_form.html', {'form': form, 'title': 'Novo Cliente'})
@@ -122,7 +122,7 @@ def cliente_update(request, pk):
             # Adicionar mensagem de sucesso
             from django.contrib import messages
             messages.success(request, 'Cliente atualizado com sucesso!')
-            return redirect('clientes_list')
+            return redirect('core:clientes_list')
     else:
         form = ClienteForm(instance=cliente)
     return render(request, 'core/clientes_form.html', {'form': form, 'title': 'Editar Cliente'})
@@ -134,7 +134,7 @@ def cliente_delete(request, pk):
         # Adicionar mensagem de sucesso
         from django.contrib import messages
         messages.success(request, 'Cliente excluído com sucesso!')
-        return redirect('clientes_list')
+        return redirect('core:clientes_list')
     return render(request, 'core/clientes_confirm_delete.html', {'cliente': cliente})
 
 
@@ -199,7 +199,7 @@ def empresa_create(request):
         if form.is_valid():
             form.save()
             messages.success(request, 'Empresa criada com sucesso!')
-            return redirect('empresas_list')
+            return redirect('core:empresas_list')
     else:
         form = EmpresaForm()
     return render(request, 'core/empresas_form.html', {'form': form, 'title': 'Nova Empresa'})
@@ -211,7 +211,7 @@ def empresa_update(request, pk):
         if form.is_valid():
             form.save()
             messages.success(request, 'Empresa atualizada com sucesso!')
-            return redirect('empresas_list')
+            return redirect('core:empresas_list')
     else:
         form = EmpresaForm(instance=empresa)
     return render(request, 'core/empresas_form.html', {'form': form, 'title': 'Editar Empresa'})
@@ -221,7 +221,7 @@ def empresa_delete(request, pk):
     if request.method == 'POST':
         empresa.delete()
         messages.success(request, 'Empresa excluída com sucesso!')
-        return redirect('empresas_list')
+        return redirect('core:empresas_list')
     return render(request, 'core/empresas_confirm_delete.html', {'empresa': empresa})
 
 # --- NOVAS Views de Usuário ---
@@ -259,7 +259,7 @@ def usuario_create(request):
         if form.is_valid():
             form.save()
             messages.success(request, 'Usuário criado com sucesso!')
-            return redirect('usuarios_list')
+            return redirect('core:usuarios_list')
     else:
         form = UsuarioForm()
     return render(request, 'core/usuario_form.html', {'form': form, 'form_title': 'Novo Usuário'})
@@ -271,7 +271,7 @@ def usuario_update(request, pk):
         if form.is_valid():
             form.save()
             messages.success(request, 'Usuário atualizado com sucesso!')
-            return redirect('usuarios_list')
+            return redirect('core:usuarios_list')
     else:
         form = UsuarioForm(instance=usuario)
     return render(request, 'core/usuario_form.html', {'form': form, 'form_title': 'Editar Usuário'})
@@ -281,7 +281,7 @@ def usuario_delete(request, pk):
     if request.method == 'POST':
         usuario.delete()
         messages.success(request, 'Usuário excluído com sucesso!')
-        return redirect('usuarios_list')
+        return redirect('core:usuarios_list')
     return render(request, 'core/usuario_confirm_delete.html', {'object': usuario})
 
 # View para listar setores
@@ -340,7 +340,7 @@ def setor_create(request):
         if form.is_valid():
             form.save()
             messages.success(request, "Setor cadastrado com sucesso!")
-            return redirect('setor_list')
+            return redirect('core:setor_list')
     else:
         form = SetorForm()
     return render(request, 'core/setor_form.html', {'form': form, 'title': 'Novo Setor'})
@@ -354,7 +354,7 @@ def setor_update(request, pk):
         if form.is_valid():
             form.save()
             messages.success(request, "Setor atualizado com sucesso!")
-            return redirect('setor_list')
+            return redirect('core:setor_list')
     else:
         form = SetorForm(instance=setor)
     return render(request, 'core/setor_form.html', {'form': form, 'title': 'Editar Setor'})
@@ -372,9 +372,9 @@ def setor_delete(request, pk):
     if request.method == 'POST':
         setor.delete()
         messages.success(request, "Setor excluído com sucesso!")
-        return redirect('setor_list')
+        return redirect('core:setor_list')
     # Redireciona de volta para a lista se não for uma requisição POST
-    return redirect('setor_list')
+    return redirect('core:setor_list')
 
 #-------------------------------------------------------------------------------
 # View para listar categorias
@@ -433,7 +433,7 @@ def categoria_create(request):
         if form.is_valid():
             form.save()
             messages.success(request, "Categoria cadastrada com sucesso!")
-            return redirect('categoria_list')
+            return redirect('core:categoria_list')
     else:
         form = CategoriaForm()
     return render(request, 'core/categoria_form.html', {'form': form, 'title': 'Nova Categoria'})
@@ -447,7 +447,7 @@ def categoria_update(request, pk):
         if form.is_valid():
             form.save()
             messages.success(request, "Categoria atualizada com sucesso!")
-            return redirect('categoria_list')
+            return redirect('core:categoria_list')
     else:
         form = CategoriaForm(instance=categoria)
     return render(request, 'core/categoria_form.html', {'form': form, 'title': 'Editar Categoria'})
@@ -465,9 +465,9 @@ def categoria_delete(request, pk):
     if request.method == 'POST':
         categoria.delete()
         messages.success(request, "Categoria excluída com sucesso!")
-        return redirect('categoria_list')
+        return redirect('core:categoria_list')
     # Redireciona de volta para a lista se não for uma requisição POST
-    return redirect('categoria_list')
+    return redirect('core:categoria_list')
 #----------------------------------------------------------------------------------------------------
 # View para listar grupos
 # @login_required # Removido/comentado conforme solicitado
@@ -525,7 +525,7 @@ def grupo_create(request):
         if form.is_valid():
             form.save()
             messages.success(request, "Grupo cadastrado com sucesso!")
-            return redirect('grupo_list')
+            return redirect('core:grupo_list')
     else:
         form = GrupoForm()
     return render(request, 'core/grupo_form.html', {'form': form, 'title': 'Novo Grupo'})
@@ -539,7 +539,7 @@ def grupo_update(request, pk):
         if form.is_valid():
             form.save()
             messages.success(request, "Grupo atualizado com sucesso!")
-            return redirect('grupo_list')
+            return redirect('core:grupo_list')
     else:
         form = GrupoForm(instance=grupo)
     return render(request, 'core/grupo_form.html', {'form': form, 'title': 'Editar grupo'})
@@ -557,9 +557,9 @@ def grupo_delete(request, pk):
     if request.method == 'POST':
         grupo.delete()
         messages.success(request, "Grupo excluído com sucesso!")
-        return redirect('grupo_list')
+        return redirect('core:grupo_list')
     # Redireciona de volta para a lista se não for uma requisição POST
-    return redirect('grupo_list')
+    return redirect('core:grupo_list')
 
 
 # -------------------------------------------------------------------------------
@@ -625,7 +625,7 @@ def ncm_create(request):
         if form.is_valid():
             form.save()
             messages.success(request, 'NCM cadastrado com sucesso!')
-            return redirect('ncm_list')
+            return redirect('core:ncm_list')
         else:
             messages.error(request, 'Erro ao cadastrar NCM. Verifique os campos.')
     else:
@@ -646,7 +646,7 @@ def ncm_update(request, pk):
         if form.is_valid():
             form.save()
             messages.success(request, 'NCM atualizado com sucesso!')
-            return redirect('ncm_list')
+            return redirect('core:ncm_list')
         else:
             messages.error(request, 'Erro ao atualizar NCM. Verifique os campos.')
     else:
@@ -675,10 +675,10 @@ def ncm_delete(request, pk):
     if request.method == 'POST':
         ncm.delete()
         messages.success(request, 'NCM excluído com sucesso!')
-        return redirect('ncm_list')
+        return redirect('core:ncm_list')
     else:
         # Se alguém tentar acessar diretamente via GET, redireciona para a confirmação
-        return redirect('ncm_confirm_delete', pk=pk)
+        return redirect('core:ncm_confirm_delete', pk=pk)
 
 
 # -------------------------------------------------------------------------------
@@ -748,7 +748,7 @@ def cfop_create(request):
         if form.is_valid():
             form.save()
             messages.success(request, 'CFOP cadastrado com sucesso!')
-            return redirect('cfop_list')
+            return redirect('core:cfop_list')
         else:
             messages.error(request, 'Erro ao cadastrar CFOP. Verifique os campos.')
     else:
@@ -769,7 +769,7 @@ def cfop_update(request, pk):
         if form.is_valid():
             form.save()
             messages.success(request, 'CFOP atualizado com sucesso!')
-            return redirect('cfop_list')
+            return redirect('core:cfop_list')
         else:
             messages.error(request, 'Erro ao atualizar CFOP. Verifique os campos.')
     else:
@@ -798,10 +798,10 @@ def cfop_delete(request, pk):
     if request.method == 'POST':
         cfop.delete()
         messages.success(request, 'CFOP excluído com sucesso!')
-        return redirect('cfop_list')
+        return redirect('core:cfop_list')
     else:
         # Se alguém tentar acessar diretamente via GET, redireciona para a confirmação
-        return redirect('cfop_confirm_delete', pk=pk)
+        return redirect('core:cfop_confirm_delete', pk=pk)
 
 # --- NOVAS VIEWS: CEST ---
 def cest_list(request): # <-- ESTA DEVE ESTAR AQUI
@@ -862,7 +862,7 @@ def cest_create(request):
         if form.is_valid():
             form.save()
             messages.success(request, 'CEST cadastrado com sucesso!')
-            return redirect('cest_list')
+            return redirect('core:cest_list')
         else:
             messages.error(request, 'Erro ao cadastrar CEST. Verifique os campos.')
     else:
@@ -882,7 +882,7 @@ def cest_update(request, pk):
         if form.is_valid():
             form.save()
             messages.success(request, 'CEST atualizado com sucesso!')
-            return redirect('cest_list')
+            return redirect('core:cest_list')
         else:
             messages.error(request, 'Erro ao atualizar CEST. Verifique os campos.')
     else:
@@ -909,9 +909,9 @@ def cest_delete(request, pk):
     if request.method == 'POST':
         cest.delete()
         messages.success(request, 'CEST excluído com sucesso!')
-        return redirect('cest_list')
+        return redirect('core:cest_list')
     else:
-        return redirect('cest_confirm_delete', pk=pk)
+        return redirect('core:cest_confirm_delete', pk=pk)
 
 
 # -------------------------------------------------------------------------------
@@ -966,7 +966,7 @@ def cst_cson_list(request):
         html = render_to_string('core/cst_cson_table_partial.html', context, request=request)
         return JsonResponse({'html': html})
 
-    return render(request, 'core/cst_cson_list.html', context)
+    return render(request, 'core/cstcson_list.html', context)
 
 
 def cst_cson_create(request):
@@ -975,7 +975,7 @@ def cst_cson_create(request):
         if form.is_valid():
             form.save()
             messages.success(request, 'CST/CSOSN cadastrado com sucesso!')
-            return redirect('cst_cson_list')
+            return redirect('core:cst_cson_list')
         else:
             messages.error(request, 'Erro ao cadastrar CST/CSOSN. Verifique os campos.')
     else:
@@ -985,7 +985,7 @@ def cst_cson_create(request):
         'form': form,
         'title': 'Cadastrar Novo CST/CSOSN'
     }
-    return render(request, 'core/cst_cson_form.html', context)
+    return render(request, 'core/cstcson_form.html', context)
 
 
 def cst_cson_update(request, pk):
@@ -995,7 +995,7 @@ def cst_cson_update(request, pk):
         if form.is_valid():
             form.save()
             messages.success(request, 'CST/CSOSN atualizado com sucesso!')
-            return redirect('cst_cson_list')
+            return redirect('core:cst_cson_list')
         else:
             messages.error(request, 'Erro ao atualizar CST/CSOSN. Verifique os campos.')
     else:
@@ -1005,7 +1005,7 @@ def cst_cson_update(request, pk):
         'form': form,
         'title': 'Editar CST/CSOSN'
     }
-    return render(request, 'core/cst_cson_form.html', context)
+    return render(request, 'core/cstcson_form.html', context)
 
 
 def cst_cson_confirm_delete(request, pk):
@@ -1014,7 +1014,7 @@ def cst_cson_confirm_delete(request, pk):
         'cst_cson': cst_cson,
         'title': 'Confirmar Exclusão'
     }
-    return render(request, 'core/cst_cson_confirm_delete.html', context)
+    return render(request, 'core/cstcson_confirm_delete.html', context)
 
 
 def cst_cson_delete(request, pk):
@@ -1022,9 +1022,9 @@ def cst_cson_delete(request, pk):
     if request.method == 'POST':
         cst_cson.delete()
         messages.success(request, 'CST/CSOSN excluído com sucesso!')
-        return redirect('cst_cson_list')
+        return redirect('core:cst_cson_list')
     else:
-        return redirect('cst_cson_confirm_delete', pk=pk)
+        return redirect('core:cst_cson_confirm_delete', pk=pk)
 
 
 # -------------------------------------------------------------------------------
@@ -1090,7 +1090,7 @@ def produto_create(request):
         if form.is_valid():
             form.save()
             messages.success(request, 'Produto cadastrado com sucesso!')
-            return redirect('produto_list')
+            return redirect('core:produto_list')
         else:
             messages.error(request, 'Erro ao cadastrar Produto. Verifique os campos.')
     else:
@@ -1110,7 +1110,7 @@ def produto_update(request, pk):
         if form.is_valid():
             form.save()
             messages.success(request, 'Produto atualizado com sucesso!')
-            return redirect('produto_list')
+            return redirect('core:produto_list')
         else:
             messages.error(request, 'Erro ao atualizar Produto. Verifique os campos.')
     else:
@@ -1137,73 +1137,91 @@ def produto_delete(request, pk):
     if request.method == 'POST':
         produto.delete()
         messages.success(request, 'Produto excluído com sucesso!')
-        return redirect('produto_list')
+        return redirect('core:produto_list')
     else:
-        return redirect('produto_confirm_delete', pk=pk)
+        return redirect('core:produto_confirm_delete', pk=pk)
 
 
 # -------------------------------------------------------------------------------
 # NOVAS VIEWS: CONVENIO ABERTURA
 # -------------------------------------------------------------------------------
-
 def convenio_abertura_list(request):
+    """
+    Lista todos os convênios de abertura, com funcionalidades de busca, filtro e paginação.
+    Suporta requisições AJAX para atualização parcial da tabela.
+    """
     convenios_abertura_list = ConvenioAbertura.objects.all()
 
     search_query = request.GET.get('search', '')
     status_filter = request.GET.get('status', 'all')
-    sort_by = request.GET.get('sort_by', 'id_convenio_abertura')
+    sort_by = request.GET.get('sort_by', '-mes_referencia') # Ordem padrão: mais recente primeiro
     per_page = int(request.GET.get('per_page', 10))
 
+    # Lógica de busca
     if search_query:
         convenios_abertura_list = convenios_abertura_list.filter(
-            Q(id_convenio_abertura__icontains=search_query) |
-            Q(descricao__icontains=search_query)
+            Q(mes_referencia__icontains=search_query) | # Busca pelo mês/ano de referência
+            Q(status__icontains=search_query)           # Permite buscar por 'A' ou 'F' no status
         )
 
-    if status_filter == 'true':
-        convenios_abertura_list = convenios_abertura_list.filter(cancelado=True)
-    elif status_filter == 'false':
-        convenios_abertura_list = convenios_abertura_list.filter(cancelado=False)
+    # Lógica de filtro por status (Ativo/Fechado)
+    if status_filter != 'all':
+        convenios_abertura_list = convenios_abertura_list.filter(status=status_filter)
 
+    # Lógica de ordenação
     if sort_by:
-        allowed_sort_fields = ['id_convenio_abertura', 'descricao', 'cancelado', 'data_cadastro', 'data_atualizacao']
+        # Campos permitidos para ordenação. Certifique-se de que correspondem aos campos do seu modelo.
+        allowed_sort_fields = [
+            'id', 'mes_referencia', 'data_abertura',
+            'data_fechamento', 'data_pagamento', 'status'
+        ]
         if sort_by in allowed_sort_fields or (sort_by.startswith('-') and sort_by[1:] in allowed_sort_fields):
             convenios_abertura_list = convenios_abertura_list.order_by(sort_by)
         else:
-            convenios_abertura_list = convenios_abertura_list.order_by('id_convenio_abertura')
+            # Caso o sort_by seja inválido, retorne à ordenação padrão
+            convenios_abertura_list = convenios_abertura_list.order_by('-mes_referencia')
 
+    # Configuração da Paginação
     paginator = Paginator(convenios_abertura_list, per_page)
     page_number = request.GET.get('page')
 
     try:
         convenios_abertura = paginator.get_page(page_number)
     except EmptyPage:
+        # Se a página estiver fora do intervalo (ex: 9999), entrega a última página de resultados.
         convenios_abertura = paginator.get_page(paginator.num_pages)
     except PageNotAnInteger:
+        # Se a página não for um inteiro, entrega a primeira página.
         convenios_abertura = paginator.get_page(1)
 
     context = {
-        'page_obj': convenios_abertura,
+        'convenios': convenios_abertura, # Nome 'convenios' para corresponder ao partial template
         'search': search_query,
         'status_filter': status_filter,
         'sort_by': sort_by,
         'per_page': per_page,
     }
 
+    # Resposta AJAX para atualização da tabela
     if request.headers.get('x-requested-with') == 'XMLHttpRequest':
         html = render_to_string('core/convenio_abertura_table_partial.html', context, request=request)
         return JsonResponse({'html': html})
 
+    # Resposta normal para a primeira carga da página
     return render(request, 'core/convenio_abertura_list.html', context)
 
-
 def convenio_abertura_create(request):
+    """
+    Permite cadastrar um novo convênio de abertura.
+    Redireciona para a lista após sucesso, ou exibe erros do formulário.
+    """
     if request.method == 'POST':
         form = ConvenioAberturaForm(request.POST)
         if form.is_valid():
             form.save()
             messages.success(request, 'Convênio de Abertura cadastrado com sucesso!')
-            return redirect('convenio_abertura_list')
+            # **CORREÇÃO:** Usando o namespace 'core'
+            return redirect('core:convenio_abertura_list')
         else:
             messages.error(request, 'Erro ao cadastrar Convênio de Abertura. Verifique os campos.')
     else:
@@ -1215,15 +1233,18 @@ def convenio_abertura_create(request):
     }
     return render(request, 'core/convenio_abertura_form.html', context)
 
-
 def convenio_abertura_update(request, pk):
+    """
+    Permite editar um convênio de abertura existente.
+    """
     convenio_abertura_instance = get_object_or_404(ConvenioAbertura, pk=pk)
     if request.method == 'POST':
         form = ConvenioAberturaForm(request.POST, instance=convenio_abertura_instance)
         if form.is_valid():
             form.save()
             messages.success(request, 'Convênio de Abertura atualizado com sucesso!')
-            return redirect('convenio_abertura_list')
+            # **CORREÇÃO:** Usando o namespace 'core'
+            return redirect('core:convenio_abertura_list')
         else:
             messages.error(request, 'Erro ao atualizar Convênio de Abertura. Verifique os campos.')
     else:
@@ -1235,8 +1256,10 @@ def convenio_abertura_update(request, pk):
     }
     return render(request, 'core/convenio_abertura_form.html', context)
 
-
 def convenio_abertura_confirm_delete(request, pk):
+    """
+    Exibe uma página de confirmação antes de excluir um convênio de abertura.
+    """
     convenio_abertura = get_object_or_404(ConvenioAbertura, pk=pk)
     context = {
         'convenio_abertura': convenio_abertura,
@@ -1244,16 +1267,19 @@ def convenio_abertura_confirm_delete(request, pk):
     }
     return render(request, 'core/convenio_abertura_confirm_delete.html', context)
 
-
 def convenio_abertura_delete(request, pk):
+    """
+    Exclui um convênio de abertura após a confirmação.
+    """
     convenio_abertura = get_object_or_404(ConvenioAbertura, pk=pk)
     if request.method == 'POST':
         convenio_abertura.delete()
         messages.success(request, 'Convênio de Abertura excluído com sucesso!')
-        return redirect('convenio_abertura_list')
+        # **CORREÇÃO:** Usando o namespace 'core'
+        return redirect('core:convenio_abertura_list')
     else:
-        return redirect('convenio_abertura_confirm_delete', pk=pk)
-
+        # Redireciona para a página de confirmação se não for POST
+        return redirect('core:convenio_abertura_confirm_delete', pk=pk)
 
 # -------------------------------------------------------------------------------
 # NOVAS VIEWS: CONVENIO
@@ -1317,7 +1343,7 @@ def convenio_create(request):
         if form.is_valid():
             form.save()
             messages.success(request, 'Convênio cadastrado com sucesso!')
-            return redirect('convenio_list')
+            return redirect('core:convenio_list')
         else:
             messages.error(request, 'Erro ao cadastrar Convênio. Verifique os campos.')
     else:
@@ -1337,7 +1363,7 @@ def convenio_update(request, pk):
         if form.is_valid():
             form.save()
             messages.success(request, 'Convênio atualizado com sucesso!')
-            return redirect('convenio_list')
+            return redirect('core:convenio_list')
         else:
             messages.error(request, 'Erro ao atualizar Convênio. Verifique os campos.')
     else:
@@ -1364,13 +1390,13 @@ def convenio_delete(request, pk):
     if request.method == 'POST':
         convenio.delete()
         messages.success(request, 'Convênio excluído com sucesso!')
-        return redirect('convenio_list')
+        return redirect('core:convenio_list')
     else:
-        return redirect('convenio_confirm_delete', pk=pk)
+        return redirect('core:convenio_confirm_delete', pk=pk)
 
 
 # -------------------------------------------------------------------------------
-# NOVAS VIEWS: CONVENIO EMISSAO
+# VIEWS DE CRUD PARA CONVENIO_EMISSAO
 # -------------------------------------------------------------------------------
 
 def convenio_emissao_list(request):
@@ -1378,26 +1404,26 @@ def convenio_emissao_list(request):
 
     search_query = request.GET.get('search', '')
     status_filter = request.GET.get('status', 'all')
-    sort_by = request.GET.get('sort_by', 'id')
+    sort_by = request.GET.get('sort_by', '-DATA_TRANSACAO')
     per_page = int(request.GET.get('per_page', 10))
 
     if search_query:
         convenios_emissao_list = convenios_emissao_list.filter(
-            Q(id__icontains=search_query) |
-            Q(cpf__icontains=search_query)
+            Q(ID_CLIENTE__cpf_cnpj__icontains=search_query) |
+            Q(ID_CLIENTE__nome_completo__icontains=search_query) |
+            Q(ID_CONVENIO__nome_convenio__icontains=search_query) |
+            Q(MES_REFERENCIA__icontains=search_query)
         )
 
-    if status_filter == 'true':
-        convenios_emissao_list = convenios_emissao_list.filter(cancelado=True)
-    elif status_filter == 'false':
-        convenios_emissao_list = convenios_emissao_list.filter(cancelado=False)
-
     if sort_by:
-        allowed_sort_fields = ['id', 'cpf', 'mes_referencia', 'valor', 'cancelado', 'data_cadastro', 'data_atualizacao']
+        allowed_sort_fields = [
+            'id', 'CPF', 'ID_CLIENTE__nome_completo', 'ID_CONVENIO__nome_convenio',
+            'VALOR', 'QTD_PARCELA', 'MES_REFERENCIA', 'DATA_TRANSACAO', 'HORA_TRANSACAO'
+        ]
         if sort_by in allowed_sort_fields or (sort_by.startswith('-') and sort_by[1:] in allowed_sort_fields):
             convenios_emissao_list = convenios_emissao_list.order_by(sort_by)
         else:
-            convenios_emissao_list = convenios_emissao_list.order_by('id')
+            convenios_emissao_list = convenios_emissao_list.order_by('-DATA_TRANSACAO')
 
     paginator = Paginator(convenios_emissao_list, per_page)
     page_number = request.GET.get('page')
@@ -1410,7 +1436,7 @@ def convenio_emissao_list(request):
         convenios_emissao = paginator.get_page(1)
 
     context = {
-        'page_obj': convenios_emissao,
+        'emissoes': convenios_emissao,
         'search': search_query,
         'status_filter': status_filter,
         'sort_by': sort_by,
@@ -1430,9 +1456,14 @@ def convenio_emissao_create(request):
         if form.is_valid():
             form.save()
             messages.success(request, 'Convênio de Emissão cadastrado com sucesso!')
-            return redirect('convenio_emissao_list')
+            return redirect('core:convenio_emissao_list')
         else:
             messages.error(request, 'Erro ao cadastrar Convênio de Emissão. Verifique os campos.')
+            context = {
+                'form': form,
+                'title': 'Cadastrar Novo Convênio de Emissão'
+            }
+            return render(request, 'core/convenio_emissao_form.html', context)
     else:
         form = ConvenioEmissaoForm()
 
@@ -1444,21 +1475,26 @@ def convenio_emissao_create(request):
 
 
 def convenio_emissao_update(request, pk):
-    convenio_emissao_instance = get_object_or_404(ConvenioEmissao, pk=pk)
+    convenio_emissao = get_object_or_404(ConvenioEmissao, pk=pk)
     if request.method == 'POST':
-        form = ConvenioEmissaoForm(request.POST, instance=convenio_emissao_instance)
+        form = ConvenioEmissaoForm(request.POST, instance=convenio_emissao)
         if form.is_valid():
             form.save()
             messages.success(request, 'Convênio de Emissão atualizado com sucesso!')
-            return redirect('convenio_emissao_list')
+            return redirect('core:convenio_emissao_list')
         else:
             messages.error(request, 'Erro ao atualizar Convênio de Emissão. Verifique os campos.')
+            context = {
+                'form': form,
+                'title': 'Editar Convênio de Emissão',
+            }
+            return render(request, 'core/convenio_emissao_form.html', context)
     else:
-        form = ConvenioEmissaoForm(instance=convenio_emissao_instance)
+        form = ConvenioEmissaoForm(instance=convenio_emissao)
 
     context = {
         'form': form,
-        'title': 'Editar Convênio de Emissão'
+        'title': 'Editar Convênio de Emissão',
     }
     return render(request, 'core/convenio_emissao_form.html', context)
 
@@ -1477,60 +1513,55 @@ def convenio_emissao_delete(request, pk):
     if request.method == 'POST':
         convenio_emissao.delete()
         messages.success(request, 'Convênio de Emissão excluído com sucesso!')
-        return redirect('convenio_emissao_list')
+        return redirect('core:convenio_emissao_list')
     else:
-        return redirect('convenio_emissao_confirm_delete', pk=pk)
+        return redirect('core:convenio_emissao_confirm_delete', pk=pk)
+
 
 # -------------------------------------------------------------------------------
-# NOVAS VIEWS: AJAX para ConvenioEmissaoForm
+# VIEWS DE API PARA CONVENIOEMISSAOFORM (AJAX)
 # -------------------------------------------------------------------------------
 
-@require_http_methods(["GET"])
+@require_GET
 def search_client_by_cpf(request):
-    cpf = request.GET.get('cpf')
-    print('-------------------------------------------------')
-    print(f"DEBUG - 001 : CPF recebido na requisição: {cpf}")
-    print('-------------------------------------------------')
+    cpf = request.GET.get('cpf', None)
     if not cpf:
-        return JsonResponse({'error': 'CPF não fornecido.'}, status=400)
+        return JsonResponse({'error': 'CPF/CNPJ não fornecido.'}, status=400)
+
     try:
         # Remova caracteres não numéricos para a busca no banco
         cpf_cleaned = ''.join(filter(str.isdigit, cpf))
-        cliente = Cliente.objects.get(cpf_cnpj=cpf)
-        print('-------------------------------------------------')
-        print(f"DEBUG - 002: CPF recebido na requisição: {cliente}")
-        print('-------------------------------------------------')
-        #cliente = Cliente.objects.get(cpf_cnpj=cpf_cleaned) # Use o nome exato do campo do seu model
+
+        # Use o cpf_cleaned para a busca
+        cliente = Cliente.objects.get(cpf_cnpj=cpf_cleaned)
         data = {
             'id': cliente.pk,
-            'nome_completo': cliente.nome_completo, # Ajuste para o nome real do campo no seu model Cliente
-            'saldo_cliente': float(cliente.saldo) if cliente.saldo is not None else 0.0 # Ajuste para o nome real do campo e trate None
+            'nome_completo': cliente.nome_completo,  # Nome do campo no seu model Cliente
+            'saldo': float(cliente.saldo) if cliente.saldo is not None else 0.0
+            # **CORRIGIDO**: Alterado de 'saldo_cliente' para 'saldo'
         }
-        print('-------------------------------------------------')
-        print(f"DEBUG - 003: CPF recebido na requisição: {data}")
-        print('-------------------------------------------------')
         return JsonResponse(data)
     except Cliente.DoesNotExist:
         return JsonResponse({'error': 'Cliente não encontrado.'}, status=404)
     except Exception as e:
-        # Log the actual error for debugging
         print(f"Erro ao buscar dados do cliente: {e}")
-        return JsonResponse({'error': f'Erro interno ao buscar cliente: {e}'}, status=500)
+        return JsonResponse({'error': f'Erro interno ao buscar cliente: {str(e)}'}, status=500)
 
-@require_http_methods(["GET"])
+
+@require_GET
 def get_convenio_details(request):
-    convenio_id = request.GET.get('id')
+    convenio_id = request.GET.get('id', None)
     if not convenio_id:
         return JsonResponse({'error': 'ID do Convênio não fornecido.'}, status=400)
     try:
         convenio = Convenio.objects.get(pk=convenio_id)
         data = {
-            'qtd_parc_permi': convenio.QTD_PARC_PERMI, # Ajuste para o nome real do campo no seu model Convenio
+            'qtd_parc_permi': convenio.qtd_parc_permi,  # Nome real do campo no seu model Convenio
+            # 'mes_referencia': convenio.mes_referencia, # Você pode incluir este se precisar no JS
         }
         return JsonResponse(data)
     except Convenio.DoesNotExist:
         return JsonResponse({'error': 'Convênio não encontrado.'}, status=404)
     except Exception as e:
-        # Log the actual error for debugging
         print(f"Erro ao buscar dados do convênio: {e}")
-        return JsonResponse({'error': f'Erro interno ao buscar convênio: {e}'}, status=500)
+        return JsonResponse({'error': f'Erro interno ao buscar convênio: {str(e)}'}, status=500)

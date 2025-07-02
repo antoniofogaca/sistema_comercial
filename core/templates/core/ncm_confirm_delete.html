@@ -13,10 +13,10 @@
         <p>Você tem certeza que deseja excluir o NCM **"{{ ncm.ncm }} - {{ ncm.descricao }}"**?</p> {# Variável e campos ajustados #}
         <p class="text-danger">Esta ação não pode ser desfeita.</p>
 
-        <form method="post" action="{% url 'ncm_delete' ncm.pk %}"> {# URL e variável ajustadas #}
+        <form method="post" action="{% url 'core:ncm_delete' ncm.pk %}"> {# URL e variável ajustadas #}
             {% csrf_token %}
             <button type="submit" class="btn btn-danger me-2">Sim, Excluir</button>
-            <a href="{% url 'ncm_list' %}" class="btn btn-secondary">Cancelar</a> {# URL ajustada #}
+            <a href="{% url 'core:ncm_list' %}" class="btn btn-secondary">Cancelar</a> {# URL ajustada #}
         </form>
     </div>
 </div>

@@ -13,10 +13,10 @@
         <p>Você tem certeza que deseja excluir o produto **"{{ produto.codigo_ean_dun }} - {{ produto.descricao_produto }}"**?</p>
         <p class="text-danger">Esta ação não pode ser desfeita.</p>
 
-        <form method="post" action="{% url 'produto_delete' produto.pk %}">
+        <form method="post" action="{% url 'core:produto_delete' produto.pk %}">
             {% csrf_token %}
             <button type="submit" class="btn btn-danger me-2">Sim, Excluir</button>
-            <a href="{% url 'produto_list' %}" class="btn btn-secondary">Cancelar</a>
+            <a href="{% url 'core:produto_list' %}" class="btn btn-secondary">Cancelar</a>
         </form>
     </div>
 </div>

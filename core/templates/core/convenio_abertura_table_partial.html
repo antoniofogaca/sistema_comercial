@@ -13,6 +13,7 @@
         </tr>
     </thead>
     <tbody>
+        {# CORREÇÃO: Iterando sobre 'convenios' que vem do contexto da view #}
         {% for convenio in convenios %}
         <tr>
             <td>{{ convenio.mes_referencia }}</td>
@@ -27,10 +28,12 @@
                 {% endif %}
             </td>
             <td>
-                <a href="{% url 'convenio_abertura_update' convenio.pk %}" class="btn btn-warning btn-sm" title="Editar">
+                {# CORREÇÃO: Usando 'core:convenio_abertura_update' #}
+                <a href="{% url 'core:convenio_abertura_update' convenio.pk %}" class="btn btn-warning btn-sm" title="Editar">
                     <i class="fas fa-edit"></i>
                 </a>
-                <a href="{% url 'convenio_abertura_confirm_delete' convenio.pk %}" class="btn btn-danger btn-sm" title="Excluir">
+                {# CORREÇÃO: Usando 'core:convenio_abertura_confirm_delete' #}
+                <a href="{% url 'core:convenio_abertura_confirm_delete' convenio.pk %}" class="btn btn-danger btn-sm" title="Excluir">
                     <i class="fas fa-trash-alt"></i>
                 </a>
             </td>
@@ -56,6 +59,7 @@
             </li>
         {% endif %}
 
+        {# Loop para os números das páginas, usando convenios.paginator.page_range #}
         {% for i in convenios.paginator.page_range %}
             {% if convenios.number == i %}
                 <li class="page-item active" aria-current="page">

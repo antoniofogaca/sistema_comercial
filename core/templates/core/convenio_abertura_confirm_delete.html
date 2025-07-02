@@ -12,10 +12,10 @@
         <p>Você tem certeza que deseja excluir a abertura de convênio para **"{{ convenio.mes_referencia }}"**?</p>
         <p class="text-danger">Esta ação não pode ser desfeita.</p>
 
-        <form method="post" action="{% url 'convenio_abertura_delete' convenio.pk %}">
+        <form method="post" action="{% url 'core:convenio_abertura_delete' convenio.pk %}">
             {% csrf_token %}
             <button type="submit" class="btn btn-danger me-2">Sim, Excluir</button>
-            <a href="{% url 'convenio_abertura_list' %}" class="btn btn-secondary">Cancelar</a>
+            <a href="{% url 'core:convenio_abertura_list' %}" class="btn btn-secondary">Cancelar</a>
         </form>
     </div>
 </div>

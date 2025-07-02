@@ -149,25 +149,25 @@
             </a>
             <div class="collapse {% if request.path|slice:'0:8' == '/setores' or request.path|slice:'0:10' == '/categorias' or request.path|slice:'0:7' == '/grupos' or request.path|slice:'0:6' == '/cfop' or request.path|slice:'0:9' == '/cstcson' or request.path|slice:'0:6' == '/ncm' or request.path|slice:'0:6' == '/cest' %}show{% endif %}" id="collapseAuxiliares" data-bs-parent="#sidebar" style="background-color: #343a40;">
                 <div class="list-group list-group-flush border-bottom border-top">
-                    <a href="{% url 'categoria_list' %}" class="list-group-item list-group-item-action py-2 ripple ps-5 {% if request.path|slice:'0:10' == '/categorias' %}active{% endif %}">
+                    <a href="{% url 'core:categoria_list' %}" class="list-group-item list-group-item-action py-2 ripple ps-5 {% if request.path|slice:'0:10' == '/categorias' %}active{% endif %}">
                         <i class="fas fa-tags fa-fw me-3"></i><span>Categoria</span>
                     </a>
-                    <a href="{% url 'setor_list' %}" class="list-group-item list-group-item-action py-2 ripple ps-5 {% if request.path|slice:'0:8' == '/setores' %}active{% endif %}">
+                    <a href="{% url 'core:setor_list' %}" class="list-group-item list-group-item-action py-2 ripple ps-5 {% if request.path|slice:'0:8' == '/setores' %}active{% endif %}">
                         <i class="fas fa-folder fa-fw me-3"></i><span>Setor</span>
                     </a>
-                    <a href="{% url 'grupo_list' %}" class="list-group-item list-group-item-action py-2 ripple ps-5 {% if request.path|slice:'0:7' == '/grupos' %}active{% endif %}">
+                    <a href="{% url 'core:grupo_list' %}" class="list-group-item list-group-item-action py-2 ripple ps-5 {% if request.path|slice:'0:7' == '/grupos' %}active{% endif %}">
                         <i class="fas fa-folder fa-fw me-3"></i><span>Grupo</span>
                     </a>
-                    <a href="{% url 'cfop_list' %}" class="list-group-item list-group-item-action py-2 ripple ps-5 {% if request.path|slice:'0:6' == '/cfop' %}active{% endif %}">
+                    <a href="{% url 'core:cfop_list' %}" class="list-group-item list-group-item-action py-2 ripple ps-5 {% if request.path|slice:'0:6' == '/cfop' %}active{% endif %}">
                         <i class="fas fa-folder fa-fw me-3"></i><span>Cfop</span>
                     </a>
-                    <a href="{% url 'cstcson_list' %}" class="list-group-item list-group-item-action py-2 ripple ps-5 {% if request.path|slice:'0:9' == '/cstcson' %}active{% endif %}">
+                    <a href="{% url 'core:cst_cson_list' %}" class="list-group-item list-group-item-action py-2 ripple ps-5 {% if request.path|slice:'0:9' == '/cstcson' %}active{% endif %}">
                         <i class="fas fa-folder fa-fw me-3"></i><span>Cst-Csosn</span>
                     </a>
-                    <a href="{% url 'ncm_list' %}" class="list-group-item list-group-item-action py-2 ripple ps-5 {% if request.path|slice:'0:6' == '/ncm' %}active{% endif %}">
+                    <a href="{% url 'core:ncm_list' %}" class="list-group-item list-group-item-action py-2 ripple ps-5 {% if request.path|slice:'0:6' == '/ncm' %}active{% endif %}">
                         <i class="fas fa-folder fa-fw me-3"></i><span>Ncm</span>
                     </a>
-                    <a href="{% url 'cest_list' %}" class="list-group-item list-group-item-action py-2 ripple ps-5 {% if request.path|slice:'0:6' == '/cest' %}active{% endif %}">
+                    <a href="{% url 'core:cest_list' %}" class="list-group-item list-group-item-action py-2 ripple ps-5 {% if request.path|slice:'0:6' == '/cest' %}active{% endif %}">
                         <i class="fas fa-folder fa-fw me-3"></i><span>Cest</span>
                     </a>
                 </div>
@@ -187,19 +187,19 @@
                  id="collapseConvenios" data-bs-parent="#sidebar" style="background-color: #343a40;">
                 <div class="list-group list-group-flush border-bottom border-top">
                     {# Sub-item para Abertura de Convênio #}
-                    <a href="{% url 'convenio_abertura_list' %}" class="list-group-item list-group-item-action py-2 ripple ps-5
+                    <a href="{% url 'core:convenio_abertura_list' %}" class="list-group-item list-group-item-action py-2 ripple ps-5
                         {% if request.path|slice:'0:17' == '/convenio/abertura' %}active{% endif %}">
                         <i class="fas fa-calendar-check fa-fw me-3"></i><span>Abertura de Convênio</span>
                     </a>
 
                     {# NOVO SUB-ITEM: Incluir Convênio (listagem de convênios em si) #}
-                    <a href="{% url 'convenio_list' %}" class="list-group-item list-group-item-action py-2 ripple ps-5
+                    <a href="{% url 'core:convenio_list' %}" class="list-group-item list-group-item-action py-2 ripple ps-5
                         {% if request.path == '/convenio/' or request.path|slice:'0:17' == '/convenio/editar' %}active{% endif %}">
                         <i class="fas fa-list-alt fa-fw me-3"></i><span>Incluir Convênio</span>
                     </a>
 
                     {# NOVO SUB-ITEM: Emissão de Convênio #}
-                    <a href="{% url 'convenio_emissao_list' %}" class="list-group-item list-group-item-action py-2 ripple ps-5
+                    <a href="{% url 'core:convenio_emissao_list' %}" class="list-group-item list-group-item-action py-2 ripple ps-5
                         {% if request.path|slice:'0:17' == '/convenio/emissao' %}active{% endif %}">
                         <i class="fas fa-money-check-alt fa-fw me-3"></i><span>Emissão de Convênio</span>
                     </a>
@@ -207,26 +207,26 @@
             </div>
 
             {# Itens de menu simples #}
-            <a href="{% url 'usuarios_list' %}" class="list-group-item list-group-item-action py-2 ripple {% if request.path|slice:'0:9' == '/usuarios' %}active{% endif %}">
+            <a href="{% url 'core:usuarios_list' %}" class="list-group-item list-group-item-action py-2 ripple {% if request.path|slice:'0:9' == '/usuarios' %}active{% endif %}">
                 <i class="fas fa-users fa-fw me-3"></i><span>Usuários</span>
             </a>
-            <a href="{% url 'clientes_list' %}" class="list-group-item list-group-item-action py-2 ripple {% if request.path|slice:'0:9' == '/clientes' %}active{% endif %}">
+            <a href="{% url 'core:clientes_list' %}" class="list-group-item list-group-item-action py-2 ripple {% if request.path|slice:'0:9' == '/clientes' %}active{% endif %}">
                 <i class="fas fa-handshake fa-fw me-3"></i><span>Clientes</span>
             </a>
-            <a href="{% url 'empresas_list' %}" class="list-group-item list-group-item-action py-2 ripple {% if request.path|slice:'0:9' == '/empresas' %}active{% endif %}">
+            <a href="{% url 'core:empresas_list' %}" class="list-group-item list-group-item-action py-2 ripple {% if request.path|slice:'0:9' == '/empresas' %}active{% endif %}">
                 <i class="fas fa-building fa-fw me-3"></i><span>Empresas</span>
             </a>
-            <a href="{% url 'produto_list' %}" class="list-group-item list-group-item-action py-2 ripple {% if request.path == '/produtos/' %}active{% endif %}">
+            <a href="{% url 'core:produto_list' %}" class="list-group-item list-group-item-action py-2 ripple {% if request.path == '/produtos/' %}active{% endif %}">
                 <i class="fas fa-box fa-fw me-3"></i><span>Produtos</span>
             </a>
 
             {# Autenticação (Login/Logout) #}
             {% if user.is_authenticated %}
-                <a href="{% url 'logout' %}" class="list-group-item list-group-item-action py-2 ripple">
+                <a href="{% url 'core:logout' %}" class="list-group-item list-group-item-action py-2 ripple">
                     <i class="bi bi-box-arrow-right"></i> <span>Sair</span>
                 </a>
             {% else %}
-                <a href="{% url 'login' %}" class="list-group-item list-group-item-action py-2 ripple">
+                <a href="{% url 'core:login' %}" class="list-group-item list-group-item-action py-2 ripple">
                     <i class="bi bi-box-arrow-in-right"></i> <span>Entrar</span>
                 </a>
             {% endif %}

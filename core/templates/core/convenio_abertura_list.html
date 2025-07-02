@@ -1,3 +1,4 @@
+{# core/templates/core/convenio_abertura_list.html #}
 {% extends 'core/base.html' %}
 {% load static %}
 {% load widget_tweaks %}
@@ -7,7 +8,8 @@
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h1 class="h3 mb-0 text-gray-800">Lista de Aberturas de Convênio</h1>
-    <a href="{% url 'convenio_abertura_create' %}" class="btn btn-primary">
+    {# CORREÇÃO: Usando 'core:convenio_abertura_create' #}
+    <a href="{% url 'core:convenio_abertura_create' %}" class="btn btn-primary">
         <i class="fas fa-plus"></i> Nova Abertura de Convênio
     </a>
 </div>
@@ -38,6 +40,7 @@
             </div>
         </div>
         <div class="table-responsive" id="convenioAberturaTableContainer">
+            {# Este partial será atualizado via AJAX, o contexto 'convenios' vem da view #}
             {% include 'core/convenio_abertura_table_partial.html' %}
         </div>
     </div>
@@ -58,6 +61,7 @@
                 const url = new URL(window.location.origin + window.location.pathname);
                 const currentParams = new URLSearchParams(window.location.search);
 
+                // Preserve existing parameters unless overridden by new ones
                 currentParams.forEach((value, key) => {
                     if (!(key in params)) {
                         url.searchParams.set(key, value);
@@ -66,6 +70,7 @@
 
                 Object.keys(params).forEach(key => url.searchParams.set(key, params[key]));
 
+                // Remove empty or 'all' status parameters from the URL
                 url.searchParams.forEach((value, key) => {
                     if (value === '' || (key === 'status' && value === 'all')) {
                         url.searchParams.delete(key);
@@ -88,6 +93,7 @@
                 .then(data => {
                     if (convenioAberturaTableContainer) {
                         convenioAberturaTableContainer.innerHTML = data.html;
+                        // Atualiza a URL na barra de endereços sem recarregar a página
                         window.history.pushState({}, '', url);
                     } else {
                         console.error("Element with ID 'convenioAberturaTableContainer' not found.");
@@ -97,14 +103,14 @@
             }, 300); // Debounce de 300ms
         }
 
-        // Adiciona event listeners
+        // Adiciona event listeners para os controles de filtro e busca
         if (searchInput) {
             searchInput.addEventListener('input', function() {
                 fetchConvenios({
                     search: this.value,
                     status: statusFilter ? statusFilter.value : 'all',
                     per_page: perPageSelect ? perPageSelect.value : 10,
-                    page: 1
+                    page: 1 // Sempre volta para a primeira página ao pesquisar/filtrar
                 });
             });
         }
@@ -129,29 +135,29 @@
             });
         }
 
-        // Delegação de clique para ordenação e paginação
+        // Delegação de clique para ordenação e paginação (links na tabela parcial)
         document.addEventListener('click', function(e) {
+            // Verifica se o clique foi em um link de ordenação ou paginação
             if (e.target && e.target.matches('.sort-link, .page-link')) {
-                e.preventDefault();
+                e.preventDefault(); // Impede o comportamento padrão do link
 
                 const currentSearch = searchInput ? searchInput.value : '';
                 const currentStatus = statusFilter ? statusFilter.value : 'all';
                 const currentPerPage = perPageSelect ? perPageSelect.value : 10;
 
-
                 const url = new URL(e.target.href);
                 const params = Object.fromEntries(url.searchParams.entries());
 
+                // Garante que os parâmetros de busca, status e por página sejam mantidos
                 if (currentSearch) params.search = currentSearch;
                 if (currentStatus && currentStatus !== 'all') params.status = currentStatus;
                 if (currentPerPage) params.per_page = currentPerPage;
-
 
                 fetchConvenios(params);
             }
         });
 
-        // Define o valor inicial dos selects com base no contexto do Django
+        // Define o valor inicial dos selects com base no contexto do Django (primeira carga da página)
         const initialStatus = '{{ status_filter }}';
         if (statusFilter && initialStatus) {
             statusFilter.value = initialStatus;

@@ -4,6 +4,7 @@ from django.forms import PasswordInput
 import re
 from django.utils import timezone # Se for usar timezone.now().year na validação do ano
 import datetime
+from decimal import Decimal
 
 class ClienteForm(forms.ModelForm):
     class Meta:
@@ -574,66 +575,149 @@ class ConvenioForm(forms.ModelForm):
 #-----------------------------------------------------------------------------------------------------------------------
 
 class ConvenioEmissaoForm(forms.ModelForm):
-    # If you want to dynamically filter choices for ID_CLIENTE or ID_CONVENIO,
-    # you can do it in the __init__ method or define specific ModelChoiceFields if needed.
-    # However, for basic functionality, ModelForm handles ForeignKeys automatically.
+    # CPF é um CharField no formulário e também no modelo ConvenioEmissao.
+    CPF = forms.CharField(label="CPF/CNPJ do Cliente", max_length=18, required=True)
 
     class Meta:
         model = ConvenioEmissao
-        # Specify all fields you want in the form.
-        # CPF and ID_CLIENTE are separated for distinct display/input.
-        fields = [
-            'CPF', # This will be manually entered for search, then ID_CLIENTE linked
-            'ID_CLIENTE',
-            'SALDO',
-            'MES_REFERENCIA',
-            'ID_CONVENIO',
-            'QTD_PARCELA',
-            'VALOR',
-            # 'DATA_TRANSACAO', # Excluded as it's auto-filled
-            # 'HORA_TRANSACAO', # Excluded as it's auto-filled
-        ]
-        # Alternatively, you could use:
-        # exclude = ['DATA_TRANSACAO', 'HORA_TRANSACAO']
-        # This approach is often safer as it ensures all non-excluded fields are included.
-
-    widgets = {
-        'CPF': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ex: 000.000.000-00', 'maxlength': '14', 'pattern': r'\d{3}\.\d{3}\.\d{3}-\d{2}', 'title': 'Formato: 000.000.000-00'}),
-        'ID_CLIENTE': forms.Select(attrs={'class': 'form-control'}), # Render as a dropdown
-        'SALDO': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01', 'readonly': 'readonly'}), # Make read-only as it's from Cliente model
-        'MES_REFERENCIA': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'AAAA_MM (Ex: 202312)', 'maxlength': '6', 'pattern': r'\d{6}', 'title': 'Formato: AAAAMM'}),
-        'ID_CONVENIO': forms.Select(attrs={'class': 'form-control'}), # Render as a dropdown
-        'QTD_PARCELA': forms.NumberInput(attrs={'class': 'form-control'}),
-        'VALOR': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
-    }
-
-    labels = {
-        'CPF': 'CPF do Cliente',
-        'ID_CLIENTE': 'Cliente', # Simpler label for dropdown
-        'SALDO': 'Saldo do Cliente',
-        'MES_REFERENCIA': 'Mês de Referência',
-        'ID_CONVENIO': 'Convênio', # Simpler label for dropdown
-        'QTD_PARCELA': 'Quantidade de Parcelas',
-        'VALOR': 'Valor da Transação',
-    }
+        # APENAS OS CAMPOS QUE EXISTEM NO SEU MODELO CONVENIOEMISSAO E SÃO EDITÁVEIS MANUALMENTE
+        fields = ['CPF', 'ID_CLIENTE', 'SALDO', 'ID_CONVENIO', 'VALOR',
+                  'QTD_PARCELA', 'MES_REFERENCIA']  # Removidos DATA_TRANSACAO e HORA_TRANSACAO
+        widgets = {
+            'ID_CLIENTE': forms.HiddenInput(),  # Campo oculto para o ID do cliente
+            'SALDO': forms.NumberInput(attrs={'readonly': 'readonly', 'class': 'form-control text-success'}),
+            'CPF': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Digite o CPF/CNPJ do cliente'}),
+            'MES_REFERENCIA': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'AAAAMM (Ex: 202312)'}),
+            'VALOR': forms.NumberInput(attrs={'step': '0.01', 'min': '0'}),
+            'QTD_PARCELA': forms.NumberInput(attrs={'readonly': 'readonly', 'class': 'form-control'}),
+            # Tornar readonly se for preenchido via JS
+            'ID_CONVENIO': forms.Select(attrs={'class': 'form-select'}),
+        }
+        labels = {
+            'CPF': "CPF/CNPJ do Cliente",
+            'ID_CLIENTE': "ID Cliente (oculto)",
+            'SALDO': "Saldo Disponível",
+            'MES_REFERENCIA': "Mês de Referência",
+            'ID_CONVENIO': "Convênio",
+            'QTD_PARCELA': "Quantidade de Parcelas",
+            'VALOR': "Valor Total da Transação",
+        }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # Populate ID_CLIENTE and ID_CONVENIO dropdowns
-        self.fields['ID_CLIENTE'].queryset = Cliente.objects.filter(cancelado=False).order_by('nome_completo')
-        self.fields['ID_CONVENIO'].queryset = Convenio.objects.filter(ativo=True).order_by('nome_convenio')
 
-        # Add initial logic for 'SALDO' if instance exists
-        if self.instance and self.instance.pk:
-            # If SALDO is meant to be derived from ID_CLIENTE.saldo_cliente (example field name)
-            # You might need to set it here from the associated client object.
-            # Make sure Cliente model has a 'saldo_cliente' field or similar.
-            if self.instance.ID_CLIENTE:
-                self.fields['SALDO'].initial = self.instance.ID_CLIENTE.saldo_cliente # Assuming Cliente has a 'saldo_cliente' field
+        # Preenche o campo CPF e ID_CLIENTE do formulário se for uma instância existente (edição)
+        if self.instance and self.instance.ID_CLIENTE:
+            self.initial['CPF'] = self.instance.ID_CLIENTE.cpf_cnpj
+            self.initial['ID_CLIENTE'] = self.instance.ID_CLIENTE.pk
+            # O SALDO salvo na emissão pode ser diferente do saldo atual do cliente
+            # No __init__, pega o que está salvo na instância, o JS pegará o atual
+            self.initial['SALDO'] = self.instance.SALDO
+
+        # Aplica classes Bootstrap padrão a campos que ainda não foram definidos nos widgets attrs
+        for field_name, field in self.fields.items():
+            if field_name not in self.Meta.widgets:  # Aplica apenas se não tem widget customizado
+                if isinstance(field.widget, (forms.TextInput, forms.NumberInput, forms.EmailInput, forms.Textarea)):
+                    field.widget.attrs.update({'class': 'form-control'})
+                elif isinstance(field.widget, forms.Select):
+                    field.widget.attrs.update({'class': 'form-select'})
+
+        # Garante que campos somente leitura não sejam obrigatórios na validação do Django
+        # Pois serão preenchidos via JS ou são ocultos
+        self.fields['ID_CLIENTE'].required = False
+        self.fields['SALDO'].required = False
+        self.fields['QTD_PARCELA'].required = False  # Será preenchido via JS, não pelo usuário
+
+    def clean(self):
+        cleaned_data = super().clean()
+        cpf_digitado = cleaned_data.get('CPF')
+        id_cliente_from_form_pk = cleaned_data.get('ID_CLIENTE')
+        valor = cleaned_data.get('VALOR')
+        qtd_parcela = cleaned_data.get('QTD_PARCELA')
+        id_convenio_obj = cleaned_data.get('ID_CONVENIO')
+        mes_referencia = cleaned_data.get('MES_REFERENCIA')
+
+        cliente_encontrado = None
+
+        # 1. Validar e buscar o cliente pelo CPF/CNPJ digitado
+        if cpf_digitado:
+            cleaned_cpf_cnpj = ''.join(filter(str.isdigit, cpf_digitado))
+            if cleaned_cpf_cnpj:
+                try:
+                    cliente_encontrado = Cliente.objects.get(cpf_cnpj=cleaned_cpf_cnpj)
+                except Cliente.DoesNotExist:
+                    self.add_error('CPF',
+                                   "CPF/CNPJ do Cliente não encontrado. Por favor, verifique ou cadastre o cliente.")
+                except Cliente.MultipleObjectsReturned:
+                    self.add_error('CPF', "Múltiplos clientes encontrados com este CPF/CNPJ. Contate o suporte.")
+            else:
+                self.add_error('CPF', "Por favor, digite um CPF/CNPJ válido.")
         else:
-            # For new forms, SALDO starts empty or 0 and is filled via JS/AJAX
-            self.fields['SALDO'].initial = 0.00 # Or leave as None
+            self.add_error('CPF', "O campo CPF/CNPJ é obrigatório.")
 
-        # Set specific field as required if needed (ModelForm does this automatically based on model)
-        # self.fields['CPF'].required = True
-        # self.fields['ID_CLIENTE'].required = True
+        # 2. Consistência entre CPF digitado e ID_CLIENTE oculto
+        # Se cliente_encontrado existe (ou seja, o CPF digitado encontrou um cliente)
+        if cliente_encontrado:
+            # Se o ID_CLIENTE oculto foi enviado (vindo do JS), verifica consistência
+            if id_cliente_from_form_pk and cliente_encontrado.pk != id_cliente_from_form_pk:
+                self.add_error(None, "Inconsistência: O CPF/CNPJ digitado não corresponde ao cliente selecionado.")
+
+            # Atualiza os dados no cleaned_data com base no cliente encontrado
+            cleaned_data['ID_CLIENTE'] = cliente_encontrado
+            cleaned_data['CPF'] = cliente_encontrado.cpf_cnpj
+            cleaned_data['SALDO'] = cliente_encontrado.saldo  # O saldo a ser salvo na emissão
+        elif id_cliente_from_form_pk:
+            # Se ID_CLIENTE veio do JS mas o CPF não encontrou (ou não foi digitado) um cliente correspondente
+            try:
+                cliente_via_id = Cliente.objects.get(pk=id_cliente_from_form_pk)
+                cleaned_data['ID_CLIENTE'] = cliente_via_id
+                cleaned_data['CPF'] = cliente_via_id.cpf_cnpj
+                cleaned_data['SALDO'] = cliente_via_id.saldo
+            except Cliente.DoesNotExist:
+                self.add_error('ID_CLIENTE', "ID do Cliente inválido ou não encontrado.")
+        else:
+            # Só adiciona erro se for uma submissão de um novo formulário ou edição sem ID_CLIENTE válido
+            if self.instance is None or not self.instance.pk:  # Se não é uma instância existente
+                self.add_error('ID_CLIENTE',
+                               "Nenhum cliente válido associado. Por favor, digite um CPF/CNPJ e selecione um cliente.")
+
+        # 3. Validação de Mês de Referência (Formato AAAAMM)
+        if mes_referencia:
+            if not (len(mes_referencia) == 6 and mes_referencia.isdigit()):
+                self.add_error('MES_REFERENCIA', "Formato do Mês de Referência inválido. Use AAAAMM (Ex: 202312).")
+            else:
+                try:
+                    ano = int(mes_referencia[:4])
+                    mes = int(mes_referencia[4:])
+                    if not (1 <= mes <= 12 and 1900 <= ano <= 2100):
+                        self.add_error('MES_REFERENCIA', "Mês ou Ano de Referência inválido.")
+                except ValueError:
+                    self.add_error('MES_REFERENCIA', "Mês de Referência inválido.")
+        else:
+            self.add_error('MES_REFERENCIA', "O Mês de Referência é obrigatório.")
+
+        # 4. Validação do valor em relação ao saldo do cliente *no momento da transação*
+        if valor is not None:
+            if valor <= 0:
+                self.add_error('VALOR', "O valor da transação deve ser maior que zero.")
+            # Validar contra o saldo ATUAL do cliente (cliente_encontrado.saldo)
+            elif cliente_encontrado and valor > cliente_encontrado.saldo:
+                self.add_error('VALOR',
+                               f"Valor da transação (R$ {valor:.2f}) excede o saldo disponível do cliente (R$ {cliente_encontrado.saldo:.2f}).")
+        else:
+            self.add_error('VALOR', "O valor do convênio é obrigatório.")
+
+        # 5. Validação da QTD_PARCELA em relação ao convênio
+        if qtd_parcela is not None:
+            if qtd_parcela <= 0:
+                self.add_error('QTD_PARCELA', "A quantidade de parcelas deve ser maior que zero.")
+            # Assume que 'Convenio' tem um campo 'qtd_parc_permi'
+            elif id_convenio_obj and hasattr(id_convenio_obj,
+                                             'qtd_parc_permi') and qtd_parcela > id_convenio_obj.qtd_parc_permi:
+                self.add_error('QTD_PARCELA',
+                               f"Quantidade de parcelas excede o limite permitido para este convênio ({id_convenio_obj.qtd_parc_permi}).")
+        else:
+            # QTD_PARCELA é preenchido via JS, mas pode ser nulo se JS falhar
+            self.add_error('QTD_PARCELA', "A quantidade de parcelas é obrigatória.")
+
+        return cleaned_data

@@ -13,10 +13,10 @@
         <p>Você tem certeza que deseja excluir a emissão de convênio do cliente **"{{ convenio_emissao.ID_CLIENTE.nome_completo }}"** (CPF: {{ convenio_emissao.CPF }}) com o convênio **"{{ convenio_emissao.ID_CONVENIO.nome_convenio }}"** referente ao mês **{{ convenio_emissao.MES_REFERENCIA }}**?</p>
         <p class="text-danger">Esta ação não pode ser desfeita.</p>
 
-        <form method="post" action="{% url 'convenio_emissao_delete' convenio_emissao.pk %}">
+        <form method="post" action="{% url 'core:convenio_emissao_delete' convenio_emissao.pk %}">
             {% csrf_token %}
             <button type="submit" class="btn btn-danger me-2">Sim, Excluir</button>
-            <a href="{% url 'convenio_emissao_list' %}" class="btn btn-secondary">Cancelar</a>
+            <a href="{% url 'core:convenio_emissao_list' %}" class="btn btn-secondary">Cancelar</a>
         </form>
     </div>
 </div>
