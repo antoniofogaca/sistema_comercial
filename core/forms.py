@@ -606,8 +606,10 @@ class ConvenioEmissaoForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
+        # === ESTA É A LINHA CRÍTICA PARA A CORREÇÃO ===
         # Preenche o campo CPF e ID_CLIENTE do formulário se for uma instância existente (edição)
-        if self.instance and self.instance.ID_CLIENTE:
+        # E se o ID_CLIENTE não for None nessa instância.
+        if self.instance.pk and self.instance.ID_CLIENTE:  # Verifica se a instância já existe (tem PK) e se ID_CLIENTE não é None
             self.initial['CPF'] = self.instance.ID_CLIENTE.cpf_cnpj
             self.initial['ID_CLIENTE'] = self.instance.ID_CLIENTE.pk
             # O SALDO salvo na emissão pode ser diferente do saldo atual do cliente
@@ -677,7 +679,8 @@ class ConvenioEmissaoForm(forms.ModelForm):
                 self.add_error('ID_CLIENTE', "ID do Cliente inválido ou não encontrado.")
         else:
             # Só adiciona erro se for uma submissão de um novo formulário ou edição sem ID_CLIENTE válido
-            if self.instance is None or not self.instance.pk:  # Se não é uma instância existente
+            # Se ID_CLIENTE é um campo obrigatório no modelo (null=False), essa validação é crucial aqui.
+            if not id_cliente_from_form_pk:  # Se nenhum ID_CLIENTE foi fornecido
                 self.add_error('ID_CLIENTE',
                                "Nenhum cliente válido associado. Por favor, digite um CPF/CNPJ e selecione um cliente.")
 
