@@ -84,10 +84,30 @@
             <div class="row">
                 <div class="col-md-3 mb-3">
                     <label for="{{ form.MES_REFERENCIA.id_for_label }}" class="form-label">Mês de Referência<span class="text-danger">*</span></label>
-                    {% render_field form.MES_REFERENCIA class="form-control" placeholder="AAAAMM" %}
-                    <small class="form-text text-muted">Formato: AAAAMM (Ex: 202312)</small>
+                    {% render_field form.MES_REFERENCIA class="form-control" placeholder="MM/AAAA" %}
+                    <small class="form-text text-muted">Formato: MM/AAAA (Ex: 07/2025)</small>
                     {% if form.MES_REFERENCIA.errors %}
                         {% for error in form.MES_REFERENCIA.errors %}
+                            <div class="invalid-feedback d-block">{{ error }}</div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+
+                <div class="col-md-3 mb-3">
+                    <label for="{{ form.DATA_TRANSACAO.id_for_label }}" class="form-label">Data da Transação<span class="text-danger">*</span></label>
+                    {% render_field form.DATA_TRANSACAO class="form-control" %}
+                    {% if form.DATA_TRANSACAO.errors %}
+                        {% for error in form.DATA_TRANSACAO.errors %}
+                            <div class="invalid-feedback d-block">{{ error }}</div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+
+                <div class="col-md-3 mb-3">
+                    <label for="{{ form.HORA_TRANSACAO.id_for_label }}" class="form-label">Hora da Transação<span class="text-danger">*</span></label>
+                    {% render_field form.HORA_TRANSACAO class="form-control" %}
+                    {% if form.HORA_TRANSACAO.errors %}
+                        {% for error in form.HORA_TRANSACAO.errors %}
                             <div class="invalid-feedback d-block">{{ error }}</div>
                         {% endfor %}
                     {% endif %}
@@ -175,6 +195,26 @@ document.addEventListener('DOMContentLoaded', function () {
             qtdParcelaInput.value = '';
         }
     });
+
+    // ======== MES_REFERENCIA COM CURSOR NO FINAL ========
+    const mesRefInput = document.querySelector('input[name="MES_REFERENCIA"]');
+
+    function formatarMesReferencia(valor) {
+        const numeros = valor.replace(/\D/g, '').slice(0, 6);
+        if (numeros.length <= 2) return numeros;
+        return numeros.slice(0,2) + '/' + numeros.slice(2,6);
+    }
+
+    if (mesRefInput) {
+        mesRefInput.addEventListener('input', function () {
+            const valorFormatado = formatarMesReferencia(mesRefInput.value);
+            mesRefInput.value = valorFormatado;
+            // Força cursor sempre no final
+            mesRefInput.setSelectionRange(mesRefInput.value.length, mesRefInput.value.length);
+        });
+        // Formata ao carregar
+        mesRefInput.value = formatarMesReferencia(mesRefInput.value);
+    }
 });
 </script>
 {% endblock %}

@@ -1450,12 +1450,24 @@ def convenio_emissao_list(request):
 
 def convenio_emissao_create(request):
     if request.method == 'POST':
+        print("\n===== DEBUG POST DATA =====")
+        print(request.POST)
+        print("===========================\n")
+
         form = ConvenioEmissaoForm(request.POST)
         if form.is_valid():
+            print("\n===== DEBUG CLEANED DATA (VALID) =====")
+            print(form.cleaned_data)
+            print("======================================\n")
+
             form.save()
             messages.success(request, 'Convênio de Emissão cadastrado com sucesso!')
             return redirect('core:convenio_emissao_list')
         else:
+            print("\n===== DEBUG FORM ERRORS =====")
+            print(form.errors)
+            print("==============================\n")
+
             messages.error(request, 'Erro ao cadastrar Convênio de Emissão. Verifique os campos.')
             context = {
                 'form': form,
@@ -1470,7 +1482,6 @@ def convenio_emissao_create(request):
         'title': 'Cadastrar Novo Convênio de Emissão'
     }
     return render(request, 'core/convenio_emissao_form.html', context)
-
 
 def convenio_emissao_update(request, pk):
     convenio_emissao = get_object_or_404(ConvenioEmissao, pk=pk)

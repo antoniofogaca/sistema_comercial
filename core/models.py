@@ -597,8 +597,8 @@ class ConvenioEmissao(models.Model):
     # SALDO será preenchido com o saldo da model Cliente
     SALDO = models.DecimalField(max_digits=12, decimal_places=2, verbose_name="Saldo do Cliente")
 
-    MES_REFERENCIA = models.CharField(max_length=6, verbose_name="Mês de Referência",
-                                      help_text="Mês e ano de referência (ex: 202312)")
+    MES_REFERENCIA = models.CharField(max_length=7, verbose_name="Mês de Referência",
+                                      help_text="Mês e ano de referência (ex: 122023)")
 
     # ID_CONVENIO será preenchido com o id_convenio da model Convenio
     # Usaremos uma ForeignKey para a model Convenio.

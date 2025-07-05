@@ -606,7 +606,7 @@ class ConvenioEmissaoForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        # === ESTA É A LINHA CRÍTICA PARA A CORREÇÃO ===
+
         # Preenche o campo CPF e ID_CLIENTE do formulário se for uma instância existente (edição)
         # E se o ID_CLIENTE não for None nessa instância.
         if self.instance.pk and self.instance.ID_CLIENTE:  # Verifica se a instância já existe (tem PK) e se ID_CLIENTE não é None
@@ -661,8 +661,11 @@ class ConvenioEmissaoForm(forms.ModelForm):
         # Se cliente_encontrado existe (ou seja, o CPF digitado encontrou um cliente)
         if cliente_encontrado:
             # Se o ID_CLIENTE oculto foi enviado (vindo do JS), verifica consistência
-            if id_cliente_from_form_pk and cliente_encontrado.pk != id_cliente_from_form_pk:
-                self.add_error(None, "Inconsistência: O CPF/CNPJ digitado não corresponde ao cliente selecionado.")
+            if id_cliente_from_form_pk:
+                id_cliente_pk = id_cliente_from_form_pk.pk if hasattr(id_cliente_from_form_pk, 'pk') else int(
+                    id_cliente_from_form_pk)
+                if cliente_encontrado.pk != id_cliente_pk:
+                    self.add_error(None, "Inconsistência: O CPF/CNPJ digitado não corresponde ao cliente selecionado.")
 
             # Atualiza os dados no cleaned_data com base no cliente encontrado
             cleaned_data['ID_CLIENTE'] = cliente_encontrado
@@ -684,18 +687,24 @@ class ConvenioEmissaoForm(forms.ModelForm):
                 self.add_error('ID_CLIENTE',
                                "Nenhum cliente válido associado. Por favor, digite um CPF/CNPJ e selecione um cliente.")
 
-        # 3. Validação de Mês de Referência (Formato AAAAMM)
+        # 3. Validação de Mês de Referência (Formato MMAAAA)
         if mes_referencia:
-            if not (len(mes_referencia) == 6 and mes_referencia.isdigit()):
-                self.add_error('MES_REFERENCIA', "Formato do Mês de Referência inválido. Use AAAAMM (Ex: 202312).")
+            mes_referencia = mes_referencia.strip().replace(' ', '')
+            if '/' not in mes_referencia:
+                self.add_error('MES_REFERENCIA', "Formato inválido. Use MM/AAAA (Ex: 07/2025).")
             else:
                 try:
-                    ano = int(mes_referencia[:4])
-                    mes = int(mes_referencia[4:])
-                    if not (1 <= mes <= 12 and 1900 <= ano <= 2100):
-                        self.add_error('MES_REFERENCIA', "Mês ou Ano de Referência inválido.")
+                    mes, ano = mes_referencia.split('/')
+                    if len(mes) != 2 or len(ano) != 4 or not mes.isdigit() or not ano.isdigit():
+                        raise ValueError
+                    mes_int = int(mes)
+                    ano_int = int(ano)
+                    if not (1 <= mes_int <= 12 and 1900 <= ano_int <= 2100):
+                        raise ValueError
+                    # Grava no formato MMYYYY
+                    cleaned_data['MES_REFERENCIA'] = f"{mes}{ano}"
                 except ValueError:
-                    self.add_error('MES_REFERENCIA', "Mês de Referência inválido.")
+                    self.add_error('MES_REFERENCIA', "Formato inválido. Use MM/AAAA (Ex: 07/2025).")
         else:
             self.add_error('MES_REFERENCIA', "O Mês de Referência é obrigatório.")
 
@@ -724,3 +733,15 @@ class ConvenioEmissaoForm(forms.ModelForm):
             self.add_error('QTD_PARCELA', "A quantidade de parcelas é obrigatória.")
 
         return cleaned_data
+
+    def save(self, commit=True):
+        instance = super().save(commit=False)
+
+        # Para o caso de criação (não edição), garante que data/hora sejam preenchidos
+        if not instance.DATA_TRANSACAO:
+            instance.DATA_TRANSACAO = timezone.now().date()
+
+        if not instance.HORA_TRANSACAO:
+            instance.HORA_TRANSACAO = timezone.now().time()
+
+        return super().save(commit=commit)
