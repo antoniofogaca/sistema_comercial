@@ -11,7 +11,7 @@
         <h6 class="m-0 font-weight-bold text-primary">{{ title }}</h6>
     </div>
     <div class="card-body">
-        <form method="post" class="needs-validation" novalidate>
+        <form method="post">
             {% csrf_token %}
 
             <div class="mb-4">
@@ -19,10 +19,9 @@
             </div>
 
             <div class="row">
-                {# Campo CPF do Cliente (Input para busca) #}
                 <div class="col-md-3 mb-3">
                     <label for="{{ form.CPF.id_for_label }}" class="form-label">CPF/CNPJ do Cliente<span class="text-danger">*</span></label>
-                    {% render_field form.CPF %}
+                    {% render_field form.CPF class="form-control" placeholder="Digite o CPF/CNPJ" %}
                     <small class="form-text text-muted">Digite o CPF/CNPJ do cliente para buscar seus dados.</small>
                     {% if form.CPF.errors %}
                         {% for error in form.CPF.errors %}
@@ -30,58 +29,52 @@
                         {% endfor %}
                     {% endif %}
                 </div>
-                {# ID_CLIENTE oculto - este será preenchido pelo JS #}
-                {% render_field form.ID_CLIENTE %}
 
-                {# Campo para exibir o Nome do Cliente (ReadOnly) #}
+                {% render_field form.ID_CLIENTE type="hidden" %}
+
                 <div class="col-md-6 mb-3">
                     <label for="id_nome_cliente_exibicao" class="form-label">Nome do Cliente</label>
                     <input type="text" id="id_nome_cliente_exibicao" class="form-control" readonly placeholder="Preenchido automaticamente">
                 </div>
 
-                {# Campo Saldo Disponível (ReadOnly) #}
                 <div class="col-md-3 mb-3">
                     <label for="{{ form.SALDO.id_for_label }}" class="form-label">Saldo Disponível</label>
-                    {% render_field form.SALDO %}
+                    {% render_field form.SALDO class="form-control" readonly="readonly" placeholder="R$ 0,00" %}
                     {% if form.SALDO.errors %}
                         {% for error in form.SALDO.errors %}
                             <div class="invalid-feedback d-block">{{ error }}</div>
                         {% endfor %}
                     {% endif %}
-                    {# Div para exibir erros de saldo via JS #}
                     <div id="saldo-error-feedback" class="invalid-feedback d-block" style="display: none;"></div>
                 </div>
             </div>
 
-            <hr> {# Separador visual #}
+            <hr>
 
             <div class="mb-4 mt-4">
                 <h5 class="text-primary">Detalhes do Convênio</h5>
             </div>
 
             <div class="row">
-                {# Campo Convênio #}
                 <div class="col-md-6 mb-3">
                     <label for="{{ form.ID_CONVENIO.id_for_label }}" class="form-label">Convênio<span class="text-danger">*</span></label>
-                    {% render_field form.ID_CONVENIO %}
+                    {% render_field form.ID_CONVENIO class="form-control" %}
                     {% if form.ID_CONVENIO.errors %}
                         {% for error in form.ID_CONVENIO.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
                     {% endif %}
                 </div>
 
-                {# Campo Quantidade de Parcelas (readonly, preenchido via JS) #}
                 <div class="col-md-3 mb-3">
                     <label for="{{ form.QTD_PARCELA.id_for_label }}" class="form-label">Quantidade de Parcelas</label>
-                    {% render_field form.QTD_PARCELA %}
+                    {% render_field form.QTD_PARCELA class="form-control" readonly="readonly" placeholder="Auto" %}
                     {% if form.QTD_PARCELA.errors %}
                         {% for error in form.QTD_PARCELA.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
                     {% endif %}
                 </div>
 
-                {# Campo Valor Total da Transação #}
                 <div class="col-md-3 mb-3">
                     <label for="{{ form.VALOR.id_for_label }}" class="form-label">Valor Total da Transação<span class="text-danger">*</span></label>
-                    {% render_field form.VALOR %}
+                    {% render_field form.VALOR class="form-control" placeholder="0,00" %}
                     {% if form.VALOR.errors %}
                         {% for error in form.VALOR.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
                     {% endif %}
@@ -89,19 +82,16 @@
             </div>
 
             <div class="row">
-                {# Campo Mês de Referência #}
                 <div class="col-md-3 mb-3">
                     <label for="{{ form.MES_REFERENCIA.id_for_label }}" class="form-label">Mês de Referência<span class="text-danger">*</span></label>
-                    {% render_field form.MES_REFERENCIA %}
+                    {% render_field form.MES_REFERENCIA class="form-control" placeholder="AAAAMM" %}
                     <small class="form-text text-muted">Formato: AAAAMM (Ex: 202312)</small>
                     {% if form.MES_REFERENCIA.errors %}
-                        {% for error in form.MES_REFERENCIA.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+                        {% for error in form.MES_REFERENCIA.errors %}
+                            <div class="invalid-feedback d-block">{{ error }}</div>
+                        {% endfor %}
                     {% endif %}
                 </div>
-
-                {# Os campos DATA_TRANSACAO e HORA_TRANSACAO são preenchidos automaticamente no modelo #}
-                {# e não precisam de input do usuário, então foram removidos do HTML. #}
-                {# O campo Valor da Parcela também foi removido conforme sua solicitação. #}
             </div>
 
             <div class="d-flex justify-content-end mt-4">
@@ -114,297 +104,77 @@
 {% endblock %}
 
 {% block extra_js %}
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const cpfInput = document.getElementById('id_CPF');
-        const idClienteHiddenInput = document.getElementById('id_ID_CLIENTE');
-        const nomeClienteExibicaoInput = document.getElementById('id_nome_cliente_exibicao');
-        const saldoInput = document.getElementById('id_SALDO');
-        const convenioSelect = document.getElementById('id_ID_CONVENIO');
-        const qtdParcelaInput = document.getElementById('id_QTD_PARCELA');
-        const valorInput = document.getElementById('id_VALOR');
-        const saveButton = document.getElementById('saveButton');
-        const form = document.querySelector('form.needs-validation');
+document.addEventListener('DOMContentLoaded', function () {
+    // ======== CLIENTE ========
+    const cpfInput = document.querySelector('input[name="CPF"]');
+    const idClienteInput = document.querySelector('input[name="ID_CLIENTE"]');
+    const nomeClienteInput = document.getElementById('id_nome_cliente_exibicao');
+    const saldoInput = document.querySelector('input[name="SALDO"]');
+    let lastSearchedCpf = '';
 
-        let currentClienteSaldo = parseFloat(saldoInput.value || 0);
+    function limparCamposCliente() {
+        idClienteInput.value = '';
+        nomeClienteInput.value = '';
+        saldoInput.value = '';
+    }
 
-        // Funções auxiliares ----------------------------------------------------
-        function formatCurrency(value) {
-            return parseFloat(value).toLocaleString('pt-BR', {
-                style: 'currency',
-                currency: 'BRL',
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2
-            });
-        }
-
-        function displaySaldoError(message) {
-            let saldoErrorDiv = document.getElementById('saldo-error-feedback');
-            if (!saldoErrorDiv) {
-                saldoErrorDiv = document.createElement('div');
-                saldoErrorDiv.id = 'saldo-error-feedback';
-                saldoErrorDiv.classList.add('invalid-feedback', 'd-block');
-                saldoInput.parentNode.appendChild(saldoErrorDiv);
-            }
-            saldoErrorDiv.textContent = message;
-            saldoErrorDiv.style.display = message ? 'block' : 'none';
-        }
-
-        function clearSaldoError() {
-            displaySaldoError('');
-        }
-
-        function toggleSaveButton(enable) {
-            saveButton.disabled = !enable;
-            if (enable) {
-                saveButton.classList.remove('btn-secondary');
-                saveButton.classList.add('btn-primary');
-            } else {
-                saveButton.classList.remove('btn-primary');
-                saveButton.classList.add('btn-secondary');
-            }
-        }
-
-        // Funções principais de lógica de formulário ------------------------------------
-
-        // 1. Busca de Dados do Cliente
-        async function fetchClientData(cpf) {
-            const cleanedCpf = cpf.replace(/\D/g, '');
-            if (cleanedCpf.length === 0) {
-                nomeClienteExibicaoInput.value = '';
-                saldoInput.value = formatCurrency(0);
-                idClienteHiddenInput.value = '';
-                currentClienteSaldo = 0;
-                clearSaldoError();
-                validateFormForSave();
+    async function buscarClientePorCpf(cpf) {
+        try {
+            const response = await fetch(`/api/clientes/search_by_cpf/?cpf=${encodeURIComponent(cpf)}`);
+            if (!response.ok) {
+                limparCamposCliente();
                 return;
             }
-
-            if (cleanedCpf.length !== 11 && cleanedCpf.length !== 14) {
-                nomeClienteExibicaoInput.value = '';
-                saldoInput.value = formatCurrency(0);
-                idClienteHiddenInput.value = '';
-                currentClienteSaldo = 0;
-                displaySaldoError('CPF/CNPJ deve ter 11 ou 14 dígitos.');
-                validateFormForSave();
-                return;
-            }
-
-            try {
-                const response = await fetch(`/api/clientes/search_by_cpf/?cpf=${cleanedCpf}`);
-                const data = await response.json();
-
-                if (response.ok) {
-                    if (data.id) {
-                        nomeClienteExibicaoInput.value = data.nome_completo;
-                        saldoInput.value = formatCurrency(data.saldo); // Espera 'saldo' do backend
-                        idClienteHiddenInput.value = data.id;
-                        currentClienteSaldo = parseFloat(data.saldo);
-                        clearSaldoError();
-                        validateFormForSave();
-                    } else {
-                        nomeClienteExibicaoInput.value = 'Cliente não encontrado.';
-                        saldoInput.value = formatCurrency(0);
-                        idClienteHiddenInput.value = '';
-                        currentClienteSaldo = 0;
-                        displaySaldoError('CPF/CNPJ não corresponde a nenhum cliente cadastrado.');
-                        validateFormForSave();
-                    }
-                } else {
-                    nomeClienteExibicaoInput.value = '';
-                    saldoInput.value = formatCurrency(0);
-                    idClienteHiddenInput.value = '';
-                    currentClienteSaldo = 0;
-                    displaySaldoError(data.error || 'Erro ao buscar cliente.');
-                    validateFormForSave();
-                }
-            } catch (error) {
-                console.error('Erro na requisição AJAX de cliente:', error);
-                nomeClienteExibicaoInput.value = '';
-                saldoInput.value = formatCurrency(0);
-                idClienteHiddenInput.value = '';
-                currentClienteSaldo = 0;
-                displaySaldoError('Erro de conexão ao buscar dados do cliente.');
-                validateFormForSave();
-            }
+            const data = await response.json();
+            idClienteInput.value = data.id || '';
+            nomeClienteInput.value = data.nome_completo || '';
+            saldoInput.value = data.saldo || '';
+        } catch (error) {
+            console.error('Erro na requisição:', error);
+            limparCamposCliente();
         }
+    }
 
-        // 2. Busca de Detalhes do Convênio (QTD_PARCELA)
-        async function fetchConvenioDetails(convenioId) {
-            if (!convenioId) {
-                qtdParcelaInput.value = '';
-                validateFormForSave();
-                return;
-            }
-            try {
-                const response = await fetch(`/api/convenios/get_details/?id=${convenioId}`);
-                const data = await response.json();
-                if (response.ok && data.qtd_parc_permi !== undefined) {
-                    qtdParcelaInput.value = data.qtd_parc_permi;
-                } else {
-                    qtdParcelaInput.value = '';
-                }
-                validateFormForSave();
-            } catch (error) {
-                console.error('Erro ao buscar detalhes do convênio:', error);
-                qtdParcelaInput.value = '';
-                validateFormForSave();
-            }
+    cpfInput.addEventListener('input', function () {
+        const cpf = cpfInput.value.replace(/\D/g, '');
+        if (cpf.length === 11 && cpf !== lastSearchedCpf) {
+            lastSearchedCpf = cpf;
+            buscarClientePorCpf(cpf);
         }
-
-        // 3. Validação Geral do Formulário para Habilitar/Desabilitar o Botão Salvar
-        function validateFormForSave() {
-            let isValid = true;
-            let errorMessages = []; // Para coletar todas as mensagens de erro
-
-            const valorTransacao = parseFloat(valorInput.value);
-            const qtdParcela = parseInt(qtdParcelaInput.value);
-            const convenioId = convenioSelect.value;
-            const mesReferencia = document.getElementById('id_MES_REFERENCIA').value;
-
-            // Validação do Cliente
-            if (!idClienteHiddenInput.value) {
-                isValid = false;
-                errorMessages.push('Por favor, busque e selecione um cliente válido.');
-            }
-
-            // Validação de Convênio
-            if (!convenioId) {
-                isValid = false;
-                // A validação HTML5/Django form validation deve cuidar da mensagem visual para este campo
-            }
-
-            // Validação de Mês de Referência (Formato AAAAMM)
-            if (!mesReferencia || !(mesReferencia.length === 6 && /^\d+$/.test(mesReferencia))) {
-                isValid = false;
-            } else {
-                try {
-                    const ano = parseInt(mesReferencia.substring(0, 4));
-                    const mes = parseInt(mesReferencia.substring(4, 6));
-                    if (!(mes >= 1 && mes <= 12 && ano >= 1900 && ano <= 2100)) {
-                        isValid = false;
-                    }
-                } catch (e) {
-                    isValid = false;
-                }
-            }
-
-            // Validação de Valor e Saldo
-            if (isNaN(valorTransacao) || valorTransacao <= 0) {
-                isValid = false;
-                // A validação HTML5 do campo VALOR já deve dar feedback
-            } else if (isNaN(currentClienteSaldo) || currentClienteSaldo < valorTransacao) {
-                isValid = false;
-                errorMessages.push(`Valor da transação (${formatCurrency(valorTransacao)}) excede o saldo disponível do cliente (${formatCurrency(currentClienteSaldo)}).`);
-            }
-
-            // Validação de QTD_PARCELA
-            if (isNaN(qtdParcela) || qtdParcela <= 0) {
-                isValid = false;
-                // A validação HTML5 do campo QTD_PARCELA já deve dar feedback
-            }
-
-            // Exibir/Limpar erro de saldo
-            if (errorMessages.length > 0) {
-                displaySaldoError(errorMessages.join('<br>')); // Junta as mensagens com quebra de linha
-            } else {
-                clearSaldoError();
-            }
-
-            // Finalmente, verifica a validação do HTML5 do form como um todo
-            if (!form.checkValidity()) {
-                isValid = false;
-            }
-
-            toggleSaveButton(isValid);
+        if (cpf.length < 11) {
+            limparCamposCliente();
+            lastSearchedCpf = '';
         }
-
-
-        // Event Listeners ----------------------------------------------------
-
-        // Aplica máscara de CPF/CNPJ
-        if (cpfInput) {
-            var CpfCnpjMaskBehavior = function (val) {
-                return val.replace(/\D/g, '').length <= 11 ? '000.000.000-009' : '00.000.000/0000-00';
-            },
-            cpfCnpjpOptions = {
-                onKeyPress: function(val, e, field, options) {
-                    field.mask(CpfCnpjMaskBehavior.apply({}, arguments), options);
-                }
-            };
-            $(cpfInput).mask(CpfCnpjMaskBehavior, cpfCnpjpOptions);
-
-            cpfInput.addEventListener('input', function() {
-                // Ao digitar, limpa campos dependentes e revalida
-                nomeClienteExibicaoInput.value = '';
-                saldoInput.value = formatCurrency(0);
-                idClienteHiddenInput.value = '';
-                currentClienteSaldo = 0;
-                clearSaldoError();
-                validateFormForSave(); // Revalida para desabilitar o botão
-
-                // Chame fetchClientData após um pequeno delay para evitar muitas requisições
-                clearTimeout(this.timeout);
-                this.timeout = setTimeout(() => {
-                    fetchClientData(this.value);
-                }, 700);
-            });
-            cpfInput.addEventListener('blur', function() {
-                clearTimeout(this.timeout); // Garante que a busca ocorre ao sair do campo
-                fetchClientData(this.value);
-            });
-        }
-
-        // Convênio select
-        if (convenioSelect) {
-            convenioSelect.addEventListener('change', function() {
-                fetchConvenioDetails(this.value);
-            });
-        }
-
-        // Valor input
-        if (valorInput) {
-            valorInput.addEventListener('input', function() {
-                validateFormForSave();
-            });
-        }
-
-        // Mês de Referência input
-        const mesReferenciaInput = document.getElementById('id_MES_REFERENCIA');
-        if (mesReferenciaInput) {
-            mesReferenciaInput.addEventListener('input', function() {
-                validateFormForSave();
-            });
-        }
-
-        // Submit do formulário
-        form.addEventListener('submit', function(event) {
-            validateFormForSave(); // Re-valida antes de submeter
-
-            if (!form.checkValidity() || saveButton.disabled) {
-                event.preventDefault();
-                event.stopPropagation();
-            }
-            form.classList.add('was-validated');
-        }, false);
-
-        // Inicialização para modo de edição e criação
-        // Se já tem um CPF no input (para edição), tenta buscar os dados do cliente e do convênio
-        if (idClienteHiddenInput.value && cpfInput.value) {
-            const initialCpf = cpfInput.value;
-            fetchClientData(initialCpf).then(() => {
-                if (convenioSelect.value) {
-                    convenioSelect.dispatchEvent(new Event('change'));
-                }
-                validateFormForSave();
-            });
-        } else {
-             // Modo de criação: desabilita o botão até ter dados mínimos e válidos
-             toggleSaveButton(false);
-        }
-        // Chamada inicial para garantir que o estado do botão está correto ao carregar a página
-        validateFormForSave();
     });
+
+    // ======== CONVENIO ========
+    const convenioSelect = document.getElementById('{{ form.ID_CONVENIO.id_for_label }}');
+    const qtdParcelaInput = document.getElementById('{{ form.QTD_PARCELA.id_for_label }}');
+
+    async function buscarConvenioDetails(idConvenio) {
+        try {
+            const response = await fetch(`/api/convenios/get_details/?id=${encodeURIComponent(idConvenio)}`);
+            if (!response.ok) {
+                qtdParcelaInput.value = '';
+                return;
+            }
+            const data = await response.json();
+            qtdParcelaInput.value = data.qtd_parc_permi || '';
+        } catch (error) {
+            console.error('Erro na requisição:', error);
+            qtdParcelaInput.value = '';
+        }
+    }
+
+    convenioSelect.addEventListener('change', function () {
+        const idConvenio = convenioSelect.value;
+        if (idConvenio) {
+            buscarConvenioDetails(idConvenio);
+        } else {
+            qtdParcelaInput.value = '';
+        }
+    });
+});
 </script>
 {% endblock %}

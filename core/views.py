@@ -139,8 +139,6 @@ def cliente_delete(request, pk):
 
 
 # --- NOVAS VIEWS PARA EMPRESA ---
-
-# --- NOVAS VIEWS PARA EMPRESA ---
 def empresas_list(request):
     search = request.GET.get('search', '')
     try:
@@ -1521,31 +1519,60 @@ def convenio_emissao_delete(request, pk):
 # -------------------------------------------------------------------------------
 # VIEWS DE API PARA CONVENIOEMISSAOFORM (AJAX)
 # -------------------------------------------------------------------------------
-
 @require_GET
+@csrf_exempt # Apenas para desenvolvimento, se tiver problemas de CSRF em GET. Remova em produção se não for estritamente necessário.
 def search_client_by_cpf(request):
     cpf = request.GET.get('cpf', None)
     if not cpf:
         return JsonResponse({'error': 'CPF/CNPJ não fornecido.'}, status=400)
 
     try:
-        # Remova caracteres não numéricos para a busca no banco
+        # Limpa o CPF/CNPJ para a busca no banco de dados
+        # O campo 'cpf_cnpj' no seu modelo Cliente já armazena o CPF/CNPJ limpo.
         cpf_cleaned = ''.join(filter(str.isdigit, cpf))
 
-        # Use o cpf_cleaned para a busca
+        # Busca o cliente usando o campo cpf_cnpj
         cliente = Cliente.objects.get(cpf_cnpj=cpf_cleaned)
+
         data = {
-            'id': cliente.pk,
-            'nome_completo': cliente.nome_completo,  # Nome do campo no seu model Cliente
-            'saldo': float(cliente.saldo) if cliente.saldo is not None else 0.0
-            # **CORRIGIDO**: Alterado de 'saldo_cliente' para 'saldo'
+            'id': cliente.pk, # ou cliente.id
+            'nome_completo': cliente.nome_completo,
+            'saldo': str(cliente.saldo) # Converte o DecimalField para string para JSON
         }
         return JsonResponse(data)
     except Cliente.DoesNotExist:
-        return JsonResponse({'error': 'Cliente não encontrado.'}, status=404)
+        # Cliente não encontrado. Retorna status 200 com id=None.
+        # Isso permite ao JavaScript interpretar como "não encontrado" sem erro HTTP.
+        return JsonResponse({'id': None, 'nome_completo': 'Cliente não encontrado.', 'saldo': '0.00'}, status=200)
     except Exception as e:
-        print(f"Erro ao buscar dados do cliente: {e}")
-        return JsonResponse({'error': f'Erro interno ao buscar cliente: {str(e)}'}, status=500)
+        # Loga o erro no console do servidor para depuração
+        print(f"Erro inesperado ao buscar dados do cliente: {e}")
+        return JsonResponse({'error': f'Erro interno do servidor: {str(e)}'}, status=500)
+
+# @require_GET
+# def search_client_by_cpf(request):
+#     cpf = request.GET.get('cpf', None)
+#     if not cpf:
+#         return JsonResponse({'error': 'CPF/CNPJ não fornecido.'}, status=400)
+#
+#     try:
+#         # Remova caracteres não numéricos para a busca no banco
+#         cpf_cleaned = ''.join(filter(str.isdigit, cpf))
+#
+#         # Use o cpf_cleaned para a busca
+#         cliente = Cliente.objects.get(cpf_cnpj=cpf_cleaned)
+#         data = {
+#             'id': cliente.pk,
+#             'nome_completo': cliente.nome_completo,  # Nome do campo no seu model Cliente
+#             'saldo': float(cliente.saldo) if cliente.saldo is not None else 0.0
+#             # **CORRIGIDO**: Alterado de 'saldo_cliente' para 'saldo'
+#         }
+#         return JsonResponse(data)
+#     except Cliente.DoesNotExist:
+#         return JsonResponse({'error': 'Cliente não encontrado.'}, status=404)
+#     except Exception as e:
+#         print(f"Erro ao buscar dados do cliente: {e}")
+#         return JsonResponse({'error': f'Erro interno ao buscar cliente: {str(e)}'}, status=500)
 
 
 @require_GET

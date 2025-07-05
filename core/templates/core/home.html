@@ -1,85 +1,550 @@
 {% extends 'core/base.html' %}
 
-{% block title %}Início{% endblock %}
+{% block title %}Painel de Controle{% endblock %}
 
 {% block content %}
-<div class="container-fluid">
-    <h2 class="mb-4">Painel Geral</h2>
+<div class="container-fluid py-4">
+    <h2 class="mb-4 text-center text-md-start text-dark">Visão Geral do Sistema</h2>
+    <hr class="mb-5 border-2 opacity-75">
 
-    <div class="row g-3">
-        <!-- Card 1 -->
-        <div class="col-md-6 col-xl-3">
-            <div class="card text-white bg-primary shadow-sm">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
+    <div class="row g-4 mb-5">
+        {# Cartão de Clientes #}
+        <div class="col-sm-6 col-md-4 col-lg-3">
+            <div class="card bg-gradient-primary shadow-lg border-0 h-100 animated-card">
+                <div class="card-body d-flex flex-column justify-content-between p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
                         <div>
-                            <h5 class="card-title mb-1">Clientes</h5>
-                            <h3>134</h3>
+                            <h5 class="card-title text-uppercase text-white-50 fw-light mb-1">Clientes</h5>
+                            <h3 class="mb-0 text-white display-6 fw-bold">{{ total_clientes }}</h3>
                         </div>
-                        <i class="bi bi-people-fill fs-1"></i>
+                        <i class="bi bi-people-fill text-white opacity-75 display-4"></i>
                     </div>
+                    <p class="text-white-75 mb-0 small">Total de clientes cadastrados</p>
                 </div>
             </div>
         </div>
 
-        <!-- Card 2 -->
-        <div class="col-md-6 col-xl-3">
-            <div class="card text-white bg-success shadow-sm">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
+        {# Cartão de Usuários #}
+        <div class="col-sm-6 col-md-4 col-lg-3">
+            <div class="card bg-gradient-success shadow-lg border-0 h-100 animated-card">
+                <div class="card-body d-flex flex-column justify-content-between p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
                         <div>
-                            <h5 class="card-title mb-1">Usuários</h5>
-                            <h3>18</h3>
+                            <h5 class="card-title text-uppercase text-white-50 fw-light mb-1">Usuários</h5>
+                            <h3 class="mb-0 text-white display-6 fw-bold">{{ total_usuarios }}</h3>
                         </div>
-                        <i class="bi bi-person-fill-check fs-1"></i>
+                        <i class="bi bi-person-fill-check text-white opacity-75 display-4"></i>
                     </div>
+                    <p class="text-white-75 mb-0 small">Total de usuários no sistema</p>
                 </div>
             </div>
         </div>
 
-        <!-- Card 3 -->
-        <div class="col-md-6 col-xl-3">
-            <div class="card text-white bg-warning shadow-sm">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
+        {# Cartão de Convênios Ativos #}
+        <div class="col-sm-6 col-md-4 col-lg-3">
+            <div class="card bg-gradient-warning shadow-lg border-0 h-100 animated-card">
+                <div class="card-body d-flex flex-column justify-content-between p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
                         <div>
-                            <h5 class="card-title mb-1">Convênios Ativos</h5>
-                            <h3>27</h3>
+                            <h5 class="card-title text-uppercase text-white-50 fw-light mb-1">Convênios Ativos</h5>
+                            <h3 class="mb-0 text-white display-6 fw-bold">{{ convenios_ativos }}</h3>
                         </div>
-                        <i class="bi bi-journal-check fs-1"></i>
+                        <i class="bi bi-journal-check text-white opacity-75 display-4"></i>
                     </div>
+                    <p class="text-white-75 mb-0 small">Convênios em operação</p>
                 </div>
             </div>
         </div>
 
-        <!-- Card 4 -->
-        <div class="col-md-6 col-xl-3">
-            <div class="card text-white bg-danger shadow-sm">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
+        {# Cartão de Empresas #}
+        <div class="col-sm-6 col-md-4 col-lg-3">
+            <div class="card bg-gradient-danger shadow-lg border-0 h-100 animated-card">
+                <div class="card-body d-flex flex-column justify-content-between p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
                         <div>
-                            <h5 class="card-title mb-1">Empresas</h5>
-                            <h3>9</h3>
+                            <h5 class="card-title text-uppercase text-white-50 fw-light mb-1">Empresas</h5>
+                            <h3 class="mb-0 text-white display-6 fw-bold">{{ total_empresas }}</h3>
                         </div>
-                        <i class="bi bi-building fs-1"></i>
+                        <i class="bi bi-building text-white opacity-75 display-4"></i>
                     </div>
+                    <p class="text-white-75 mb-0 small">Empresas parceiras/filiais</p>
+                </div>
+            </div>
+        </div>
+
+        {# Cartão de Total de Produtos #}
+        <div class="col-sm-6 col-md-4 col-lg-3">
+            <div class="card bg-gradient-info shadow-lg border-0 h-100 animated-card">
+                <div class="card-body d-flex flex-column justify-content-between p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div>
+                            <h5 class="card-title text-uppercase text-white-50 fw-light mb-1">Total de Produtos</h5>
+                            <h3 class="mb-0 text-white display-6 fw-bold">{{ total_produtos }}</h3>
+                        </div>
+                        <i class="bi bi-box-seam text-white opacity-75 display-4"></i>
+                    </div>
+                    <p class="text-white-75 mb-0 small">Itens em estoque ou serviço</p>
+                </div>
+            </div>
+        </div>
+
+         {# Cartão de Produtos Ativos #}
+         <div class="col-sm-6 col-md-4 col-lg-3">
+            <div class="card bg-gradient-secondary shadow-lg border-0 h-100 animated-card">
+                <div class="card-body d-flex flex-column justify-content-between p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div>
+                            <h5 class="card-title text-uppercase text-white-50 fw-light mb-1">Produtos Ativos</h5>
+                            <h3 class="mb-0 text-white display-6 fw-bold">{{ produtos_ativos }}</h3>
+                        </div>
+                        <i class="bi bi-box-arrow-in-up text-white opacity-75 display-4"></i>
+                    </div>
+                    <p class="text-white-75 mb-0 small">Produtos disponíveis para venda/uso</p>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Se quiser incluir um gráfico futuramente -->
-    <!--
-    <div class="row mt-4">
-        <div class="col">
-            <div class="card shadow-sm">
-                <div class="card-body">
-                    <h5 class="card-title">Gráfico de desempenho</h5>
-                    <canvas id="grafico"></canvas>
+    <hr class="mb-5 border-2 opacity-75">
+
+    <div class="row g-4 mb-5">
+        {# Gráfico de Distribuição de Clientes (Pizza) #}
+        <div class="col-lg-6">
+            <div class="card shadow-lg border-0 h-100 animated-card-fade">
+                <div class="card-body p-4">
+                    <h5 class="card-title text-dark mb-4 fw-bold">Distribuição de Clientes</h5>
+                    <canvas id="clientesStatusChart" style="max-height: 400px;"></canvas>
                 </div>
             </div>
         </div>
+
+        {# Gráfico de Usuários por Nível de Acesso (Barra) #}
+        <div class="col-lg-6">
+            <div class="card shadow-lg border-0 h-100 animated-card-fade">
+                <div class="card-body p-4">
+                    <h5 class="card-title text-dark mb-4 fw-bold">Usuários por Nível de Acesso</h5>
+                    <canvas id="usuariosNivelChart" style="max-height: 400px;"></canvas>
+                </div>
+            </div>
+        </div>
+
+        {# Gráfico de Valor de Emissões de Convênio (Linha) #}
+        <div class="col-lg-12">
+            <div class="card shadow-lg border-0 h-100 animated-card-fade">
+                <div class="card-body p-4">
+                    <h5 class="card-title text-dark mb-4 fw-bold">Valor de Emissões de Convênio (Últimos 6 Meses)</h5>
+                    <canvas id="emissoesConvenioChart" style="max-height: 450px;"></canvas>
+                </div>
+            </div>
+        </div>
+
+         {# Gráfico de Status de Pagamento das Parcelas (Donut) #}
+         <div class="col-lg-6">
+            <div class="card shadow-lg border-0 h-100 animated-card-fade">
+                <div class="card-body p-4">
+                    <h5 class="card-title text-dark mb-4 fw-bold">Status de Pagamento das Parcelas</h5>
+                    <canvas id="parcelasStatusChart" style="max-height: 400px;"></canvas>
+                </div>
+            </div>
+        </div>
+        {# Espaço para adicionar mais gráficos se necessário #}
     </div>
-    -->
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.0/dist/chart.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+<style>
+    /* Estilos para os cartões de informação */
+    .bg-gradient-primary { background: linear-gradient(45deg, #007bff, #0056b3); }
+    .bg-gradient-success { background: linear-gradient(45deg, #28a745, #1e7e34); }
+    .bg-gradient-warning { background: linear-gradient(45deg, #ffc107, #d39e00); }
+    .bg-gradient-danger { background: linear-gradient(45deg, #dc3545, #bd2130); }
+    .bg-gradient-info { background: linear-gradient(45deg, #17a2b8, #117a8b); }
+    .bg-gradient-secondary { background: linear-gradient(45deg, #6c757d, #545b62); }
+
+    .card {
+        border-radius: 1rem; /* Cantos mais arredondados */
+        transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+    }
+    .card:hover.animated-card {
+        transform: translateY(-5px); /* Efeito de elevação ao passar o mouse */
+        box-shadow: 0 1rem 3rem rgba(0,0,0,.175)!important; /* Sombra mais pronunciada */
+    }
+    .animated-card-fade {
+        animation: fadeIn 0.8s ease-out;
+    }
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    .card-title.fw-bold {
+        font-size: 1.25rem; /* Aumenta um pouco o tamanho da fonte dos títulos dos gráficos */
+        color: #343a40; /* Cor mais escura para melhor contraste */
+    }
+    hr.border-2 {
+        border-top-width: 2px !important;
+        border-color: rgba(0,0,0,.1);
+    }
+</style>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Registrar o plugin ChartDataLabels apenas se ainda não estiver registrado
+        if (!Chart.isRegistered(ChartDataLabels)) {
+            Chart.register(ChartDataLabels);
+        }
+
+        // --- Dados para os Gráficos (passados do Django) ---
+        // Certifique-se de que estas variáveis estejam sendo passadas corretamente do seu backend Django
+        const clientesStatusData = {{ clientes_status_data_json|safe }};
+        const usuariosNivelData = {{ usuarios_nivel_data_json|safe }};
+        const emissoesLabels = JSON.parse(document.getElementById('emissoes-labels').textContent);
+        const emissoesValores = JSON.parse(document.getElementById('emissoes-valores').textContent);
+        const parcelasStatusData = {{ parcelas_status_data_json|safe }};
+
+        // --- Paleta de Cores Personalizada ---
+        const colors = {
+            primary: '#007bff',
+            success: '#28a745',
+            warning: '#ffc107',
+            danger: '#dc3545',
+            info: '#17a2b8',
+            secondary: '#6c757d',
+            light: '#f8f9fa',
+            dark: '#343a40',
+            blue: '#007bff',
+            indigo: '#6610f2',
+            purple: '#6f42c1',
+            pink: '#e83e8c',
+            red: '#dc3545',
+            orange: '#fd7e14',
+            yellow: '#ffc107',
+            green: '#28a745',
+            teal: '#20c997',
+            cyan: '#17a2b8'
+        };
+
+        // Cores para gráficos com múltiplos itens
+        const multiColors = [
+            colors.blue, colors.success, colors.warning, colors.danger, colors.info,
+            colors.purple, colors.pink, colors.red, colors.orange, colors.cyan
+        ];
+
+        // --- Gráfico 1: Clientes Ativos vs. Cancelados (Pizza) ---
+        const ctxClientes = document.getElementById('clientesStatusChart').getContext('2d');
+        new Chart(ctxClientes, {
+            type: 'pie',
+            data: {
+                labels: clientesStatusData.map(item => item.label),
+                datasets: [{
+                    data: clientesStatusData.map(item => item.value),
+                    backgroundColor: [colors.success, colors.danger], // Verde para Ativos, Vermelho para Cancelados
+                    hoverOffset: 8, // Aumenta o offset ao passar o mouse
+                    borderColor: 'white', // Adiciona borda branca para separar as fatias
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                        labels: {
+                            font: {
+                                size: 14
+                            },
+                            color: colors.dark
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(0,0,0,0.8)',
+                        titleColor: '#fff',
+                        bodyColor: '#fff',
+                        borderColor: 'rgba(255,255,255,0.2)',
+                        borderWidth: 1,
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.label || '';
+                                if (label) {
+                                    label += ': ';
+                                }
+                                if (context.parsed !== null) {
+                                    const total = context.dataset.data.reduce((sum, val) => sum + val, 0);
+                                    const percentage = ((context.parsed / total) * 100).toFixed(2);
+                                    label += `${context.parsed} (${percentage}%)`;
+                                }
+                                return label;
+                            }
+                        }
+                    },
+                    datalabels: {
+                        color: '#fff',
+                        font: {
+                            weight: 'bold',
+                            size: 14
+                        },
+                        formatter: (value, ctx) => {
+                            const total = ctx.dataset.data.reduce((sum, val) => sum + val, 0);
+                            const percentage = (value * 100 / total).toFixed(2);
+                            return percentage + '%';
+                        },
+                        textShadowBlur: 5, // Sombra para o texto
+                        textShadowColor: 'rgba(0, 0, 0, 0.5)'
+                    }
+                },
+                layout: {
+                    padding: 10 // Espaçamento interno do gráfico
+                }
+            }
+        });
+
+        // --- Gráfico 2: Usuários por Nível de Acesso (Barra) ---
+        const ctxUsuarios = document.getElementById('usuariosNivelChart').getContext('2d');
+        new Chart(ctxUsuarios, {
+            type: 'bar',
+            data: {
+                labels: usuariosNivelData.map(item => item.label),
+                datasets: [{
+                    label: 'Número de Usuários',
+                    data: usuariosNivelData.map(item => item.value),
+                    backgroundColor: multiColors.slice(0, usuariosNivelData.length).map(color => Chart.helpers.color(color).alpha(0.7).rgbString()), // Cores com transparência
+                    borderColor: multiColors.slice(0, usuariosNivelData.length), // Cores sólidas para borda
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false // Não exibe a legenda para barras únicas
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(0,0,0,0.8)',
+                        titleColor: '#fff',
+                        bodyColor: '#fff',
+                        borderColor: 'rgba(255,255,255,0.2)',
+                        borderWidth: 1
+                    },
+                    datalabels: {
+                        anchor: 'end',
+                        align: 'top',
+                        color: colors.dark,
+                        font: {
+                            weight: 'bold',
+                            size: 14
+                        },
+                        formatter: (value) => value // Exibe apenas o valor
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Quantidade',
+                            font: { size: 14, weight: 'bold' },
+                            color: colors.dark
+                        },
+                        ticks: {
+                            color: colors.secondary
+                        },
+                        grid: {
+                            color: 'rgba(0,0,0,0.05)'
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Nível de Acesso',
+                            font: { size: 14, weight: 'bold' },
+                            color: colors.dark
+                        },
+                        ticks: {
+                            color: colors.secondary
+                        },
+                        grid: {
+                            display: false
+                        }
+                    }
+                },
+                layout: {
+                    padding: { top: 20, bottom: 10, left: 10, right: 10 }
+                }
+            }
+        });
+
+        // --- Gráfico 3: Valor de Emissões de Convênio por Mês (Linha) ---
+        const ctxEmissoes = document.getElementById('emissoesConvenioChart').getContext('2d');
+        new Chart(ctxEmissoes, {
+            type: 'line',
+            data: {
+                labels: emissoesLabels,
+                datasets: [{
+                    label: 'Valor Total Emitido (R$)',
+                    data: emissoesValores,
+                    borderColor: colors.blue,
+                    backgroundColor: Chart.helpers.color(colors.blue).alpha(0.2).rgbString(), // Área preenchida suave
+                    tension: 0.4, // Curva mais suave
+                    fill: true,
+                    pointBackgroundColor: colors.blue,
+                    pointBorderColor: '#fff',
+                    pointHoverRadius: 8,
+                    pointHoverBackgroundColor: colors.blue,
+                    pointHoverBorderColor: 'rgba(255,255,255,0.8)',
+                    borderWidth: 3
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                        labels: {
+                            font: {
+                                size: 14
+                            },
+                            color: colors.dark
+                        }
+                    },
+                    tooltip: {
+                        mode: 'index',
+                        intersect: false,
+                        backgroundColor: 'rgba(0,0,0,0.8)',
+                        titleColor: '#fff',
+                        bodyColor: '#fff',
+                        borderColor: 'rgba(255,255,255,0.2)',
+                        borderWidth: 1,
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.dataset.label || '';
+                                if (label) {
+                                    label += ': ';
+                                }
+                                if (context.parsed.y !== null) {
+                                    label += new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(context.parsed.y);
+                                }
+                                return label;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Valor (R$)',
+                            font: { size: 14, weight: 'bold' },
+                            color: colors.dark
+                        },
+                        ticks: {
+                            callback: function(value, index, values) {
+                                return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
+                            },
+                            color: colors.secondary
+                        },
+                        grid: {
+                            color: 'rgba(0,0,0,0.05)'
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Mês/Ano',
+                            font: { size: 14, weight: 'bold' },
+                            color: colors.dark
+                        },
+                        ticks: {
+                            color: colors.secondary
+                        },
+                        grid: {
+                            display: false
+                        }
+                    }
+                },
+                layout: {
+                    padding: 10
+                }
+            }
+        });
+
+        // --- Gráfico 4: Status de Pagamento das Parcelas (Donut) ---
+        const ctxParcelas = document.getElementById('parcelasStatusChart').getContext('2d');
+        const parcelasColorsMap = {
+            'Aberto': colors.info,    // Azul claro
+            'Pago': colors.success,      // Verde
+            'Cancelado': colors.danger  // Vermelho
+        };
+        new Chart(ctxParcelas, {
+            type: 'doughnut',
+            data: {
+                labels: parcelasStatusData.map(item => item.label),
+                datasets: [{
+                    data: parcelasStatusData.map(item => item.value),
+                    backgroundColor: parcelasStatusData.map(item => parcelasColorsMap[item.label] || colors.secondary), // Cores dinâmicas
+                    hoverOffset: 8,
+                    borderColor: 'white',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                        labels: {
+                            font: {
+                                size: 14
+                            },
+                            color: colors.dark
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(0,0,0,0.8)',
+                        titleColor: '#fff',
+                        bodyColor: '#fff',
+                        borderColor: 'rgba(255,255,255,0.2)',
+                        borderWidth: 1,
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.label || '';
+                                if (label) {
+                                    label += ': ';
+                                }
+                                if (context.parsed !== null) {
+                                    const total = context.dataset.data.reduce((sum, val) => sum + val, 0);
+                                    const percentage = ((context.parsed / total) * 100).toFixed(2);
+                                    label += `${context.parsed} (${percentage}%)`;
+                                }
+                                return label;
+                            }
+                        }
+                    },
+                    datalabels: {
+                        color: '#fff',
+                        font: {
+                            weight: 'bold',
+                            size: 14
+                        },
+                        formatter: (value, ctx) => {
+                            const total = ctx.dataset.data.reduce((sum, val) => sum + val, 0);
+                            const percentage = (value * 100 / total).toFixed(2);
+                            return percentage + '%';
+                        },
+                        textShadowBlur: 5,
+                        textShadowColor: 'rgba(0, 0, 0, 0.5)'
+                    }
+                },
+                layout: {
+                    padding: 10
+                }
+            }
+        });
+    });
+</script>
 {% endblock %}
