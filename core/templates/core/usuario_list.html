@@ -55,7 +55,7 @@
                 const query = searchInput.value;
                 const status = statusFilter.value;
                 const url = new URL(window.location.href);
-                url.pathname = '{% url "usuarios_list" %}';
+                url.pathname = '{% url "core:usuarios_list" %}';
                 url.searchParams.set('page', page);
                 if (query) {
                     url.searchParams.set('q', query);

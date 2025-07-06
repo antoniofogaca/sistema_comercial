@@ -3,11 +3,11 @@
 <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
     <thead>
         <tr>
-            {# Coluna Código da Loja #}
+            {# Coluna Código da Loja - CORRIGIDO O NOME DO CAMPO NO LINK DE ORDENAÇÃO #}
             <th>
                 <a href="?sort_by={% if sort_by == 'cd_loja' %}-{% endif %}cd_loja" class="sort-link">Cód. Loja</a>
             </th>
-            {# Coluna Nome do Convênio #}
+            {# Coluna Nome do Convênio - CORRIGIDO O NOME DO CAMPO NO LINK DE ORDENAÇÃO #}
             <th>
                 <a href="?sort_by={% if sort_by == 'nome_convenio' %}-{% endif %}nome_convenio" class="sort-link">Nome Convênio</a>
             </th>
@@ -27,7 +27,7 @@
             <th>
                 <a href="?sort_by={% if sort_by == 'telefone' %}-{% endif %}telefone" class="sort-link">Telefone</a>
             </th>
-            {# Coluna Status (Ativo) #}
+            {# Coluna Status (Ativo) - CORRIGIDO O NOME DO CAMPO NO LINK DE ORDENAÇÃO #}
             <th>
                 <a href="?sort_by={% if sort_by == 'ativo' %}-{% endif %}ativo" class="sort-link">Status</a>
             </th>
@@ -72,7 +72,7 @@
                 {% endif %}
             </td>
             <td>
-                {# Links de Ações - apontando para as URLs de Convênio #}
+                {# Links de Ações - apontando para as URLs de Convênio com o namespace 'core' #}
                 <a href="{% url 'core:convenio_update' convenio_item.pk %}" class="btn btn-warning btn-sm" title="Editar">
                     <i class="fas fa-edit"></i>
                 </a>
@@ -83,7 +83,7 @@
         </tr>
         {% empty %}
         <tr>
-            {# Colspan ajustado para o número total de colunas #}
+            {# Colspan ajustado para o número total de colunas (11 colunas no total) #}
             <td colspan="11" class="text-center">Nenhum Convênio encontrado.</td>
         </tr>
         {% endfor %}

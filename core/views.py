@@ -1033,29 +1033,32 @@ def produto_list(request):
     produtos_list = Produto.objects.all()
 
     search_query = request.GET.get('search', '')
-    status_filter = request.GET.get('status', 'all')  # 'all', 'true', 'false' (para cancelado)
-    sort_by = request.GET.get('sort_by', 'cd_produto')  # Default sort for Produto
+    status_filter = request.GET.get('status', 'all')  # 'all', 'A' (Ativo), 'I' (Inativo)
+    sort_by = request.GET.get('sort_by', 'descricao_produto')  # Default sort by descricao_produto
     per_page = int(request.GET.get('per_page', 10))
 
     if search_query:
         produtos_list = produtos_list.filter(
-            Q(cd_produto__icontains=search_query) |
-            Q(descricao__icontains=search_query) |
-            Q(cd_barras__icontains=search_query)
+            Q(codigo_ean_dun__icontains=search_query) |
+            Q(descricao_produto__icontains=search_query)
         )
 
-    if status_filter == 'true':
-        produtos_list = produtos_list.filter(cancelado=True)
-    elif status_filter == 'false':
-        produtos_list = produtos_list.filter(cancelado=False)
+    # Filtrar por situação
+    if status_filter == 'A':
+        produtos_list = produtos_list.filter(situacao='A')
+    elif status_filter == 'I':
+        produtos_list = produtos_list.filter(situacao='I')
 
     if sort_by:
-        allowed_sort_fields = ['cd_produto', 'descricao', 'cd_barras', 'vlr_venda', 'estoque', 'cancelado',
-                               'data_cadastro', 'data_atualizacao']
+        # Campos permitidos para ordenação baseados no seu modelo Produto
+        allowed_sort_fields = [
+            'codigo_ean_dun', 'descricao_produto', 'valor_venda', 'estoque_atual',
+            'situacao', 'data_cadastro', 'data_atualizacao'
+        ]
         if sort_by in allowed_sort_fields or (sort_by.startswith('-') and sort_by[1:] in allowed_sort_fields):
             produtos_list = produtos_list.order_by(sort_by)
         else:
-            produtos_list = produtos_list.order_by('cd_produto')
+            produtos_list = produtos_list.order_by('descricao_produto') # Fallback para um campo válido
 
     paginator = Paginator(produtos_list, per_page)
     page_number = request.GET.get('page')
@@ -1288,27 +1291,38 @@ def convenio_list(request):
 
     search_query = request.GET.get('search', '')
     status_filter = request.GET.get('status', 'all')
-    sort_by = request.GET.get('sort_by', 'cd_convenio')
+    sort_by = request.GET.get('sort_by', 'nome_convenio') # Alterado o sort_by padrão para 'nome_convenio'
     per_page = int(request.GET.get('per_page', 10))
 
     if search_query:
         convenios_list = convenios_list.filter(
-            Q(cd_convenio__icontains=search_query) |
-            Q(descricao__icontains=search_query)
+            Q(cd_loja__icontains=search_query) |         # CORRIGIDO: Usando 'cd_loja'
+            Q(nome_convenio__icontains=search_query) |   # CORRIGIDO: Usando 'nome_convenio'
+            Q(cnpj__icontains=search_query) |
+            Q(contato__icontains=search_query) |
+            Q(email__icontains=search_query) |
+            Q(telefone__icontains=search_query) |
+            Q(cod_evento__icontains=search_query)
         )
 
+    # CORRIGIDO: Lógica de filtro para o campo 'ativo'
     if status_filter == 'true':
-        convenios_list = convenios_list.filter(cancelado=True)
+        convenios_list = convenios_list.filter(ativo=True)
     elif status_filter == 'false':
-        convenios_list = convenios_list.filter(cancelado=False)
+        convenios_list = convenios_list.filter(ativo=False)
 
     if sort_by:
-        allowed_sort_fields = ['cd_convenio', 'descricao', 'taxa_juros', 'qtd_parc_permi', 'cancelado', 'data_cadastro',
-                               'data_atualizacao']
+        # CORRIGIDO: Lista de campos permitidos para ordenação
+        allowed_sort_fields = [
+            'cd_loja', 'nome_convenio', 'cnpj', 'contato', 'email',
+            'telefone', 'ativo', 'qtd_parc_permi', 'cod_evento',
+            'data_cadastro', 'data_atualizacao'
+        ]
         if sort_by in allowed_sort_fields or (sort_by.startswith('-') and sort_by[1:] in allowed_sort_fields):
             convenios_list = convenios_list.order_by(sort_by)
         else:
-            convenios_list = convenios_list.order_by('cd_convenio')
+            # Garante uma ordenação padrão caso o campo solicitado não seja válido
+            convenios_list = convenios_list.order_by('nome_convenio')
 
     paginator = Paginator(convenios_list, per_page)
     page_number = request.GET.get('page')
@@ -1316,8 +1330,10 @@ def convenio_list(request):
     try:
         convenios = paginator.get_page(page_number)
     except EmptyPage:
+        # Se a página estiver fora do intervalo (ex: 9999), entrega a última página de resultados.
         convenios = paginator.get_page(paginator.num_pages)
     except PageNotAnInteger:
+        # Se o parâmetro de página não for um inteiro, entrega a primeira página.
         convenios = paginator.get_page(1)
 
     context = {
@@ -1328,6 +1344,7 @@ def convenio_list(request):
         'per_page': per_page,
     }
 
+    # Verifica se a requisição é AJAX para retornar apenas o HTML da tabela
     if request.headers.get('x-requested-with') == 'XMLHttpRequest':
         html = render_to_string('core/convenio_table_partial.html', context, request=request)
         return JsonResponse({'html': html})
@@ -1337,7 +1354,7 @@ def convenio_list(request):
 
 def convenio_create(request):
     if request.method == 'POST':
-        form = ConvenioForm(request.POST)
+        form = ConvenioForm(request.POST, request.FILES) # Adicionado request.FILES para lidar com o upload de logo
         if form.is_valid():
             form.save()
             messages.success(request, 'Convênio cadastrado com sucesso!')
@@ -1357,7 +1374,7 @@ def convenio_create(request):
 def convenio_update(request, pk):
     convenio_instance = get_object_or_404(Convenio, pk=pk)
     if request.method == 'POST':
-        form = ConvenioForm(request.POST, instance=convenio_instance)
+        form = ConvenioForm(request.POST, request.FILES, instance=convenio_instance) # Adicionado request.FILES
         if form.is_valid():
             form.save()
             messages.success(request, 'Convênio atualizado com sucesso!')
@@ -1390,9 +1407,8 @@ def convenio_delete(request, pk):
         messages.success(request, 'Convênio excluído com sucesso!')
         return redirect('core:convenio_list')
     else:
+        # Se alguém tentar acessar a URL de exclusão diretamente via GET, redireciona para a confirmação
         return redirect('core:convenio_confirm_delete', pk=pk)
-
-
 # -------------------------------------------------------------------------------
 # VIEWS DE CRUD PARA CONVENIO_EMISSAO
 # -------------------------------------------------------------------------------

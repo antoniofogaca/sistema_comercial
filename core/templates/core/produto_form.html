@@ -38,7 +38,7 @@
 
             <div class="row">
                 {# Código EAN/DUN #}
-                <div class="col-md-3 mb-3">
+                <div class="col-md-6 mb-3">
                     <label for="{{ form.codigo_ean_dun.id_for_label }}" class="form-label">{{ form.codigo_ean_dun.label }}</label>
                     {% render_field form.codigo_ean_dun class="form-control" %}
                     {% if form.codigo_ean_dun.errors %}
@@ -47,18 +47,8 @@
                         {% endfor %}
                     {% endif %}
                 </div>
-                {# Descrição Produto #}
-                <div class="col-md-5 mb-3">
-                    <label for="{{ form.descricao_produto.id_for_label }}" class="form-label">{{ form.descricao_produto.label }}</label>
-                    {% render_field form.descricao_produto class="form-control" %}
-                    {% if form.descricao_produto.errors %}
-                        {% for error in form.descricao_produto.errors %}
-                            <div class="invalid-feedback d-block">{{ error }}</div>
-                        {% endfor %}
-                    {% endif %}
-                </div>
                 {# Descrição Produto PDV #}
-                <div class="col-md-4 mb-3">
+                <div class="col-md-6 mb-3">
                     <label for="{{ form.descricao_pdv.id_for_label }}" class="form-label">{{ form.descricao_pdv.label }}</label>
                     {% render_field form.descricao_pdv class="form-control" %}
                     {% if form.descricao_pdv.errors %}
@@ -69,9 +59,20 @@
                 </div>
             </div>
 
+            {# Descrição Produto (Nome - Marca - Modelo - Peso) #}
+            <div class="mb-3">
+                <label for="{{ form.descricao_produto.id_for_label }}" class="form-label">{{ form.descricao_produto.label }}</label>
+                {% render_field form.descricao_produto class="form-control" %}
+                {% if form.descricao_produto.errors %}
+                    {% for error in form.descricao_produto.errors %}
+                        <div class="invalid-feedback d-block">{{ error }}</div>
+                    {% endfor %}
+                {% endif %}
+            </div>
+
             <div class="row">
-                {# Unidade Venda (SELECT/DROPDOWN - a linha em branco aqui é controlada por 'required' no forms.py/models.py) #}
-                <div class="col-md-2 mb-3">
+                {# Unidade Venda (SELECT/DROPDOWN) #}
+                <div class="col-md-4 mb-3">
                     <label for="{{ form.unidade_venda.id_for_label }}" class="form-label">{{ form.unidade_venda.label }}</label>
                     {% render_field form.unidade_venda class="form-select" %}
                     {% if form.unidade_venda.errors %}
@@ -81,7 +82,7 @@
                     {% endif %}
                 </div>
                 {# Qtd Por Embalagem #}
-                <div class="col-md-2 mb-3">
+                <div class="col-md-4 mb-3">
                     <label for="{{ form.qtd_por_embalagem.id_for_label }}" class="form-label">{{ form.qtd_por_embalagem.label }}</label>
                     {% render_field form.qtd_por_embalagem class="form-control" %}
                     {% if form.qtd_por_embalagem.errors %}
@@ -90,47 +91,71 @@
                         {% endfor %}
                     {% endif %}
                 </div>
-                {# Peso (Radio) #}
-                <div class="col-md-2 mb-3">
-                    <label class="form-label d-block">{{ form.peso.label }}</label>
-                    {% for radio in form.peso %}
-                        <div class="form-check form-check-inline">
-                            {{ radio.tag }}
-                            <label class="form-check-label" for="{{ radio.id_for_label }}">{{ radio.choice_label }}</label>
-                        </div>
-                    {% endfor %}
+                {# Tipo de Produto (RADIO SELECT) #}
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">{{ form.tipo_produto.label }}</label>
+                    <div class="form-control-plaintext">
+                        {% for radio in form.tipo_produto %}
+                            <div class="form-check form-check-inline">
+                                {{ radio.tag }}
+                                <label class="form-check-label" for="{{ radio.id_for_label }}">{{ radio.choice_label }}</label>
+                            </div>
+                        {% endfor %}
+                    </div>
+                    {% if form.tipo_produto.errors %}
+                        {% for error in form.tipo_produto.errors %}
+                            <div class="invalid-feedback d-block">{{ error }}</div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="row">
+                {# Peso (RADIO SELECT) #}
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">{{ form.peso.label }}</label>
+                    <div class="form-control-plaintext">
+                        {% for radio in form.peso %}
+                            <div class="form-check form-check-inline">
+                                {{ radio.tag }}
+                                <label class="form-check-label" for="{{ radio.id_for_label }}">{{ radio.choice_label }}</label>
+                            </div>
+                        {% endfor %}
+                    </div>
                     {% if form.peso.errors %}
                         {% for error in form.peso.errors %}
                             <div class="invalid-feedback d-block">{{ error }}</div>
                         {% endfor %}
                     {% endif %}
                 </div>
-
-                {# Pode Multiplicar (Radio) #}
-                <div class="col-md-3 mb-3">
-                    <label class="form-label d-block">{{ form.pode_multiplicar.label }}</label>
-                    {% for radio in form.pode_multiplicar %}
-                        <div class="form-check form-check-inline">
-                            {{ radio.tag }}
-                            <label class="form-check-label" for="{{ radio.id_for_label }}">{{ radio.choice_label }}</label>
-                        </div>
-                    {% endfor %}
+                {# Pode Multiplicar (RADIO SELECT) #}
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">{{ form.pode_multiplicar.label }}</label>
+                    <div class="form-control-plaintext">
+                        {% for radio in form.pode_multiplicar %}
+                            <div class="form-check form-check-inline">
+                                {{ radio.tag }}
+                                <label class="form-check-label" for="{{ radio.id_for_label }}">{{ radio.choice_label }}</label>
+                            </div>
+                        {% endfor %}
+                    </div>
                     {% if form.pode_multiplicar.errors %}
                         {% for error in form.pode_multiplicar.errors %}
                             <div class="invalid-feedback d-block">{{ error }}</div>
                         {% endfor %}
                     {% endif %}
                 </div>
-
-                {# Uso/Consumo (Radio) #}
-                <div class="col-md-3 mb-3">
-                    <label class="form-label d-block">{{ form.uso_consumo.label }}</label>
-                    {% for radio in form.uso_consumo %}
-                        <div class="form-check form-check-inline">
-                            {{ radio.tag }}
-                            <label class="form-check-label" for="{{ radio.id_for_label }}">{{ radio.choice_label }}</label>
-                        </div>
-                    {% endfor %}
+                {# Uso/Consumo (RADIO SELECT) #}
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">{{ form.uso_consumo.label }}</label>
+                    <div class="form-control-plaintext">
+                        {% for radio in form.uso_consumo %}
+                            <div class="form-check form-check-inline">
+                                {{ radio.tag }}
+                                <label class="form-check-label" for="{{ radio.id_for_label }}">{{ radio.choice_label }}</label>
+                            </div>
+                        {% endfor %}
+                    </div>
                     {% if form.uso_consumo.errors %}
                         {% for error in form.uso_consumo.errors %}
                             <div class="invalid-feedback d-block">{{ error }}</div>
@@ -140,30 +165,17 @@
             </div>
 
             <div class="row">
-                {# Tipo Produto (Radio) - ÚNICA RENDERIZAÇÃO #}
-                <div class="col-md-3 mb-3">
-                    <label class="form-label d-block">{{ form.tipo_produto.label }}</label>
-                    {% for radio in form.tipo_produto %}
-                        <div class="form-check form-check-inline">
-                            {{ radio.tag }}
-                            <label class="form-check-label" for="{{ radio.id_for_label }}">{{ radio.choice_label }}</label>
-                        </div>
-                    {% endfor %}
-                    {% if form.tipo_produto.errors %}
-                        {% for error in form.tipo_produto.errors %}
-                            <div class="invalid-feedback d-block">{{ error }}</div>
+                {# Situação (RADIO SELECT) #}
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">{{ form.situacao.label }}</label>
+                    <div class="form-control-plaintext">
+                        {% for radio in form.situacao %}
+                            <div class="form-check form-check-inline">
+                                {{ radio.tag }}
+                                <label class="form-check-label" for="{{ radio.id_for_label }}">{{ radio.choice_label }}</label>
+                            </div>
                         {% endfor %}
-                    {% endif %}
-                </div>
-                {# Situação (Radio) - ÚNICA RENDERIZAÇÃO #}
-                <div class="col-md-3 mb-3">
-                    <label class="form-label d-block">{{ form.situacao.label }}</label>
-                    {% for radio in form.situacao %}
-                        <div class="form-check form-check-inline">
-                            {{ radio.tag }}
-                            <label class="form-check-label" for="{{ radio.id_for_label }}">{{ radio.choice_label }}</label>
-                        </div>
-                    {% endfor %}
+                    </div>
                     {% if form.situacao.errors %}
                         {% for error in form.situacao.errors %}
                             <div class="invalid-feedback d-block">{{ error }}</div>
@@ -171,7 +183,7 @@
                     {% endif %}
                 </div>
                 {# %ICMS Venda #}
-                <div class="col-md-3 mb-3">
+                <div class="col-md-4 mb-3">
                     <label for="{{ form.percentual_icms_venda.id_for_label }}" class="form-label">{{ form.percentual_icms_venda.label }}</label>
                     {% render_field form.percentual_icms_venda class="form-control" %}
                     {% if form.percentual_icms_venda.errors %}
@@ -181,7 +193,7 @@
                     {% endif %}
                 </div>
                 {# Estoque Atual #}
-                <div class="col-md-3 mb-3">
+                <div class="col-md-4 mb-3">
                     <label for="{{ form.estoque_atual.id_for_label }}" class="form-label">{{ form.estoque_atual.label }}</label>
                     {% render_field form.estoque_atual class="form-control" %}
                     {% if form.estoque_atual.errors %}
@@ -194,7 +206,7 @@
 
             <div class="row">
                 {# Peso Líquido #}
-                <div class="col-md-3 mb-3">
+                <div class="col-md-4 mb-3">
                     <label for="{{ form.peso_liquido.id_for_label }}" class="form-label">{{ form.peso_liquido.label }}</label>
                     {% render_field form.peso_liquido class="form-control" %}
                     {% if form.peso_liquido.errors %}
@@ -204,7 +216,7 @@
                     {% endif %}
                 </div>
                 {# Peso Bruto #}
-                <div class="col-md-3 mb-3">
+                <div class="col-md-4 mb-3">
                     <label for="{{ form.peso_bruto.id_for_label }}" class="form-label">{{ form.peso_bruto.label }}</label>
                     {% render_field form.peso_bruto class="form-control" %}
                     {% if form.peso_bruto.errors %}
@@ -213,8 +225,38 @@
                         {% endfor %}
                     {% endif %}
                 </div>
+                {# Classificação #}
+                <div class="col-md-4 mb-3">
+                    <label for="{{ form.classificacao.id_for_label }}" class="form-label">{{ form.classificacao.label }}</label>
+                    {% render_field form.classificacao class="form-control" %}
+                    {% if form.classificacao.errors %}
+                        {% for error in form.classificacao.errors %}
+                            <div class="invalid-feedback d-block">{{ error }}</div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="row">
+                {# Tipo de Tributação (RADIO SELECT) #}
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">{{ form.tipo_tributacao.label }}</label>
+                    <div class="form-control-plaintext">
+                        {% for radio in form.tipo_tributacao %}
+                            <div class="form-check form-check-inline">
+                                {{ radio.tag }}
+                                <label class="form-check-label" for="{{ radio.id_for_label }}">{{ radio.choice_label }}</label>
+                            </div>
+                        {% endfor %}
+                    </div>
+                    {% if form.tipo_tributacao.errors %}
+                        {% for error in form.tipo_tributacao.errors %}
+                            <div class="invalid-feedback d-block">{{ error }}</div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
                 {# Setor (SELECT/DROPDOWN) #}
-                <div class="col-md-3 mb-3">
+                <div class="col-md-4 mb-3">
                     <label for="{{ form.id_setor.id_for_label }}" class="form-label">{{ form.id_setor.label }}</label>
                     {% render_field form.id_setor class="form-select" %}
                     {% if form.id_setor.errors %}
@@ -224,7 +266,7 @@
                     {% endif %}
                 </div>
                 {# Grupo (SELECT/DROPDOWN) #}
-                <div class="col-md-3 mb-3">
+                <div class="col-md-4 mb-3">
                     <label for="{{ form.id_grupo.id_for_label }}" class="form-label">{{ form.id_grupo.label }}</label>
                     {% render_field form.id_grupo class="form-select" %}
                     {% if form.id_grupo.errors %}
@@ -246,38 +288,6 @@
                         {% endfor %}
                     {% endif %}
                 </div>
-                {# Classificação #}
-                <div class="col-md-3 mb-3">
-                    <label for="{{ form.classificacao.id_for_label }}" class="form-label">{{ form.classificacao.label }}</label>
-                    {% render_field form.classificacao class="form-control" %}
-                    {% if form.classificacao.errors %}
-                        {% for error in form.classificacao.errors %}
-                            <div class="invalid-feedback d-block">{{ error }}</div>
-                        {% endfor %}
-                    {% endif %}
-                </div>
-                <div class="col-md-3 mb-3">
-                    <label for="{{ form.tipo_tributacao.id_for_label }}" class="form-label">{{ form.tipo_tributacao.label }}</label>
-                    {% render_field form.tipo_tributacao class="form-select" %}
-                    {% if form.tipo_tributacao.errors %}
-                        {% for error in form.tipo_tributacao.errors %}
-                            <div class="invalid-feedback d-block">{{ error }}</div>
-                        {% endfor %}
-                    {% endif %}
-
-                    <!--<label class="form-label d-block">{{ form.tipo_tributacao.label }}</label>
-                    {% for radio in form.tipo_tributacao %}
-                        <div class="form-check form-check-inline">
-                            {{ radio.tag }}
-                            <label class="form-check-label" for="{{ radio.id_for_label }}">{{ radio.choice_label }}</label>
-                        </div>
-                    {% endfor %}
-                    {% if form.tipo_tributacao.errors %}
-                        {% for error in form.tipo_tributacao.errors %}
-                            <div class="invalid-feedback d-block">{{ error }}</div>
-                        {% endfor %}
-                    {% endif %}-->
-                </div>
                 {# CFOP (SELECT/DROPDOWN) #}
                 <div class="col-md-3 mb-3">
                     <label for="{{ form.id_cfop.id_for_label }}" class="form-label">{{ form.id_cfop.label }}</label>
@@ -288,9 +298,6 @@
                         {% endfor %}
                     {% endif %}
                 </div>
-            </div>
-
-            <div class="row">
                 {# CST/CSOSN (SELECT/DROPDOWN) #}
                 <div class="col-md-3 mb-3">
                     <label for="{{ form.id_cstcson.id_for_label }}" class="form-label">{{ form.id_cstcson.label }}</label>

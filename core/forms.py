@@ -341,7 +341,6 @@ class CstCsonForm(forms.ModelForm):
 # --- FORMULÁRIO PARA PRODUTO ---
 
 class ProdutoForm(forms.ModelForm):
-    # Definir choices para os campos booleanos (se você quer eles como Sim/Não radio)
     SIM_NAO_CHOICES = [
         (True, 'Sim'),
         (False, 'Não'),
@@ -349,7 +348,7 @@ class ProdutoForm(forms.ModelForm):
 
     peso = forms.TypedChoiceField(
         choices=SIM_NAO_CHOICES,
-        coerce=lambda x: x == 'True',
+        coerce=lambda x: x == 'True', # Converte a string 'True'/'False' para booleano
         widget=forms.RadioSelect,
         label='Peso',
         required=False
@@ -373,20 +372,12 @@ class ProdutoForm(forms.ModelForm):
         model = Produto
         fields = [
             'codigo_ean_dun', 'descricao_produto', 'descricao_pdv', 'unidade_venda',
-            'qtd_por_embalagem',
-            'tipo_produto',
-            'situacao',
-            'tipo_tributacao',
+            'qtd_por_embalagem', 'tipo_produto', 'situacao', 'tipo_tributacao',
             'peso', 'pode_multiplicar', 'uso_consumo',
             'percentual_icms_venda', 'estoque_atual', 'peso_liquido', 'peso_bruto',
             'valor_venda', 'classificacao',
-            'id_setor',
-            'id_grupo',
-            'id_sub_grupo',
-            'id_cfop',
-            'id_cstcson',
-            'id_ncm',
-            'id_cest',
+            'id_setor', 'id_grupo', 'id_sub_grupo', 'id_cfop',
+            'id_cstcson', 'id_ncm', 'id_cest',
         ]
         widgets = {
             'qtd_por_embalagem': forms.NumberInput(attrs={'step': '0.001'}),
@@ -395,18 +386,24 @@ class ProdutoForm(forms.ModelForm):
             'peso_liquido': forms.NumberInput(attrs={'step': '0.001'}),
             'peso_bruto': forms.NumberInput(attrs={'step': '0.001'}),
             'valor_venda': forms.NumberInput(attrs={'step': '0.01'}),
-            # Você pode especificar RadioSelect para CharFields aqui também, se quiser ser explícito:
-             'tipo_produto': forms.RadioSelect,
-             'situacao': forms.RadioSelect,
-            # 'tipo_tributacao': forms.RadioSelect,
+            'unidade_venda': forms.Select(attrs={'class': 'form-select'}),
+            'tipo_produto': forms.RadioSelect, # Usar RadioSelect para 'Tipo de Produto'
+            'situacao': forms.RadioSelect,    # Usar RadioSelect para 'Situação'
+            'tipo_tributacao': forms.RadioSelect, # Usar RadioSelect para 'Tipo de Tributação'
+            'id_setor': forms.Select(attrs={'class': 'form-select'}),
+            'id_grupo': forms.Select(attrs={'class': 'form-select'}),
+            'id_sub_grupo': forms.Select(attrs={'class': 'form-select'}),
+            'id_cfop': forms.Select(attrs={'class': 'form-select'}),
+            'id_cstcson': forms.Select(attrs={'class': 'form-select'}),
+            'id_ncm': forms.Select(attrs={'class': 'form-select'}),
+            'id_cest': forms.Select(attrs={'class': 'form-select'}),
         }
         labels = {
             'codigo_ean_dun': 'Código EAN/DUN',
-            'descricao_produto': 'Descrição Produto',
-            'descricao_pdv': 'Descrição PDV',
+            'descricao_produto': 'Descrição Produto (Nome - Marca - Modelo - Peso)',
+            'descricao_pdv': 'Descrição Produto PDV',
             'unidade_venda': 'Unidade de Venda',
             'qtd_por_embalagem': 'Qtd Por Embalagem',
-            # Labels para os BooleanFields já estão definidos acima na sua sobrescrição
             'tipo_produto': 'Tipo de Produto',
             'situacao': 'Situação',
             'percentual_icms_venda': '%ICMS Venda',
@@ -429,17 +426,16 @@ class ProdutoForm(forms.ModelForm):
         cleaned_data = super().clean()
         uso_consumo = cleaned_data.get('uso_consumo')
         tipo_produto = cleaned_data.get('tipo_produto')
+        peso = cleaned_data.get('peso') # Obtenha o valor do campo 'peso'
 
-        # As validações aqui já funcionam com as letras 'V', 'S'
-      #  if tipo_produto == 'S' and cleaned_data.get('peso'):
-     #       self.add_error('peso', 'Um produto do tipo "Serviço" não deve ter peso.')
-
-     #   if tipo_produto == 'S' and uso_consumo:
-     #       self.add_error('uso_consumo', 'Um produto do tipo "Serviço" não pode ser de "Uso/Consumo".')
+        # Validações condicionais
+        if tipo_produto == 'S': # Se o tipo de produto for 'Serviço'
+            if peso: # Se 'Peso' estiver marcado como Sim
+                self.add_error('peso', 'Um produto do tipo "Serviço" não deve ter peso.')
+            if uso_consumo: # Se 'Uso/Consumo' estiver marcado como Sim
+                self.add_error('uso_consumo', 'Um produto do tipo "Serviço" não pode ser de "Uso/Consumo".')
 
         return cleaned_data
-
-    # --- FORMULÁRIO PARA CONVENIO ABERTURA ---
 
 
 class ConvenioAberturaForm(forms.ModelForm):

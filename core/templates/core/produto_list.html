@@ -20,29 +20,31 @@
     <div class="card-body">
         <div class="row mb-3">
             <div class="col-md-6">
-                <input type="text" id="searchInput" class="form-control" placeholder="Buscar por Código EAN/DUN, Descrição" value="{{ search|default_if_none:'' }}">
+                <input type="text" id="searchInput" class="form-control" placeholder="Buscar por Código EAN/DUN, Descrição..." value="{{ search|default_if_none:'' }}">
             </div>
             <div class="col-md-3">
                 <select id="statusFilter" class="form-select">
                     <option value="all" {% if status_filter == 'all' %}selected{% endif %}>Todos os Status</option>
-                    <option value="ativo" {% if status_filter == 'ativo' %}selected{% endif %}>Ativos</option>
-                    <option value="inativo" {% if status_filter == 'inativo' %}selected{% endif %}>Inativos</option>
+                    <option value="A" {% if status_filter == 'A' %}selected{% endif %}>Ativo</option>
+                    <option value="I" {% if status_filter == 'I' %}selected{% endif %}>Inativo</option>
                 </select>
             </div>
-            <div class="col-md-2">
+            <div class="col-md-3">
                 <select id="perPageSelect" class="form-select">
-                    <option value="5" {% if per_page == 5 %}selected{% endif %}>5 por página</option>
                     <option value="10" {% if per_page == 10 %}selected{% endif %}>10 por página</option>
-                    <option value="20" {% if per_page == 20 %}selected{% endif %}>20 por página</option>
+                    <option value="25" {% if per_page == 25 %}selected{% endif %}>25 por página</option>
                     <option value="50" {% if per_page == 50 %}selected{% endif %}>50 por página</option>
+                    <option value="100" {% if per_page == 100 %}selected{% endif %}>100 por página</option>
                 </select>
             </div>
         </div>
-        <div class="table-responsive" id="produtoTableContainer">
+
+        <div id="produtoTableContainer">
             {% include 'core/produto_table_partial.html' %}
         </div>
     </div>
 </div>
+{% endblock %}
 
 {% block extra_js %}
 <script>
@@ -51,64 +53,38 @@
         const statusFilter = document.getElementById('statusFilter');
         const perPageSelect = document.getElementById('perPageSelect');
         const produtoTableContainer = document.getElementById('produtoTableContainer');
-        let debounceTimeout;
 
-        function fetchProdutos(params = {}) {
-            clearTimeout(debounceTimeout);
-            debounceTimeout = setTimeout(() => {
-                const url = new URL(window.location.origin + window.location.pathname);
-                const currentParams = new URLSearchParams(window.location.search);
-
-                currentParams.forEach((value, key) => {
-                    if (!(key in params)) {
-                        url.searchParams.set(key, value);
-                    }
-                });
-
-                Object.keys(params).forEach(key => url.searchParams.set(key, params[key]));
-
-                url.searchParams.forEach((value, key) => {
-                    if (value === '' || (key === 'status' && value === 'all')) {
-                        url.searchParams.delete(key);
-                    }
-                });
-
-                console.log("Fetching URL:", url.toString()); // Log para depuração
-
-                fetch(url.toString(), {
-                    headers: {
-                        'X-Requested-With': 'XMLHttpRequest'
-                    }
-                })
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok ' + response.statusText);
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    if (produtoTableContainer) {
-                        produtoTableContainer.innerHTML = data.html;
-                        window.history.pushState({}, '', url);
-                    } else {
-                        console.error("Element with ID 'produtoTableContainer' not found.");
-                    }
-                })
-                .catch(error => console.error('Erro ao carregar produtos:', error));
-            }, 300); // Debounce de 300ms
+        function fetchProdutos(params) {
+            const urlParams = new URLSearchParams(params).toString();
+            fetch(`{% url 'core:produto_list' %}?${urlParams}`, {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                produtoTableContainer.innerHTML = data.html;
+                // Re-inicializa os valores dos selects após a atualização do conteúdo
+                if (searchInput) searchInput.value = params.search || '';
+                if (statusFilter) statusFilter.value = params.status || 'all';
+                if (perPageSelect) perPageSelect.value = params.per_page || 10;
+            })
+            .catch(error => console.error('Erro ao buscar produtos:', error));
         }
 
-        // Adiciona event listeners
         if (searchInput) {
-            searchInput.addEventListener('input', function() {
-                fetchProdutos({
-                    search: this.value,
-                    status: statusFilter ? statusFilter.value : 'all',
-                    per_page: perPageSelect ? perPageSelect.value : 10,
-                    page: 1
-                });
+            searchInput.addEventListener('keyup', function(e) {
+                if (e.key === 'Enter' || this.value.length >= 3 || this.value.length === 0) {
+                    fetchProdutos({
+                        search: this.value,
+                        status: statusFilter ? statusFilter.value : 'all',
+                        per_page: perPageSelect ? perPageSelect.value : 10,
+                        page: 1
+                    });
+                }
             });
         }
+
         if (statusFilter) {
             statusFilter.addEventListener('change', function() {
                 fetchProdutos({
@@ -119,6 +95,7 @@
                 });
             });
         }
+
         if (perPageSelect) {
             perPageSelect.addEventListener('change', function() {
                 fetchProdutos({
@@ -161,5 +138,4 @@
         }
     });
 </script>
-{% endblock %}
 {% endblock %}

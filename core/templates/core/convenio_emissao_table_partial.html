@@ -6,13 +6,13 @@
         <tr>
             {# Note: 'id' é a PK padrão do Django. Se seu modelo ConvenioEmissao tem um campo ID diferente, ajuste. #}
             <th><a href="?sort_by={% if sort_by == 'id' %}-{% endif %}id" class="sort-link">ID</a></th>
-            <th><a href="?sort_by={% if sort_by == 'ID_CLIENTE__cpf_cnpj' %}-{% endif %}ID_CLIENTE__cpf_cnpj" class="sort-link">CPF</a></th>
             <th><a href="?sort_by={% if sort_by == 'ID_CLIENTE__nome_completo' %}-{% endif %}ID_CLIENTE__nome_completo" class="sort-link">Cliente</a></th>
+            <th><a href="?sort_by={% if sort_by == 'ID_CLIENTE__cpf_cnpj' %}-{% endif %}ID_CLIENTE__cpf_cnpj" class="sort-link">CPF</a></th>
             <th><a href="?sort_by={% if sort_by == 'ID_CONVENIO__nome_convenio' %}-{% endif %}ID_CONVENIO__nome_convenio" class="sort-link">Convênio</a></th>
-            <th><a href="?sort_by={% if sort_by == 'VALOR' %}-{% endif %}VALOR" class="sort-link">Valor</a></th>
-            <th><a href="?sort_by={% if sort_by == 'QTD_PARCELA' %}-{% endif %}QTD_PARCELA" class="sort-link">Parcelas</a></th>
             <th><a href="?sort_by={% if sort_by == 'MES_REFERENCIA' %}-{% endif %}MES_REFERENCIA" class="sort-link">Mês Referência</a></th>
             <th><a href="?sort_by={% if sort_by == 'DATA_TRANSACAO' %}-{% endif %}DATA_TRANSACAO" class="sort-link">Data Transação</a></th>
+            <th><a href="?sort_by={% if sort_by == 'VALOR' %}-{% endif %}VALOR" class="sort-link">Valor</a></th>
+            <th><a href="?sort_by={% if sort_by == 'QTD_PARCELA' %}-{% endif %}QTD_PARCELA" class="sort-link">Parcelas</a></th>
             <th>Ações</th>
         </tr>
     </thead>
@@ -21,13 +21,13 @@
         {% for emissao in emissoes %}
         <tr>
             <td>{{ emissao.id }}</td>
-            <td>{{ emissao.ID_CLIENTE.cpf_cnpj|default:"N/A" }}</td> {# Exibe CPF do cliente relacionado #}
             <td>{{ emissao.ID_CLIENTE.nome_completo|default:"N/A" }}</td> {# Exibe nome do cliente relacionado #}
+            <td>{{ emissao.ID_CLIENTE.cpf_cnpj|default:"N/A" }}</td> {# Exibe CPF do cliente relacionado #}
             <td>{{ emissao.ID_CONVENIO.nome_convenio|default:"N/A" }}</td> {# Exibe nome do convênio relacionado #}
-            <td>R$ {{ emissao.VALOR|floatformat:2 }}</td>
-            <td>{{ emissao.QTD_PARCELA }}</td>
             <td>{{ emissao.MES_REFERENCIA }}</td>
             <td>{{ emissao.DATA_TRANSACAO|date:"d/m/Y" }} {{ emissao.HORA_TRANSACAO|time:"H:i" }}</td>
+            <td>R$ {{ emissao.VALOR|floatformat:2 }}</td>
+            <td>{{ emissao.QTD_PARCELA }}</td>
             <td>
                 {# CORREÇÃO: Usando 'core:convenio_emissao_update' #}
                 <a href="{% url 'core:convenio_emissao_update' emissao.pk %}" class="btn btn-warning btn-sm" title="Editar">
