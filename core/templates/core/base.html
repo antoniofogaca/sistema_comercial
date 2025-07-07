@@ -189,18 +189,16 @@
             <div class="collapse {% if 'convenio' in request.resolver_match.url_name %}show{% endif %}"
                  id="collapseConvenios" data-bs-parent="#sidebar" style="background-color: #343a40;">
                 <div class="list-group list-group-flush border-bottom border-top">
-                    {# Sub-item para Abertura de Convênio #}
-                    <a href="{% url 'core:convenio_abertura_list' %}" class="list-group-item list-group-item-action py-2 ripple ps-5
-                        {% if 'convenio_abertura' in request.resolver_match.url_name %}active{% endif %}">
-                        <i class="fas fa-calendar-check fa-fw me-3"></i><span>Abertura de Convênio</span>
-                    </a>
-
                     {# SUB-ITEM: Incluir Convênio (listagem de convênios em si) #}
                     <a href="{% url 'core:convenio_list' %}" class="list-group-item list-group-item-action py-2 ripple ps-5
                         {% if 'convenio_list' in request.resolver_match.url_name or 'convenio_create' in request.resolver_match.url_name or 'convenio_update' in request.resolver_match.url_name or 'convenio_delete' in request.resolver_match.url_name %}active{% endif %}">
                         <i class="fas fa-list-alt fa-fw me-3"></i><span>Incluir Convênio</span>
                     </a>
-
+                    {# Sub-item para Abertura de Convênio #}
+                    <a href="{% url 'core:convenio_abertura_list' %}" class="list-group-item list-group-item-action py-2 ripple ps-5
+                        {% if 'convenio_abertura' in request.resolver_match.url_name %}active{% endif %}">
+                        <i class="fas fa-calendar-check fa-fw me-3"></i><span>Abertura de Convênio</span>
+                    </a>
                     {# SUB-ITEM: Emissão de Convênio #}
                     <a href="{% url 'core:convenio_emissao_list' %}" class="list-group-item list-group-item-action py-2 ripple ps-5
                         {% if 'convenio_emissao' in request.resolver_match.url_name %}active{% endif %}">

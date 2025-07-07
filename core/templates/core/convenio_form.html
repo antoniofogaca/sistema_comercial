@@ -15,86 +15,85 @@
             {% csrf_token %}
 
             {# Campo Código da Loja #}
-            <div class="mb-3">
-                <label for="{{ form.cd_loja.id_for_label }}" class="form-label">Código da Loja</label>
-                {% render_field form.cd_loja class="form-control" %}
-                {% if form.cd_loja.errors %}
-                    {% for error in form.cd_loja.errors %}
-                        <div class="invalid-feedback d-block">{{ error }}</div>
-                    {% endfor %}
-                {% endif %}
+            <div class="row">
+                {# Unidade Venda (SELECT/DROPDOWN) #}
+                <div class="col-md-2 mb-3">
+                    <label for="{{ form.cd_loja.id_for_label }}" class="form-label">Código da Loja</label>
+                    {% render_field form.cd_loja class="form-control" %}
+                    {% if form.cd_loja.errors %}
+                        {% for error in form.cd_loja.errors %}
+                            <div class="invalid-feedback d-block">{{ error }}</div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+                <div class="col-md-2 mb-3">
+                     {# Campo Código do Evento #}
+                    <label for="{{ form.cod_evento.id_for_label }}" class="form-label">Código do Evento</label>
+                    {% render_field form.cod_evento class="form-control" %}
+                    {% if form.cod_evento.errors %}
+                        {% for error in form.cod_evento.errors %}
+                            <div class="invalid-feedback d-block">{{ error }}</div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+                <div class="col-md-8 mb-3">
+                    <label for="{{ form.nome_convenio.id_for_label }}" class="form-label">Nome do Convênio</label>
+                    {% render_field form.nome_convenio class="form-control" %}
+                    {% if form.nome_convenio.errors %}
+                        {% for error in form.nome_convenio.errors %}
+                            <div class="invalid-feedback d-block">{{ error }}</div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
             </div>
-
-            {# Campo Nome do Convênio #}
-            <div class="mb-3">
-                <label for="{{ form.nome_convenio.id_for_label }}" class="form-label">Nome do Convênio</label>
-                {% render_field form.nome_convenio class="form-control" %}
-                {% if form.nome_convenio.errors %}
-                    {% for error in form.nome_convenio.errors %}
-                        <div class="invalid-feedback d-block">{{ error }}</div>
-                    {% endfor %}
-                {% endif %}
+            <div class="row">
+                <div class="col-md-2 mb-3">
+                    {# Campo CNPJ #}
+                    <label for="{{ form.cnpj.id_for_label }}" class="form-label">CNPJ</label>
+                    {% render_field form.cnpj class="form-control" %} {# O data-mask será aplicado via JS #}
+                    {% if form.cnpj.errors %}
+                        {% for error in form.cnpj.errors %}
+                            <div class="invalid-feedback d-block">{{ error }}</div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+                {# Campo Contato #}
+                <div class="col-md-10 mb-3">
+                    <label for="{{ form.contato.id_for_label }}" class="form-label">Pessoa de Contato</label>
+                    {% render_field form.contato class="form-control" %}
+                    {% if form.contato.errors %}
+                        {% for error in form.contato.errors %}
+                            <div class="invalid-feedback d-block">{{ error }}</div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
             </div>
-
-            {# Campo CNPJ #}
-            <div class="mb-3">
-                <label for="{{ form.cnpj.id_for_label }}" class="form-label">CNPJ</label>
-                {% render_field form.cnpj class="form-control" %} {# O data-mask será aplicado via JS #}
-                {% if form.cnpj.errors %}
-                    {% for error in form.cnpj.errors %}
-                        <div class="invalid-feedback d-block">{{ error }}</div>
-                    {% endfor %}
-                {% endif %}
-            </div>
-
-            {# Campo Contato #}
-            <div class="mb-3">
-                <label for="{{ form.contato.id_for_label }}" class="form-label">Pessoa de Contato</label>
-                {% render_field form.contato class="form-control" %}
-                {% if form.contato.errors %}
-                    {% for error in form.contato.errors %}
-                        <div class="invalid-feedback d-block">{{ error }}</div>
-                    {% endfor %}
-                {% endif %}
-            </div>
-
             {# Campo E-mail #}
-            <div class="mb-3">
-                <label for="{{ form.email.id_for_label }}" class="form-label">E-mail de Contato</label>
-                {% render_field form.email class="form-control" %}
-                {% if form.email.errors %}
-                    {% for error in form.email.errors %}
-                        <div class="invalid-feedback d-block">{{ error }}</div>
-                    {% endfor %}
-                {% endif %}
-            </div>
+            <div class="row">
+                {# Unidade Venda (SELECT/DROPDOWN) #}
+                <div class="col-md-6 mb-3">
+                    <label for="{{ form.email.id_for_label }}" class="form-label">E-mail de Contato</label>
+                    {% render_field form.email class="form-control" %}
+                    {% if form.email.errors %}
+                        {% for error in form.email.errors %}
+                            <div class="invalid-feedback d-block">{{ error }}</div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
 
-            {# Campo Telefone #}
-            <div class="mb-3">
-                <label for="{{ form.telefone.id_for_label }}" class="form-label">Telefone de Contato</label>
-                {% render_field form.telefone class="form-control" %} {# O data-mask será aplicado via JS #}
-                {% if form.telefone.errors %}
-                    {% for error in form.telefone.errors %}
-                        <div class="invalid-feedback d-block">{{ error }}</div>
-                    {% endfor %}
-                {% endif %}
+                {# Campo Telefone #}
+                <div class="col-md-6 mb-3">
+                    <label for="{{ form.telefone.id_for_label }}" class="form-label">Telefone de Contato</label>
+                    {% render_field form.telefone class="form-control" %} {# O data-mask será aplicado via JS #}
+                    {% if form.telefone.errors %}
+                        {% for error in form.telefone.errors %}
+                            <div class="invalid-feedback d-block">{{ error }}</div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
             </div>
-
-            {# Campo Ativo (Checkbox) #}
-            <div class="form-check mb-3">
-                {% render_field form.ativo class="form-check-input" %}
-                <label class="form-check-label" for="{{ form.ativo.id_for_label }}">
-                    Ativo
-                </label>
-                {% if form.ativo.errors %}
-                    {% for error in form.ativo.errors %}
-                        <div class="invalid-feedback d-block">{{ error }}</div>
-                    {% endfor %}
-                {% endif %}
-            </div>
-
             {# Campo Parcelas Permitidas #}
-            <div class="mb-3">
+            <div class="col-md-2 mb-3">
                 <label for="{{ form.qtd_parc_permi.id_for_label }}" class="form-label">Parcelas Permitidas</label>
                 {% render_field form.qtd_parc_permi class="form-control" %}
                 {% if form.qtd_parc_permi.errors %}
@@ -103,13 +102,14 @@
                     {% endfor %}
                 {% endif %}
             </div>
-
-            {# Campo Código do Evento #}
-            <div class="mb-3">
-                <label for="{{ form.cod_evento.id_for_label }}" class="form-label">Código do Evento</label>
-                {% render_field form.cod_evento class="form-control" %}
-                {% if form.cod_evento.errors %}
-                    {% for error in form.cod_evento.errors %}
+            {# Campo Ativo (Checkbox) #}
+            <div class="form-check mb-3">
+                {% render_field form.ativo class="form-check-input" %}
+                <label class="form-check-label" for="{{ form.ativo.id_for_label }}">
+                    Ativo
+                </label>
+                {% if form.ativo.errors %}
+                    {% for error in form.ativo.errors %}
                         <div class="invalid-feedback d-block">{{ error }}</div>
                     {% endfor %}
                 {% endif %}

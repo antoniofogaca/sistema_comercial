@@ -1576,32 +1576,6 @@ def search_client_by_cpf(request):
         print(f"Erro inesperado ao buscar dados do cliente: {e}")
         return JsonResponse({'error': f'Erro interno do servidor: {str(e)}'}, status=500)
 
-# @require_GET
-# def search_client_by_cpf(request):
-#     cpf = request.GET.get('cpf', None)
-#     if not cpf:
-#         return JsonResponse({'error': 'CPF/CNPJ não fornecido.'}, status=400)
-#
-#     try:
-#         # Remova caracteres não numéricos para a busca no banco
-#         cpf_cleaned = ''.join(filter(str.isdigit, cpf))
-#
-#         # Use o cpf_cleaned para a busca
-#         cliente = Cliente.objects.get(cpf_cnpj=cpf_cleaned)
-#         data = {
-#             'id': cliente.pk,
-#             'nome_completo': cliente.nome_completo,  # Nome do campo no seu model Cliente
-#             'saldo': float(cliente.saldo) if cliente.saldo is not None else 0.0
-#             # **CORRIGIDO**: Alterado de 'saldo_cliente' para 'saldo'
-#         }
-#         return JsonResponse(data)
-#     except Cliente.DoesNotExist:
-#         return JsonResponse({'error': 'Cliente não encontrado.'}, status=404)
-#     except Exception as e:
-#         print(f"Erro ao buscar dados do cliente: {e}")
-#         return JsonResponse({'error': f'Erro interno ao buscar cliente: {str(e)}'}, status=500)
-
-
 @require_GET
 def get_convenio_details(request):
     convenio_id = request.GET.get('id', None)
