@@ -102,6 +102,16 @@
                         </tr>
                     </thead>
                     <tbody id="parcelasContainer">
+                        {% if parcelas %}
+                            {% for parcela in parcelas %}
+                                <tr>
+                                    <td>{{ parcela.N_PARCELA }}</td>
+                                    <td>R$ {{ parcela.VALOR_PARCELA|floatformat:2 }}</td>
+                                    <td>{{ parcela.DATA_VENCIMENTO|date:"d/m/Y" }}</td>
+                                    <td>{{ parcela.DATA_EMISSAO|date:"d/m/Y H:i" }}</td>
+                                </tr>
+                            {% endfor %}
+                        {% endif %}
                     </tbody>
                 </table>
             </div>
@@ -116,6 +126,7 @@
 {% endblock %}
 
 {% block extra_js %}
+{{ block.super }}
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     // ======== CLIENTE ========
@@ -249,28 +260,97 @@ document.addEventListener('DOMContentLoaded', function () {
             return;
         }
 
-        const [mesRef, anoRef] = mesReferencia.split('/').map(Number);
+        const [mesRefNum, anoRefNum] = mesReferencia.split('/').map(Number);
         const valorParcela = (valorTotal / totalParcelas).toFixed(2);
-        const dataEmissao = new Date().toLocaleDateString('pt-BR');
+        const now = new Date();
+        const dataEmissaoString = now.toLocaleDateString('pt-BR');
+        const horaEmissaoString = now.toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'});
+        const dataHoraEmissaoCompleta = `${dataEmissaoString} ${horaEmissaoString}`;
 
+
+        console.log('--- Início da Geração de Parcelas (Frontend) ---');
         for (let i = 0; i < totalParcelas; i++) {
-            const vencimento = new Date(anoRef, mesRef, 21);
+            const vencimento = new Date(anoRefNum, mesRefNum - 1, 21);
             vencimento.setMonth(vencimento.getMonth() + i);
+
+            const diaVenc = String(vencimento.getDate()).padStart(2, '0');
+            const mesVenc = String(vencimento.getMonth() + 1).padStart(2, '0');
+            const anoVenc = vencimento.getFullYear();
+            const dataVencimentoFormatada = `${diaVenc}/${mesVenc}/${anoVenc}`;
 
             const row = document.createElement('tr');
             row.innerHTML = `
                 <td>${i + 1}</td>
                 <td>R$ ${valorParcela.replace('.', ',')}</td>
-                <td>${vencimento.toLocaleDateString('pt-BR')}</td>
-                <td>${dataEmissao}</td>
+                <td>${dataVencimentoFormatada}</td>
+                <td>${dataHoraEmissaoCompleta}</td>
             `;
             container.appendChild(row);
+
+            console.log(`  Gerada Parcela ${i + 1}: Valor: R$ ${valorParcela.replace('.', ',')}, Vencimento: ${dataVencimentoFormatada}, Emissão: ${dataHoraEmissaoCompleta}`);
         }
+        console.log('--- Fim da Geração de Parcelas (Frontend) ---');
+    });
+
+    // Adiciona inputs ocultos para cada parcela ao submeter o formulário
+    document.getElementById('saveButton').addEventListener('click', function (event) {
+        const form = this.closest('form');
+        const linhas = document.querySelectorAll('#parcelasContainer tr');
+
+        form.querySelectorAll('input[name^="parcela_"]').forEach(el => el.remove());
+
+        console.log('--- Preparando Dados das Parcelas para Envio (Frontend) ---');
+        linhas.forEach((linha, index) => {
+            const numero = linha.cells[0].innerText.trim();
+            const valorDisplay = linha.cells[1].innerText.replace('R$', '').trim();
+            const valorParaBackend = valorDisplay.replace(',', '.');
+            const vencimento = linha.cells[2].innerText.trim();
+            const emissaoCompleta = linha.cells[3].innerText.trim();
+
+            console.log(`  Anexando Parcela ${numero}: Número=${numero}, Valor=${valorParaBackend}, Vencimento=${vencimento}, Emissao=${emissaoCompleta}`);
+
+            const inputNumero = document.createElement('input');
+            inputNumero.type = 'hidden';
+            inputNumero.name = `parcela_${numero}_numero`;
+            inputNumero.value = numero;
+
+            const inputValor = document.createElement('input');
+            inputValor.type = 'hidden';
+            inputValor.name = `parcela_${numero}_valor`;
+            inputValor.value = valorParaBackend;
+
+            const inputVencimento = document.createElement('input');
+            inputVencimento.type = 'hidden';
+            inputVencimento.name = `parcela_${numero}_vencimento`;
+            inputVencimento.value = vencimento;
+
+            const inputEmissao = document.createElement('input');
+            inputEmissao.type = 'hidden';
+            inputEmissao.name = `parcela_${numero}_emissao`;
+            inputEmissao.value = emissaoCompleta;
+
+            form.appendChild(inputNumero);
+            form.appendChild(inputValor);
+            form.appendChild(inputVencimento);
+            form.appendChild(inputEmissao);
+        });
+        console.log('--- Fim da Preparação dos Dados (Frontend) ---');
     });
 
     btnLimpar.addEventListener('click', function () {
         container.innerHTML = '';
+        console.log('Tabela de parcelas limpa.');
     });
+
+    // NOVO BLOCO: Preencher "Nº Parcelas Solicitada" na edição
+    {% if num_existing_parcelas %}
+        const numExistingParcelas = {{ num_existing_parcelas }};
+        const inputNumParcelasSolicitada = document.getElementById('num_parcelas_solicitada');
+        if (inputNumParcelasSolicitada) {
+            inputNumParcelasSolicitada.value = numExistingParcelas;
+            console.log(`Campo "Nº Parcelas Solicitada" preenchido com: ${numExistingParcelas}`);
+        }
+    {% endif %}
 });
 </script>
 {% endblock %}

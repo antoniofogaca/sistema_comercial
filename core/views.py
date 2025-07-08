@@ -4,7 +4,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.db.models import Q
 from .models import Cliente, Empresa, Usuario, Setor, Categoria, Grupo, Ncm, Cfop, Cest, CstCson, Produto, \
-    ConvenioAbertura, Convenio, ConvenioEmissao
+    ConvenioAbertura, Convenio, ConvenioEmissao, ConvenioEmiDet
 from .forms import ClienteForm,EmpresaForm,UsuarioForm,SetorForm,CategoriaForm,GrupoForm,NcmForm,CfopForm,CestForm,CstCsonForm,ProdutoForm,ConvenioAberturaForm,ConvenioForm,ConvenioEmissaoForm
 from django.contrib import messages
 from django.http import JsonResponse # Para AJAX
@@ -17,6 +17,9 @@ from django.utils import timezone
 from datetime import timedelta, date
 import calendar  # Para calcular o último dia do mês
 from django.views.decorators.http import require_http_methods, require_GET
+from decimal import Decimal
+from datetime import datetime, time
+
 
 # Páginas estáticas
 def home(request):
@@ -1466,23 +1469,65 @@ def convenio_emissao_list(request):
 
 def convenio_emissao_create(request):
     if request.method == 'POST':
-        print("\n===== DEBUG POST DATA =====")
+        print("\n===== DEBUG POST DATA (CREATE) =====")
         print(request.POST)
-        print("===========================\n")
+        print("======================================\n")
 
         form = ConvenioEmissaoForm(request.POST)
         if form.is_valid():
-            print("\n===== DEBUG CLEANED DATA (VALID) =====")
+            print("\n===== DEBUG CLEANED DATA (CREATE - VALID) =====")
             print(form.cleaned_data)
-            print("======================================\n")
+            print("===============================================\n")
 
-            form.save()
+            convenio_emissao = form.save()
+
+            # ======= BLOCO PARA SALVAR PARCELAS =======
+            print("\n===== INICIANDO SALVAMENTO DE PARCELAS =====")
+            i = 0
+            while True:
+                i += 1
+                prefixo = f'parcela_{i}_'
+                if f'{prefixo}numero' not in request.POST:
+                    print(f"DEBUG: Não encontrado {prefixo}numero, finalizando loop de parcelas.")
+                    break
+
+                try:
+                    numero = int(request.POST.get(f'{prefixo}numero'))
+                    valor_str = request.POST.get(f'{prefixo}valor')
+                    data_vencimento_str = request.POST.get(f'{prefixo}vencimento')
+                    data_emissao_completa_str = request.POST.get(f'{prefixo}emissao')
+
+                    valor_parcela = Decimal(valor_str)
+                    data_vencimento = datetime.strptime(data_vencimento_str, '%d/%m/%Y').date()
+                    data_emissao = datetime.strptime(data_emissao_completa_str, '%d/%m/%Y %H:%M')
+
+                    print(f"DEBUG - Dados da parcela {numero}: Valor={valor_parcela}, Vencimento={data_vencimento}, Emissao={data_emissao}")
+
+                    ConvenioEmiDet.objects.create(
+                        ID=convenio_emissao,
+                        ID_CONVENIO=convenio_emissao.ID_CONVENIO,
+                        N_PARCELA=numero,
+                        DATA_EMISSAO=data_emissao,
+                        DATA_VENCIMENTO=data_vencimento,
+                        STATUS_PG='A',
+                        VALOR_PARCELA=valor_parcela
+                    )
+                    print(f"DEBUG - Parcela {numero} salva com sucesso.")
+                except ValueError as ve:
+                    print(f"[ERRO] Erro de conversão para parcela {i}: {ve} (Dados recebidos: Numero={request.POST.get(f'{prefixo}numero')}, Valor='{valor_str}', Vencimento='{data_vencimento_str}', Emissao='{data_emissao_completa_str}')")
+                    messages.error(request, f'Erro ao converter dados da parcela {i}: {ve}')
+                except Exception as e:
+                    print(f"[ERRO GERAL] Falha ao salvar parcela {i}: {e}")
+                    messages.error(request, f'Erro desconhecido ao salvar parcela {i}: {e}')
+
+            print("===== FIM DO SALVAMENTO DE PARCELAS =====")
+
             messages.success(request, 'Convênio de Emissão cadastrado com sucesso!')
             return redirect('core:convenio_emissao_list')
         else:
-            print("\n===== DEBUG FORM ERRORS =====")
+            print("\n===== DEBUG FORM ERRORS (CREATE) =====")
             print(form.errors)
-            print("==============================\n")
+            print("======================================\n")
 
             messages.error(request, 'Erro ao cadastrar Convênio de Emissão. Verifique os campos.')
             context = {
@@ -1499,29 +1544,101 @@ def convenio_emissao_create(request):
     }
     return render(request, 'core/convenio_emissao_form.html', context)
 
+
 def convenio_emissao_update(request, pk):
     convenio_emissao = get_object_or_404(ConvenioEmissao, pk=pk)
+
     if request.method == 'POST':
+        print("\n===== DEBUG POST DATA (UPDATE) =====")
+        print(request.POST)
+        print("======================================\n")
+
         form = ConvenioEmissaoForm(request.POST, instance=convenio_emissao)
         if form.is_valid():
-            form.save()
+            print("\n===== DEBUG CLEANED DATA (UPDATE - VALID) =====")
+            print(form.cleaned_data)
+            print("===============================================\n")
+
+            convenio_emissao = form.save()
+
+            print(f"DEBUG: Deletando {convenio_emissao.detalhes.count()} parcelas antigas para a emissão {convenio_emissao.pk}.")
+            convenio_emissao.detalhes.all().delete()
+            print("DEBUG: Parcelas antigas deletadas.")
+
+            print("\n===== INICIANDO ATUALIZAÇÃO/SALVAMENTO DE NOVAS PARCELAS =====")
+            i = 0
+            while True:
+                i += 1
+                prefixo = f'parcela_{i}_'
+                if f'{prefixo}numero' not in request.POST:
+                    print(f"DEBUG: Não encontrado {prefixo}numero, finalizando loop de parcelas.")
+                    break
+
+                try:
+                    numero = int(request.POST.get(f'{prefixo}numero'))
+                    valor_str = request.POST.get(f'{prefixo}valor')
+                    data_vencimento_str = request.POST.get(f'{prefixo}vencimento')
+                    data_emissao_completa_str = request.POST.get(f'{prefixo}emissao')
+
+                    valor_parcela = Decimal(valor_str)
+                    data_vencimento = datetime.strptime(data_vencimento_str, '%d/%m/%Y').date()
+                    data_emissao = datetime.strptime(data_emissao_completa_str, '%d/%m/%Y %H:%M')
+
+                    print(f"DEBUG - Dados da parcela {numero}: Valor={valor_parcela}, Vencimento={data_vencimento}, Emissao={data_emissao}")
+
+                    ConvenioEmiDet.objects.create(
+                        ID=convenio_emissao,
+                        ID_CONVENIO=convenio_emissao.ID_CONVENIO,
+                        N_PARCELA=numero,
+                        DATA_EMISSAO=data_emissao,
+                        DATA_VENCIMENTO=data_vencimento,
+                        STATUS_PG='A',
+                        VALOR_PARCELA=valor_parcela
+                    )
+                    print(f"DEBUG - Parcela {numero} salva com sucesso durante a atualização.")
+                except ValueError as ve:
+                    print(f"[ERRO] Erro de conversão para parcela {i} durante UPDATE: {ve} (Dados recebidos: Numero={request.POST.get(f'{prefixo}numero')}, Valor='{valor_str}', Vencimento='{data_vencimento_str}', Emissao='{data_emissao_completa_str}')")
+                    messages.error(request, f'Erro ao converter dados da parcela {i} durante atualização: {ve}')
+                except Exception as e:
+                    print(f"[ERRO GERAL] Falha ao salvar parcela {i} durante UPDATE: {e}")
+                    messages.error(request, f'Erro desconhecido ao salvar parcela {i} durante atualização: {e}')
+
+            print("===== FIM DA ATUALIZAÇÃO/SALVAMENTO DE NOVAS PARCELAS =====")
+
             messages.success(request, 'Convênio de Emissão atualizado com sucesso!')
             return redirect('core:convenio_emissao_list')
         else:
+            print("\n===== DEBUG FORM ERRORS (UPDATE) =====")
+            print(form.errors)
+            print("======================================\n")
+
             messages.error(request, 'Erro ao atualizar Convênio de Emissão. Verifique os campos.')
-            context = {
+            # Se o formulário principal falhou na validação, as parcelas antigas já foram deletadas,
+            # e as novas não foram salvas. O formulário será re-renderizado sem parcelas,
+            # e o usuário terá que gerá-las novamente.
+            # Para evitar isso, vamos passar as parcelas da instância original (se houver)
+            # e a quantidade de parcelas para o campo 'num_parcelas_solicitada'.
+            existing_parcelas = convenio_emissao.detalhes.all()
+            num_existing_parcelas = existing_parcelas.count() # Adicionado para o template
+            return render(request, 'core/convenio_emissao_form.html', {
                 'form': form,
                 'title': 'Editar Convênio de Emissão',
-            }
-            return render(request, 'core/convenio_emissao_form.html', context)
-    else:
-        form = ConvenioEmissaoForm(instance=convenio_emissao)
+                'parcelas': existing_parcelas,
+                'num_existing_parcelas': num_existing_parcelas, # Passa a quantidade de parcelas
+            })
 
-    context = {
+    else: # Método GET
+        form = ConvenioEmissaoForm(instance=convenio_emissao)
+        existing_parcelas = convenio_emissao.detalhes.all()
+        num_existing_parcelas = existing_parcelas.count() # Adicionado para o template
+        print(f"DEBUG (GET): Carregando {num_existing_parcelas} parcelas existentes para edição da emissão {pk}.")
+
+    return render(request, 'core/convenio_emissao_form.html', {
         'form': form,
         'title': 'Editar Convênio de Emissão',
-    }
-    return render(request, 'core/convenio_emissao_form.html', context)
+        'parcelas': existing_parcelas,
+        'num_existing_parcelas': num_existing_parcelas, # Passa a quantidade de parcelas
+    })
 
 
 def convenio_emissao_confirm_delete(request, pk):
@@ -1547,32 +1664,25 @@ def convenio_emissao_delete(request, pk):
 # VIEWS DE API PARA CONVENIOEMISSAOFORM (AJAX)
 # -------------------------------------------------------------------------------
 @require_GET
-@csrf_exempt # Apenas para desenvolvimento, se tiver problemas de CSRF em GET. Remova em produção se não for estritamente necessário.
+@csrf_exempt
 def search_client_by_cpf(request):
     cpf = request.GET.get('cpf', None)
     if not cpf:
         return JsonResponse({'error': 'CPF/CNPJ não fornecido.'}, status=400)
 
     try:
-        # Limpa o CPF/CNPJ para a busca no banco de dados
-        # O campo 'cpf_cnpj' no seu modelo Cliente já armazena o CPF/CNPJ limpo.
         cpf_cleaned = ''.join(filter(str.isdigit, cpf))
-
-        # Busca o cliente usando o campo cpf_cnpj
         cliente = Cliente.objects.get(cpf_cnpj=cpf_cleaned)
 
         data = {
-            'id': cliente.pk, # ou cliente.id
+            'id': cliente.pk,
             'nome_completo': cliente.nome_completo,
-            'saldo': str(cliente.saldo) # Converte o DecimalField para string para JSON
+            'saldo': str(cliente.saldo)
         }
         return JsonResponse(data)
     except Cliente.DoesNotExist:
-        # Cliente não encontrado. Retorna status 200 com id=None.
-        # Isso permite ao JavaScript interpretar como "não encontrado" sem erro HTTP.
         return JsonResponse({'id': None, 'nome_completo': 'Cliente não encontrado.', 'saldo': '0.00'}, status=200)
     except Exception as e:
-        # Loga o erro no console do servidor para depuração
         print(f"Erro inesperado ao buscar dados do cliente: {e}")
         return JsonResponse({'error': f'Erro interno do servidor: {str(e)}'}, status=500)
 
@@ -1584,8 +1694,7 @@ def get_convenio_details(request):
     try:
         convenio = Convenio.objects.get(pk=convenio_id)
         data = {
-            'qtd_parc_permi': convenio.qtd_parc_permi,  # Nome real do campo no seu model Convenio
-            # 'mes_referencia': convenio.mes_referencia, # Você pode incluir este se precisar no JS
+            'qtd_parc_permi': convenio.qtd_parc_permi,
         }
         return JsonResponse(data)
     except Convenio.DoesNotExist:
