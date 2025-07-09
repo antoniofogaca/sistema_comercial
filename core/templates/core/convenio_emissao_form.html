@@ -20,8 +20,7 @@
             <div class="row">
                 <div class="col-md-2 mb-3">
                     <label for="{{ form.CPF.id_for_label }}" class="form-label">CPF/CNPJ do Cliente<span class="text-danger">*</span></label>
-                    {% render_field form.CPF class="form-control" placeholder="Digite o CPF/CNPJ" %}
-                    <small class="form-text text-muted">Digite o CPF/CNPJ do cliente para buscar seus dados.</small>
+                    {% render_field form.CPF class="form-control" %}
                     {% if form.CPF.errors %}
                         {% for error in form.CPF.errors %}
                             <div class="invalid-feedback d-block">{{ error }}</div>
@@ -32,17 +31,13 @@
                 {% render_field form.ID_CLIENTE type="hidden" %}
 
                 <div class="col-md-6 mb-3">
-                    <label for="id_nome_cliente_exibicao" class="form-label">Nome do Cliente</label>
+                    <label for="id_nome_cliente_exibicao" class="form-label">Nome</label>
                     <input type="text" id="id_nome_cliente_exibicao" class="form-control" readonly placeholder="Preenchido automaticamente">
                 </div>
 
                 <div class="col-md-2 mb-3">
-                    <label for="{{ form.SALDO.id_for_label }}" class="form-label">Saldo Disponível</label>
+                    <label for="{{ form.SALDO.id_for_label }}" class="form-label">Saldo</label>
                     {% render_field form.SALDO class="form-control" readonly="readonly" placeholder="R$ 0,00" %}
-                </div>
-                <div class="col-md-2 mb-3">
-                    <label for="{{ form.MES_REFERENCIA.id_for_label }}" class="form-label">Mês de Referência<span class="text-danger">*</span></label>
-                    {% render_field form.MES_REFERENCIA class="form-control" placeholder="MM/AAAA" %}
                 </div>
             </div>
 
@@ -52,13 +47,24 @@
             </div>
 
             <div class="row">
-                <div class="col-md-4 mb-3">
+                <div class="col-md-8 mb-3">
                     <label for="{{ form.ID_CONVENIO.id_for_label }}" class="form-label">Convênio<span class="text-danger">*</span></label>
                     {% render_field form.ID_CONVENIO class="form-control" %}
                 </div>
                 <div class="col-md-2 mb-3">
                     <label for="{{ form.QTD_PARCELA.id_for_label }}" class="form-label">Quantidade de Parcelas</label>
                     {% render_field form.QTD_PARCELA class="form-control" readonly="readonly" placeholder="Auto" %}
+                </div>
+
+            </div>
+            <hr>
+            <div class="mb-4 mt-4">
+                <h5 class="text-primary">Solicitar Requisição</h5>
+            </div>
+            <div class="row">
+                <div class="col-md-2 mb-3">
+                    <label for="{{ form.MES_REFERENCIA.id_for_label }}" class="form-label">Mês de Referência<span class="text-danger">*</span></label>
+                    {% render_field form.MES_REFERENCIA class="form-control" placeholder="MM/AAAA" %}
                 </div>
                 <div class="col-md-2 mb-3">
                     <label for="num_parcelas_solicitada" class="form-label">Nº Parcelas Solicitada<span class="text-danger">*</span></label>
@@ -76,45 +82,47 @@
                 </div>
             </div>
 
-            <div class="row">
-                <div class="col-md-3 mb-3">
-                    <label for="{{ form.DATA_TRANSACAO.id_for_label }}" class="form-label">Data da Transação<span class="text-danger">*</span></label>
-                    {% render_field form.DATA_TRANSACAO class="form-control" %}
-                </div>
-                <div class="col-md-3 mb-3">
-                    <label for="{{ form.HORA_TRANSACAO.id_for_label }}" class="form-label">Hora da Transação<span class="text-danger">*</span></label>
-                    {% render_field form.HORA_TRANSACAO class="form-control" %}
-                </div>
-            </div>
+<!--            <div class="row">-->
+<!--                <div class="col-md-3 mb-3">-->
+<!--                    <label for="{{ form.DATA_TRANSACAO.id_for_label }}" class="form-label">Data da Transação<span class="text-danger">*</span></label>-->
+<!--                    {% render_field form.DATA_TRANSACAO class="form-control" %}-->
+<!--                </div>-->
+<!--                <div class="col-md-3 mb-3">-->
+<!--                    <label for="{{ form.HORA_TRANSACAO.id_for_label }}" class="form-label">Hora da Transação<span class="text-danger">*</span></label>-->
+<!--                    {% render_field form.HORA_TRANSACAO class="form-control" %}-->
+<!--                </div>-->
+<!--           </div>-->
+
+
 
             <hr>
             <div class="mb-4 mt-4">
                 <h5 class="text-primary">Detalhes das Parcelas Geradas</h5>
             </div>
-            <div class="table-responsive">
-                <table class="table table-bordered" id="tabelaParcelasGeradas">
-                    <thead>
-                        <tr>
-                            <th>Nº Parcela</th>
-                            <th>Valor Parcela</th>
-                            <th>Data Vencimento (simulado)</th>
-                            <th>Data Emissão</th>
-                        </tr>
-                    </thead>
-                    <tbody id="parcelasContainer">
-                        {% if parcelas %}
-                            {% for parcela in parcelas %}
-                                <tr>
-                                    <td>{{ parcela.N_PARCELA }}</td>
-                                    <td>R$ {{ parcela.VALOR_PARCELA|floatformat:2 }}</td>
-                                    <td>{{ parcela.DATA_VENCIMENTO|date:"d/m/Y" }}</td>
-                                    <td>{{ parcela.DATA_EMISSAO|date:"d/m/Y H:i" }}</td>
-                                </tr>
-                            {% endfor %}
-                        {% endif %}
-                    </tbody>
-                </table>
-            </div>
+           <div class="table-responsive">
+    <table class="table table-bordered table-hover table-striped shadow-sm rounded bg-dark text-light" id="tabelaParcelasGeradas" style="border-radius: 10px; overflow: hidden;">
+        <thead style="background: linear-gradient(to right, #37474f, #263238); color: #ffffff;">
+            <tr>
+                <th>Nº Parcela</th>
+                <th>Valor Parcela</th>
+                <th>Data Vencimento (simulado)</th>
+                <th>Data Emissão</th>
+            </tr>
+        </thead>
+        <tbody id="parcelasContainer">
+            {% if parcelas %}
+                {% for parcela in parcelas %}
+                    <tr>
+                        <td>{{ parcela.N_PARCELA }}</td>
+                        <td>R$ {{ parcela.VALOR_PARCELA|floatformat:2 }}</td>
+                        <td>{{ parcela.DATA_VENCIMENTO|date:"d/m/Y" }}</td>
+                        <td>{{ parcela.DATA_EMISSAO|date:"d/m/Y H:i" }}</td>
+                    </tr>
+                {% endfor %}
+            {% endif %}
+        </tbody>
+    </table>
+</div>
 
             <div class="d-flex justify-content-end mt-4">
                 <button type="submit" class="btn btn-primary me-2" id="saveButton">Salvar</button>
@@ -271,7 +279,7 @@ document.addEventListener('DOMContentLoaded', function () {
         console.log('--- Início da Geração de Parcelas (Frontend) ---');
         for (let i = 0; i < totalParcelas; i++) {
             const vencimento = new Date(anoRefNum, mesRefNum - 1, 21);
-            vencimento.setMonth(vencimento.getMonth() + i);
+            vencimento.setMonth(vencimento.getMonth() + i + 1);
 
             const diaVenc = String(vencimento.getDate()).padStart(2, '0');
             const mesVenc = String(vencimento.getMonth() + 1).padStart(2, '0');
