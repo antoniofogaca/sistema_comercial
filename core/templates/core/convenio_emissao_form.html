@@ -178,6 +178,15 @@ document.addEventListener('DOMContentLoaded', function () {
             lastSearchedCpf = '';
         }
     });
+   // NOVO BLOCO: Acionar a busca do cliente ao carregar a página se o CPF já estiver preenchido
+    const initialCpf = cpfInput.value.replace(/\D/g, '');
+    if (initialCpf.length === 11) {
+        lastSearchedCpf = initialCpf; // Define o lastSearchedCpf para evitar busca duplicada
+        buscarClientePorCpf(initialCpf);
+        console.log(`Buscando dados do cliente para o CPF inicial: ${initialCpf}`);
+    }
+
+
 
     // ======== CONVENIO ========
     const convenioSelect = document.getElementById('{{ form.ID_CONVENIO.id_for_label }}');
