@@ -2,6 +2,7 @@
 from django.db import models
 from django.core.validators import MinLengthValidator, MaxLengthValidator # Certifique-se de importar esses validadores
 from django.utils import timezone
+from django.contrib.auth.models import User
 
 # Seu modelo Cliente existente (NÃO APAGUE!)
 class Cliente(models.Model):
@@ -686,3 +687,59 @@ class ConvenioEmiDet(models.Model):
     def __str__(self):
         return f"Emissão ID: {self.ID.pk} - Parcela: {self.N_PARCELA} - Valor: {self.VALOR_PARCELA}"
 
+#-----------------------------------------------------------------------------------------------------------------------
+# Modelo de Vendas
+#-----------------------------------------------------------------------------------------------------------------------
+class Venda(models.Model):
+    # id_venda (chave primaria) - Será gerado automaticamente pelo Django (pk)
+
+    # id_usuario (ForeignKey para a tabela de usuários do Django ou sua própria UserProfile)
+    # Por simplicidade, vamos usar o User padrão do Django. Certifique-se de importá-lo:
+    # from django.contrib.auth.models import User
+    # Se você tiver um UserProfile customizado, use-o.
+    # Exemplo com User padrão:
+    id_usuario = models.ForeignKey(
+        'auth.User', # 'auth.User' se você estiver usando o modelo de usuário padrão do Django
+        on_delete=models.PROTECT,
+        related_name='vendas_realizadas',
+        verbose_name="Usuário"
+    )
+
+    # id_requisicao (chave estrangeira) tabela (convenio_emissao)
+    id_requisicao = models.ForeignKey(
+        'ConvenioEmissao', # Referencia o seu modelo ConvenioEmissao
+        on_delete=models.PROTECT, # Garante que não apague requisições associadas a vendas
+        related_name='vendas',
+        verbose_name="ID da Requisição (Emissão de Convênio)"
+    )
+
+    # id_cliente vai preencher ao buscar a requisição na tabela (convenio_emissao)
+    # Embora o cliente já esteja na requisição, é bom ter uma referência direta aqui
+    id_cliente = models.ForeignKey(
+        'Cliente',
+        on_delete=models.PROTECT,
+        related_name='vendas_cliente',
+        verbose_name="Cliente"
+    )
+
+    # id_convenio (ForeignKey para a tabela Convenio)
+    id_convenio = models.ForeignKey(
+        'Convenio', # Referencia o seu modelo Convenio
+        on_delete=models.PROTECT,
+        related_name='vendas',
+        verbose_name="Convênio"
+    )
+
+    Data_venda = models.DateField(default=timezone.now, verbose_name="Data da Venda")
+    Hora_venda = models.TimeField(default=timezone.now, verbose_name="Hora da Venda")
+    Valor_venda = models.DecimalField(max_digits=12, decimal_places=2, verbose_name="Valor da Venda")
+    Numero_Parcelas = models.IntegerField(verbose_name="Número de Parcelas")
+
+    class Meta:
+        db_table = 'VENDAS' # Define o nome da tabela no banco de dados
+        verbose_name = "Venda"
+        verbose_name_plural = "Vendas"
+        ordering = ['-Data_venda', '-Hora_venda'] # Ordenar pelas vendas mais recentes
+
+    def __str__(self):
+        return f"Venda ID: {self.pk} - Requisição: {self.id_requisicao.pk} - Cliente: {self.id_cliente.nome_completo}"

@@ -1,6 +1,7 @@
 # core/urls.py
 from django.urls import path
-from django.contrib.auth.views import LogoutView, LoginView
+from django.contrib.auth import views as auth_views # <<< CORREÇÃO AQUI: Importe 'views' como 'auth_views'
+from django.contrib.auth.views import LogoutView    # <<< Mantenha esta importação para LogoutView
 from . import views
 
 app_name = 'core'
@@ -8,7 +9,18 @@ app_name = 'core'
 urlpatterns = [
     path('', views.home, name='home'),  # Página inicial
     path('logout/', LogoutView.as_view(next_page='home'), name='logout'),
-    path('login/', LoginView.as_view(template_name='login.html'), name='login'), # Movido para cima para clareza
+    path('login/', auth_views.LoginView.as_view(template_name='core/login.html'), name='login'), # <<< APENAS ESTA LINHA PARA LOGIN
+
+    # ... suas outras URLs (o restante do seu arquivo está correto)
+    # Módulo de Vendas
+    path('vendas/', views.venda_list, name='venda_list'),
+    path('vendas/nova/', views.venda_create, name='venda_create'),
+    path('vendas/editar/<int:pk>/', views.venda_update, name='venda_update'),
+    path('vendas/excluir/<int:pk>/', views.venda_delete, name='venda_delete'),
+    path('vendas/confirmar-exclusao/<int:pk>/', views.venda_confirm_delete, name='venda_confirm_delete'),
+
+    # API para buscar Requisição por ID (se precisar, pode usar a mesma do cliente para o CPF)
+    path('api/vendas/search_requisicao/', views.search_requisicao_details, name='search_requisicao_details'),
 
     # Módulo de Convênios (Listagem principal de convênios - "Incluir Convênio")
     path('convenios/', views.convenio_list, name='convenio_list'), # URL principal para a lista de convênios

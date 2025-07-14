@@ -1,10 +1,13 @@
 from django import forms
-from .models import Cliente,Empresa,Usuario,Setor,Categoria,Grupo,Ncm,Cfop,Cest,CstCson,Produto,ConvenioAbertura,Convenio,ConvenioEmissao
+from .models import Cliente,Empresa,Usuario,Setor,Categoria,Grupo,Ncm,Cfop,Cest,CstCson,Produto,ConvenioAbertura,Venda,Convenio,ConvenioEmissao
 from django.forms import PasswordInput
 import re
 from django.utils import timezone # Se for usar timezone.now().year na validação do ano
 import datetime
 from decimal import Decimal
+from django.forms.widgets import NumberInput, DateInput, TimeInput, Select
+from django.core.exceptions import ValidationError
+from django.utils.translation import gettext_lazy as _
 
 class ClienteForm(forms.ModelForm):
     class Meta:
@@ -741,3 +744,92 @@ class ConvenioEmissaoForm(forms.ModelForm):
             instance.HORA_TRANSACAO = timezone.now().time()
 
         return super().save(commit=commit)
+
+
+#---------------------------------------------------------------------------------------------------------------
+# Formulário de Vendas
+#---------------------------------------------------------------------------------------------------------------
+
+class VendaForm(forms.ModelForm):
+    # Campo para o CPF do Cliente (não é um campo do modelo Venda, mas é usado para busca)
+    cpf_cliente_busca = forms.CharField(
+        label="CPF/CNPJ do Cliente",
+        max_length=18,  # Para incluir máscara (000.000.000-00 ou 00.000.000/0000-00)
+        required=True,
+        help_text="Digite o CPF/CNPJ do cliente para buscar a requisição."
+    )
+    # Campo para o nome do cliente, que será preenchido automaticamente
+    nome_cliente_exibicao = forms.CharField(
+        label="Nome do Cliente",
+        max_length=255,
+        required=False,
+        widget=forms.TextInput(attrs={'readonly': 'readonly'})
+    )
+    # Campo para o número da requisição (ID da ConvenioEmissao)
+    numero_requisicao_busca = forms.IntegerField(
+        label="Número da Requisição",
+        required=True,
+        help_text="Digite o ID da requisição (Emissão de Convênio)."
+    )
+
+    class Meta:
+        model = Venda
+        fields = [
+            'id_usuario',  # Será preenchido na view com o usuário logado
+            'id_requisicao',
+            'id_cliente',
+            'id_convenio',
+            'Data_venda',
+            'Hora_venda',
+            'Valor_venda',
+            'Numero_Parcelas',
+        ]
+        widgets = {
+            'id_requisicao': forms.HiddenInput(),  # Campo hidden, preenchido via JS/backend
+            'id_cliente': forms.HiddenInput(),  # Campo hidden, preenchido via JS/backend
+            'id_convenio': forms.HiddenInput(),  # Campo hidden, preenchido via JS/backend
+            'Data_venda': DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+            'Hora_venda': TimeInput(attrs={'type': 'time', 'class': 'form-control'}),
+            'Valor_venda': NumberInput(attrs={'step': '0.01', 'class': 'form-control'}),
+            'Numero_Parcelas': NumberInput(attrs={'min': '1', 'max': '12', 'class': 'form-control'}),
+            # Ou Select se preferir dropdown
+            # 'Numero_Parcelas': Select(choices=[(i, str(i)) for i in range(1, 13)], attrs={'class': 'form-control'}), # Se for dropdown
+        }
+        labels = {
+            'id_requisicao': 'Requisição',  # Rótulo para display, embora seja hidden
+            'id_cliente': 'Cliente',
+            'id_convenio': 'Convênio',
+        }
+
+    # Custom clean method para validação de campos não-modelo e para associar IDs
+    def clean(self):
+        cleaned_data = super().clean()
+        cpf_cliente_busca = cleaned_data.get('cpf_cliente_busca')
+        numero_requisicao_busca = cleaned_data.get('numero_requisicao_busca')
+
+        # Validação do CPF e busca do cliente
+        if cpf_cliente_busca:
+            cpf_cleaned = ''.join(filter(str.isdigit, cpf_cliente_busca))
+            try:
+                cliente_encontrado = Cliente.objects.get(cpf_cnpj=cpf_cleaned)
+                cleaned_data['id_cliente'] = cliente_encontrado
+            except Cliente.DoesNotExist:
+                self.add_error('cpf_cliente_busca', 'Cliente não encontrado com o CPF/CNPJ informado.')
+            except Exception as e:
+                self.add_error('cpf_cliente_busca', f'Erro ao buscar cliente: {e}')
+
+        # Validação da Requisição e associação de Cliente e Convênio
+        if numero_requisicao_busca:
+            try:
+                requisicao_encontrada = ConvenioEmissao.objects.get(pk=numero_requisicao_busca)
+                cleaned_data['id_requisicao'] = requisicao_encontrada
+                # Preenche id_cliente e id_convenio com base na requisição
+                cleaned_data['id_cliente'] = requisicao_encontrada.ID_CLIENTE
+                cleaned_data['id_convenio'] = requisicao_encontrada.ID_CONVENIO
+            except ConvenioEmissao.DoesNotExist:
+                self.add_error('numero_requisicao_busca',
+                               'Requisição de Convênio não encontrada com o ID informado.')
+            except Exception as e:
+                self.add_error('numero_requisicao_busca', f'Erro ao buscar requisição: {e}')
+
+        return cleaned_data

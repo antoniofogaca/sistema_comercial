@@ -4,8 +4,8 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.db.models import Q
 from .models import Cliente, Empresa, Usuario, Setor, Categoria, Grupo, Ncm, Cfop, Cest, CstCson, Produto, \
-    ConvenioAbertura, Convenio, ConvenioEmissao, ConvenioEmiDet
-from .forms import ClienteForm,EmpresaForm,UsuarioForm,SetorForm,CategoriaForm,GrupoForm,NcmForm,CfopForm,CestForm,CstCsonForm,ProdutoForm,ConvenioAberturaForm,ConvenioForm,ConvenioEmissaoForm
+    ConvenioAbertura, Convenio, ConvenioEmissao, ConvenioEmiDet, Venda
+from .forms import ClienteForm,EmpresaForm,UsuarioForm,SetorForm,CategoriaForm,GrupoForm,NcmForm,CfopForm,CestForm,CstCsonForm,ProdutoForm,ConvenioAberturaForm,ConvenioForm,ConvenioEmissaoForm,VendaForm
 from django.contrib import messages
 from django.http import JsonResponse # Para AJAX
 from django.template.loader import render_to_string
@@ -19,7 +19,8 @@ import calendar  # Para calcular o último dia do mês
 from django.views.decorators.http import require_http_methods, require_GET
 from decimal import Decimal
 from datetime import datetime, time
-
+from django.contrib.auth.decorators import login_required # Para garantir que o usuário esteja logado
+from django.views.decorators.http import require_GET, require_POST # Certifique-se que require_POST está aqui
 
 # Páginas estáticas
 def home(request):
@@ -1702,3 +1703,158 @@ def get_convenio_details(request):
     except Exception as e:
         print(f"Erro ao buscar dados do convênio: {e}")
         return JsonResponse({'error': f'Erro interno ao buscar convênio: {str(e)}'}, status=500)
+
+#--------------------------------------------------------------------------------------------------------------
+# Vendas
+# --------------------------------------------------------------------------------------------------------------
+
+# --- VIEWS DE CONVENIO EMISSAO (existentes, mantidas como base) ---
+# ... (Seu código para convenio_emissao_list, convenio_emissao_create, convenio_emissao_update, etc.) ...
+# ... (Suas APIs search_client_by_cpf, get_convenio_details) ...
+
+# --- NOVAS VIEWS PARA VENDAS ---
+
+@login_required
+def venda_list(request):
+    vendas_list = Venda.objects.all()
+
+    search_query = request.GET.get('search', '')
+    sort_by = request.GET.get('sort_by', '-Data_venda')
+    per_page = int(request.GET.get('per_page', 10))
+
+    if search_query:
+        vendas_list = vendas_list.filter(
+            Q(id_cliente__cpf_cnpj__icontains=search_query) |
+            Q(id_cliente__nome_completo__icontains=search_query) |
+            Q(id_requisicao__pk__icontains=search_query) |  # Busca por ID da requisição
+            Q(id_convenio__nome_convenio__icontains=search_query) |
+            Q(Valor_venda__icontains=search_query)
+        )
+
+    if sort_by:
+        allowed_sort_fields = [
+            'id', 'Data_venda', 'Hora_venda', 'Valor_venda', 'Numero_Parcelas',
+            'id_cliente__nome_completo', 'id_requisicao__pk', 'id_convenio__nome_convenio'
+        ]
+        if sort_by in allowed_sort_fields or (sort_by.startswith('-') and sort_by[1:] in allowed_sort_fields):
+            vendas_list = vendas_list.order_by(sort_by)
+        else:
+            vendas_list = vendas_list.order_by('-Data_venda')
+
+    paginator = Paginator(vendas_list, per_page)
+    page_number = request.GET.get('page')
+
+    try:
+        vendas = paginator.get_page(page_number)
+    except EmptyPage:
+        vendas = paginator.get_page(paginator.num_pages)
+    except PageNotAnInteger:
+        vendas = paginator.get_page(1)
+
+    context = {
+        'vendas': vendas,
+        'search': search_query,
+        'sort_by': sort_by,
+        'per_page': per_page,
+    }
+
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        html = render_to_string('core/venda_table_partial.html', context, request=request)
+        return JsonResponse({'html': html})
+
+    return render(request, 'core/venda_list.html', context)
+
+@login_required
+def venda_create(request):
+    if request.method == 'POST':
+        form = VendaForm(request.POST)
+        if form.is_valid():
+            venda = form.save(commit=False)
+            venda.id_usuario = request.user  # Associa a venda ao usuário logado
+            venda.save()
+            messages.success(request, 'Venda registrada com sucesso!')
+            return redirect('core:venda_list')
+        else:
+            messages.error(request, 'Erro ao registrar a venda. Verifique os campos.')
+            print("Form Errors:", form.errors)  # Para debug
+    else:
+        form = VendaForm(initial={'Data_venda': timezone.now().date(), 'Hora_venda': timezone.now().time()})
+
+    context = {
+        'form': form,
+        'title': 'Registrar Nova Venda'
+    }
+    return render(request, 'core/venda_form.html', context)
+
+@login_required
+def venda_update(request, pk):
+    venda = get_object_or_404(Venda, pk=pk)
+    if request.method == 'POST':
+        form = VendaForm(request.POST, instance=venda)
+        if form.is_valid():
+            venda = form.save(commit=False)
+            venda.id_usuario = request.user  # Garante que o usuário da venda seja mantido/atualizado
+            venda.save()
+            messages.success(request, 'Venda atualizada com sucesso!')
+            return redirect('core:venda_list')
+        else:
+            messages.error(request, 'Erro ao atualizar a venda. Verifique os campos.')
+            print("Form Errors:", form.errors)  # Para debug
+    else:
+        # Preenche os campos de busca para exibição na edição
+        initial_data = {
+            'cpf_cliente_busca': venda.id_cliente.cpf_cnpj,
+            'nome_cliente_exibicao': venda.id_cliente.nome_completo,
+            'numero_requisicao_busca': venda.id_requisicao.pk,
+        }
+        form = VendaForm(instance=venda, initial=initial_data)
+
+    context = {
+        'form': form,
+        'title': 'Editar Venda'
+    }
+    return render(request, 'core/venda_form.html', context)
+
+@login_required
+def venda_confirm_delete(request, pk):
+    venda = get_object_or_404(Venda, pk=pk)
+    context = {
+        'venda': venda,
+        'title': 'Confirmar Exclusão'
+    }
+    return render(request, 'core/venda_confirm_delete.html', context)
+
+@login_required
+@require_POST
+def venda_delete(request, pk):
+    venda = get_object_or_404(Venda, pk=pk)
+    venda.delete()
+    messages.success(request, 'Venda excluída com sucesso!')
+    return redirect('core:venda_list')
+
+# --- NOVA API PARA BUSCAR DETALHES DA REQUISIÇÃO (EMISSÃO DE CONVÊNIO) ---
+@require_GET
+@csrf_exempt  # Cuidado ao usar em produção sem validação adequada
+def search_requisicao_details(request):
+    requisicao_id = request.GET.get('id', None)
+    if not requisicao_id:
+        return JsonResponse({'error': 'ID da Requisição não fornecido.'}, status=400)
+
+    try:
+        requisicao = ConvenioEmissao.objects.get(pk=requisicao_id)
+        data = {
+            'id_requisicao': requisicao.pk,
+            'cpf_cliente': requisicao.ID_CLIENTE.cpf_cnpj,
+            'nome_cliente': requisicao.ID_CLIENTE.nome_completo,
+            'id_cliente': requisicao.ID_CLIENTE.pk,
+            'id_convenio': requisicao.ID_CONVENIO.pk,
+            'nome_convenio': requisicao.ID_CONVENIO.nome_convenio,
+            'valor_requisicao': str(requisicao.VALOR),  # Converte Decimal para string
+            'qtd_parcela_requisicao': requisicao.QTD_PARCELA,
+        }
+        return JsonResponse(data)
+    except ConvenioEmissao.DoesNotExist:
+        return JsonResponse({'error': 'Requisição não encontrada.'}, status=404)
+    except Exception as e:
+        print(f"Erro ao buscar detalhes da requisição: {e}")
+        return JsonResponse({'error': f'Erro interno do servidor: {str(e)}'}, status=500)
