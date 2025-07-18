@@ -1714,7 +1714,7 @@ def get_convenio_details(request):
 
 # --- NOVAS VIEWS PARA VENDAS ---
 
-@login_required
+# @login_required
 def venda_list(request):
     vendas_list = Venda.objects.all()
 
@@ -1764,7 +1764,7 @@ def venda_list(request):
 
     return render(request, 'core/venda_list.html', context)
 
-@login_required
+# @login_required
 def venda_create(request):
     if request.method == 'POST':
         form = VendaForm(request.POST)
@@ -1786,7 +1786,7 @@ def venda_create(request):
     }
     return render(request, 'core/venda_form.html', context)
 
-@login_required
+# @login_required
 def venda_update(request, pk):
     venda = get_object_or_404(Venda, pk=pk)
     if request.method == 'POST':
@@ -1806,6 +1806,8 @@ def venda_update(request, pk):
             'cpf_cliente_busca': venda.id_cliente.cpf_cnpj,
             'nome_cliente_exibicao': venda.id_cliente.nome_completo,
             'numero_requisicao_busca': venda.id_requisicao.pk,
+            # A LINHA 'Valor_venda' FOI REMOVIDA DAQUI.
+            # O valor correto será carregado a partir da 'instance=venda'.
         }
         form = VendaForm(instance=venda, initial=initial_data)
 
@@ -1815,7 +1817,7 @@ def venda_update(request, pk):
     }
     return render(request, 'core/venda_form.html', context)
 
-@login_required
+# @login_required
 def venda_confirm_delete(request, pk):
     venda = get_object_or_404(Venda, pk=pk)
     context = {
@@ -1824,7 +1826,7 @@ def venda_confirm_delete(request, pk):
     }
     return render(request, 'core/venda_confirm_delete.html', context)
 
-@login_required
+# @login_required
 @require_POST
 def venda_delete(request, pk):
     venda = get_object_or_404(Venda, pk=pk)

@@ -790,7 +790,7 @@ class VendaForm(forms.ModelForm):
             'id_convenio': forms.HiddenInput(),  # Campo hidden, preenchido via JS/backend
             'Data_venda': DateInput(attrs={'type': 'date', 'class': 'form-control'}),
             'Hora_venda': TimeInput(attrs={'type': 'time', 'class': 'form-control'}),
-            'Valor_venda': NumberInput(attrs={'step': '0.01', 'class': 'form-control'}),
+            'Valor_venda': forms.TextInput(attrs={'class': 'form-control money-mask', 'placeholder': '0,00'}),
             'Numero_Parcelas': NumberInput(attrs={'min': '1', 'max': '12', 'class': 'form-control'}),
             # Ou Select se preferir dropdown
             # 'Numero_Parcelas': Select(choices=[(i, str(i)) for i in range(1, 13)], attrs={'class': 'form-control'}), # Se for dropdown
@@ -800,6 +800,8 @@ class VendaForm(forms.ModelForm):
             'id_cliente': 'Cliente',
             'id_convenio': 'Convênio',
         }
+
+
 
     # Custom clean method para validação de campos não-modelo e para associar IDs
     def clean(self):
@@ -826,6 +828,11 @@ class VendaForm(forms.ModelForm):
                 # Preenche id_cliente e id_convenio com base na requisição
                 cleaned_data['id_cliente'] = requisicao_encontrada.ID_CLIENTE
                 cleaned_data['id_convenio'] = requisicao_encontrada.ID_CONVENIO
+
+                # --- CORREÇÃO AQUI ---
+                # Buscava o valor do convênio genérico. Agora busca o valor da emissão específica.
+                cleaned_data['Valor_venda'] = requisicao_encontrada.VALOR
+
             except ConvenioEmissao.DoesNotExist:
                 self.add_error('numero_requisicao_busca',
                                'Requisição de Convênio não encontrada com o ID informado.')
