@@ -1,0 +1,136 @@
+{# core/templates/core/venda_list.html #}
+{% extends 'core/base.html' %}
+{% load static %}
+{% load widget_tweaks %}
+
+{% block title %}Lista de Vendas{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3 mb-0 text-gray-800">Lista de Vendas</h1>
+    <a href="{% url 'core:venda_create' %}" class="btn btn-primary">
+        <i class="fas fa-plus"></i> Nova Venda
+    </a>
+</div>
+
+<div class="card shadow mb-4">
+    <div class="card-header py-3">
+        <h6 class="m-0 font-weight-bold text-primary">Vendas Registradas</h6>
+    </div>
+    <div class="card-body">
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <input type="text" id="searchInputVenda" class="form-control" placeholder="Buscar por CPF, Cliente, Requisição ou Convênio" value="{{ search|default_if_none:'' }}">
+            </div>
+            <div class="col-md-3">
+                <select id="perPageSelectVenda" class="form-select">
+                    <option value="5" {% if per_page == 5 %}selected{% endif %}>5 por página</option>
+                    <option value="10" {% if per_page == 10 %}selected{% endif %}>10 por página</option>
+                    <option value="20" {% if per_page == 20 %}selected{% endif %}>20 por página</option>
+                    <option value="50" {% if per_page == 50 %}selected{% endif %}>50 por página</option>
+                </select>
+            </div>
+        </div>
+        <div class="table-responsive" id="vendaTableContainer">
+            {% include 'core/venda_table_partial.html' %}
+        </div>
+    </div>
+</div>
+{% endblock content %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchInput = document.getElementById('searchInputVenda');
+        const perPageSelect = document.getElementById('perPageSelectVenda');
+        const vendaTableContainer = document.getElementById('vendaTableContainer');
+        let debounceTimeout;
+
+        function fetchVendas(params = {}) {
+            clearTimeout(debounceTimeout);
+            debounceTimeout = setTimeout(() => {
+                const url = new URL(window.location.origin + window.location.pathname);
+                const currentParams = new URLSearchParams(window.location.search);
+
+                currentParams.forEach((value, key) => {
+                    if (!(key in params)) {
+                        url.searchParams.set(key, value);
+                    }
+                });
+
+                Object.keys(params).forEach(key => url.searchParams.set(key, params[key]));
+
+                url.searchParams.forEach((value, key) => {
+                    if (value === '') {
+                        url.searchParams.delete(key);
+                    }
+                });
+
+                console.log("Fetching Vendas URL:", url.toString());
+
+                fetch(url.toString(), {
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok ' + response.statusText);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (vendaTableContainer) {
+                        vendaTableContainer.innerHTML = data.html;
+                        window.history.pushState({}, '', url);
+                    } else {
+                        console.error("Element with ID 'vendaTableContainer' not found.");
+                    }
+                })
+                .catch(error => console.error('Erro ao carregar Vendas:', error));
+            }, 300);
+        }
+
+        if (searchInput) {
+            searchInput.addEventListener('input', function() {
+                fetchVendas({
+                    search: this.value,
+                    per_page: perPageSelect ? perPageSelect.value : 10,
+                    page: 1
+                });
+            });
+        }
+        if (perPageSelect) {
+            perPageSelect.addEventListener('change', function() {
+                fetchVendas({
+                    search: searchInput ? searchInput.value : '',
+                    per_page: this.value,
+                    page: 1
+                });
+            });
+        }
+
+        document.addEventListener('click', function(e) {
+            if (e.target && e.target.matches('.sort-link, .page-link')) {
+                e.preventDefault();
+
+                const currentSearch = searchInput ? searchInput.value : '';
+                const currentPerPage = perPageSelect ? perPageSelect.value : 10;
+
+                const url = new URL(e.target.href);
+                const params = Object.fromEntries(url.searchParams.entries());
+
+                if (currentSearch) params.search = currentSearch;
+                if (currentPerPage) params.per_page = currentPerPage;
+
+                fetchVendas(params);
+            }
+        });
+
+        const initialPerPage = '{{ per_page }}';
+        if (perPageSelect && initialPerPage) {
+            perPageSelect.value = initialPerPage;
+        }
+    });
+</script>
+{% endblock extra_js %}

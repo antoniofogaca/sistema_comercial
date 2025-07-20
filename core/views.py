@@ -1,5 +1,6 @@
 # core/views.py
 import json
+from django.contrib.auth.models import User
 from django.shortcuts import render, redirect, get_object_or_404
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.db.models import Q
@@ -21,7 +22,7 @@ from decimal import Decimal
 from datetime import datetime, time
 from django.contrib.auth.decorators import login_required # Para garantir que o usuário esteja logado
 from django.views.decorators.http import require_GET, require_POST # Certifique-se que require_POST está aqui
-
+from django.db.models import Sum
 # Páginas estáticas
 def home(request):
     return render(request, 'core/home.html')
@@ -1731,6 +1732,9 @@ def venda_list(request):
             Q(Valor_venda__icontains=search_query)
         )
 
+    # ⬇️ Calcule aqui, depois do filtro
+    total_vendas = vendas_list.aggregate(Sum('Valor_venda'))['Valor_venda__sum'] or 0
+
     if sort_by:
         allowed_sort_fields = [
             'id', 'Data_venda', 'Hora_venda', 'Valor_venda', 'Numero_Parcelas',
@@ -1753,6 +1757,7 @@ def venda_list(request):
 
     context = {
         'vendas': vendas,
+        'total_vendas': total_vendas,  # 👈 Incluído aqui
         'search': search_query,
         'sort_by': sort_by,
         'per_page': per_page,
@@ -1764,21 +1769,53 @@ def venda_list(request):
 
     return render(request, 'core/venda_list.html', context)
 
+from django.contrib.auth.decorators import login_required
+from core.models import Usuario
 # @login_required
 def venda_create(request):
     if request.method == 'POST':
         form = VendaForm(request.POST)
+
+        # Adiciona debug inicial
+        print("📥 Dados recebidos no POST:", request.POST)
+
         if form.is_valid():
+            print("✅ Formulário é válido")
+            print("🧼 Dados limpos (cleaned_data):", form.cleaned_data)
+
             venda = form.save(commit=False)
-            venda.id_usuario = request.user  # Associa a venda ao usuário logado
+           # venda.id_usuario = request.user
+            usuario_ficticio = Usuario.objects.first()
+
+            venda.id_usuario = usuario_ficticio
+
+            # Debug de campos críticos
+            print("🔗 ID Requisição:", form.cleaned_data.get('id_requisicao'))
+            print("👤 ID Cliente:", form.cleaned_data.get('id_cliente'))
+            print("📄 ID Convênio:", form.cleaned_data.get('id_convenio'))
+
+            venda.id_requisicao = form.cleaned_data.get('id_requisicao')
+            venda.id_cliente = form.cleaned_data.get('id_cliente')
+            venda.id_convenio = form.cleaned_data.get('id_convenio')
+
+            print("💾 Salvando a venda...")
+
             venda.save()
+            print("✅ Venda salva com sucesso!")
+
             messages.success(request, 'Venda registrada com sucesso!')
             return redirect('core:venda_list')
         else:
+            # Debug de erros
+            print("❌ Erros de validação no formulário:")
+            for field, errors in form.errors.items():
+                print(f" - {field}: {errors}")
             messages.error(request, 'Erro ao registrar a venda. Verifique os campos.')
-            print("Form Errors:", form.errors)  # Para debug
     else:
-        form = VendaForm(initial={'Data_venda': timezone.now().date(), 'Hora_venda': timezone.now().time()})
+        form = VendaForm(initial={
+            'Data_venda': timezone.now().date(),
+            'Hora_venda': timezone.now().time()
+        })
 
     context = {
         'form': form,
@@ -1793,7 +1830,7 @@ def venda_update(request, pk):
         form = VendaForm(request.POST, instance=venda)
         if form.is_valid():
             venda = form.save(commit=False)
-            venda.id_usuario = request.user  # Garante que o usuário da venda seja mantido/atualizado
+          #  venda.id_usuario = request.user  # Garante que o usuário da venda seja mantido/atualizado
             venda.save()
             messages.success(request, 'Venda atualizada com sucesso!')
             return redirect('core:venda_list')

@@ -690,6 +690,7 @@ class ConvenioEmiDet(models.Model):
 #-----------------------------------------------------------------------------------------------------------------------
 # Modelo de Vendas
 #-----------------------------------------------------------------------------------------------------------------------
+from core.models import Usuario
 class Venda(models.Model):
     # id_venda (chave primaria) - Será gerado automaticamente pelo Django (pk)
 
@@ -698,12 +699,14 @@ class Venda(models.Model):
     # from django.contrib.auth.models import User
     # Se você tiver um UserProfile customizado, use-o.
     # Exemplo com User padrão:
-    id_usuario = models.ForeignKey(
-        'auth.User', # 'auth.User' se você estiver usando o modelo de usuário padrão do Django
-        on_delete=models.PROTECT,
-        related_name='vendas_realizadas',
-        verbose_name="Usuário"
-    )
+    # id_usuario = models.ForeignKey(
+    #     'auth.User', # 'auth.User' se você estiver usando o modelo de usuário padrão do Django
+    #     on_delete=models.PROTECT,
+    #     related_name='vendas_realizadas',
+    #     verbose_name="Usuário"
+    # )
+
+    id_usuario = models.ForeignKey(Usuario, on_delete=models.PROTECT)
 
     # id_requisicao (chave estrangeira) tabela (convenio_emissao)
     id_requisicao = models.ForeignKey(

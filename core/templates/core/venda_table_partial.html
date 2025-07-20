@@ -1,0 +1,87 @@
+{# core/templates/core/venda_table_partial.html #}
+{% load static %}
+
+<table class="table table-bordered" id="dataTableVenda" width="100%" cellspacing="0">
+    <thead>
+        <tr>
+            <th><a href="?sort_by={% if sort_by == 'id' %}-{% endif %}id" class="sort-link">ID</a></th>
+            <th><a href="?sort_by={% if sort_by == 'id_requisicao__pk' %}-{% endif %}id_requisicao__pk" class="sort-link">Requisição ID</a></th>
+            <th><a href="?sort_by={% if sort_by == 'id_cliente__nome_completo' %}-{% endif %}id_cliente__nome_completo" class="sort-link">Cliente</a></th>
+            <th><a href="?sort_by={% if sort_by == 'id_cliente__cpf_cnpj' %}-{% endif %}id_cliente__cpf_cnpj" class="sort-link">CPF Cliente</a></th>
+            <th><a href="?sort_by={% if sort_by == 'id_convenio__nome_convenio' %}-{% endif %}id_convenio__nome_convenio" class="sort-link">Convênio</a></th>
+            <th><a href="?sort_by={% if sort_by == 'Data_venda' %}-{% endif %}Data_venda" class="sort-link">Data Venda</a></th>
+            <th><a href="?sort_by={% if sort_by == 'Valor_venda' %}-{% endif %}Valor_venda" class="sort-link">Valor</a></th>
+            <th><a href="?sort_by={% if sort_by == 'Numero_Parcelas' %}-{% endif %}Numero_Parcelas" class="sort-link">Parcelas</a></th>
+            <th>Ações</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for venda in vendas %}
+        <tr>
+            <td>{{ venda.id }}</td>
+            <td>{{ venda.id_requisicao.pk }}</td>
+            <td>{{ venda.id_cliente.nome_completo|default:"N/A" }}</td>
+            <td>{{ venda.id_cliente.cpf_cnpj|default:"N/A" }}</td>
+            <td>{{ venda.id_convenio.nome_convenio|default:"N/A" }}</td>
+            <td>{{ venda.Data_venda|date:"d/m/Y" }} {{ venda.Hora_venda|time:"H:i" }}</td>
+            <td>R$ {{ venda.Valor_venda|floatformat:2 }}</td>
+            <td>{{ venda.Numero_Parcelas }}</td>
+            <td>
+                <a href="{% url 'core:venda_update' venda.pk %}" class="btn btn-warning btn-sm" title="Editar">
+                    <i class="fas fa-edit"></i>
+                </a>
+                <a href="{% url 'core:venda_confirm_delete' venda.pk %}" class="btn btn-danger btn-sm" title="Excluir">
+                    <i class="fas fa-trash-alt"></i>
+                </a>
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="9" class="text-center">Nenhuma venda encontrada.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+                {% if vendas %}
+                <tr>
+                    <td colspan="6" class="text-end font-weight-bold">Total das Vendas:</td>
+                    <td colspan="1"><strong>R$ {{ total_vendas|floatformat:2 }}</strong></td>
+                    <td colspan="2"></td>
+                </tr>
+            {% endif %}
+</table>
+
+<nav aria-label="Page navigation">
+    <ul class="pagination justify-content-center">
+        {% if vendas.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ vendas.previous_page_number }}{% if search %}&search={{ search }}{% endif %}{% if per_page %}&per_page={{ per_page }}{% endif %}{% if sort_by %}&sort_by={{ sort_by }}{% endif %}" data-page="{{ vendas.previous_page_number }}">Anterior</a>
+            </li>
+        {% else %}
+            <li class="page-item disabled">
+                <span class="page-link">Anterior</span>
+            </li>
+        {% endif %}
+
+        {% for i in vendas.paginator.page_range %}
+            {% if vendas.number == i %}
+                <li class="page-item active" aria-current="page">
+                    <span class="page-link">{{ i }}</span>
+                </li>
+            {% else %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ i }}{% if search %}&search={{ search }}{% endif %}{% if per_page %}&per_page={{ per_page }}{% endif %}{% if sort_by %}&sort_by={{ sort_by }}{% endif %}" data-page="{{ i }}">{{ i }}</a>
+                </li>
+            {% endif %}
+        {% endfor %}
+
+        {% if vendas.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ vendas.next_page_number }}{% if search %}&search={{ search }}{% endif %}{% if per_page %}&per_page={{ per_page }}{% endif %}{% if sort_by %}&sort_by={{ sort_by }}{% endif %}" data-page="{{ vendas.next_page_number }}">Próximo</a>
+            </li>
+        {% else %}
+            <li class="page-item disabled">
+                <span class="page-link">Próximo</span>
+            </li>
+        {% endif %}
+    </ul>
+</nav>

@@ -775,7 +775,7 @@ class VendaForm(forms.ModelForm):
     class Meta:
         model = Venda
         fields = [
-            'id_usuario',  # Será preenchido na view com o usuário logado
+            #'id_usuario',  # Será preenchido na view com o usuário logado
             'id_requisicao',
             'id_cliente',
             'id_convenio',

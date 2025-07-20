@@ -1,0 +1,199 @@
+{# core/templates/core/venda_form.html #}
+
+{% extends 'core/base.html' %}
+{% load widget_tweaks %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="card shadow mb-4">
+    <div class="card-header py-3">
+        <h6 class="m-0 font-weight-bold text-primary">{{ title }}</h6>
+    </div>
+    <div class="card-body">
+        <form method="post">
+            {% csrf_token %}
+            <div class="mb-4">
+                <h5 class="text-primary">Dados da Venda</h5>
+            </div>
+
+            <div class="row">
+                <div class="col-md-2 mb-3">
+                    <label for="{{ form.numero_requisicao_busca.id_for_label }}" class="form-label">Número da Requisição<span class="text-danger">*</span></label>
+                    {% render_field form.numero_requisicao_busca class="form-control" %}
+                    <small class="form-text text-muted">{{ form.numero_requisicao_busca.help_text }}</small>
+                    {% if form.numero_requisicao_busca.errors %}
+                        {% for error in form.numero_requisicao_busca.errors %}
+                            <div class="invalid-feedback d-block">{{ error }}</div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+
+                <div class="col-md-3 mb-3">
+                    <label for="{{ form.cpf_cliente_busca.id_for_label }}" class="form-label">CPF/CNPJ do Cliente<span class="text-danger">*</span></label>
+                    {% render_field form.cpf_cliente_busca class="form-control cpf-mask"  %}
+                    <small class="form-text text-muted">{{ form.cpf_cliente_busca.help_text }}</small>
+                    {% if form.cpf_cliente_busca.errors %}
+                        {% for error in form.cpf_cliente_busca.errors %}
+                            <div class="invalid-feedback d-block">{{ error }}</div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+
+                <div class="col-md-7 mb-3">
+                    <label for="id_nome_cliente_exibicao_venda" class="form-label">Nome do Cliente</label>
+                    {% render_field form.nome_cliente_exibicao id="id_nome_cliente_exibicao_venda" class="form-control" %}
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-3 mb-3">
+                    <label for="{{ form.Data_venda.id_for_label }}" class="form-label">Data da Venda<span class="text-danger">*</span></label>
+                    {% render_field form.Data_venda type="text" class="form-control date-mask" placeholder="dd/mm/aaaa" %}
+                    {% if form.Data_venda.errors %}
+                        {% for error in form.Data_venda.errors %}
+                            <div class="invalid-feedback d-block">{{ error }}</div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label for="{{ form.Hora_venda.id_for_label }}" class="form-label">Hora da Venda<span class="text-danger">*</span></label>
+                    {% render_field form.Hora_venda class="form-control" %}
+                    {% if form.Hora_venda.errors %}
+                        {% for error in form.Hora_venda.errors %}
+                            <div class="invalid-feedback d-block">{{ error }}</div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label for="{{ form.Valor_venda.id_for_label }}" class="form-label">Valor da Venda<span class="text-danger">*</span></label>
+                    {% render_field form.Valor_venda class="form-control money-mask" placeholder="0,00" %}
+                    {% if form.Valor_venda.errors %}
+                        {% for error in form.Valor_venda.errors %}
+                            <div class="invalid-feedback d-block">{{ error }}</div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label for="{{ form.Numero_Parcelas.id_for_label }}" class="form-label">Número de Parcelas<span class="text-danger">*</span></label>
+                    {% render_field form.Numero_Parcelas class="form-control" %}
+                    {% if form.Numero_Parcelas.errors %}
+                        {% for error in form.Numero_Parcelas.errors %}
+                            <div class="invalid-feedback d-block">{{ error }}</div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+            </div>
+
+            {% render_field form.id_requisicao type="hidden" %}
+            {% render_field form.id_cliente type="hidden" %}
+            {% render_field form.id_convenio type="hidden" %}
+
+            <div class="d-flex justify-content-end mt-4">
+                <button type="submit" class="btn btn-primary me-2">Salvar</button>
+                <a href="{% url 'core:venda_list' %}" class="btn btn-secondary">Cancelar</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+{{ block.super }}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const numeroRequisicaoInput = document.getElementById('id_numero_requisicao_busca');
+    const cpfClienteBuscaInput = document.getElementById('id_cpf_cliente_busca');
+    const nomeClienteExibicaoInput = document.getElementById('id_nome_cliente_exibicao_venda');
+    const hiddenIdRequisicao = document.getElementById('id_id_requisicao');
+    const hiddenIdCliente = document.getElementById('id_id_cliente');
+    const hiddenIdConvenio = document.getElementById('id_id_convenio');
+    const valorVendaInput = document.getElementById('id_Valor_venda');
+    const numeroParcelasInput = document.getElementById('id_Numero_Parcelas');
+
+    $(cpfClienteBuscaInput).mask('000.000.000-00', {reverse: true});
+    $('.date-mask').mask('00/00/0000');
+    $('.money-mask').mask('#.##0,00', {reverse: true}); // Máscara monetária padrão e eficiente
+
+
+    function limparDadosRequisicaoCliente() {
+        cpfClienteBuscaInput.value = '';
+        nomeClienteExibicaoInput.value = '';
+        hiddenIdRequisicao.value = '';
+        hiddenIdCliente.value = '';
+        hiddenIdConvenio.value = '';
+        valorVendaInput.value = '';
+        numeroParcelasInput.value = '';
+    }
+
+    async function buscarDetalhesRequisicao(requisicaoId) {
+        if (!requisicaoId) {
+            limparDadosRequisicaoCliente();
+            return;
+        }
+        try {
+            const response = await fetch(`/api/vendas/search_requisicao/?id=${encodeURIComponent(requisicaoId)}`);
+            if (!response.ok) {
+                const errorData = await response.json();
+                alert(`Erro ao buscar requisição: ${errorData.error || response.statusText}`);
+                limparDadosRequisicaoCliente();
+                return;
+            }
+            const data = await response.json();
+
+            if (data.id_requisicao) {
+                cpfClienteBuscaInput.value = data.cpf_cliente;
+                nomeClienteExibicaoInput.value = data.nome_cliente;
+                hiddenIdRequisicao.value = data.id_requisicao;
+                hiddenIdCliente.value = data.id_cliente;
+                hiddenIdConvenio.value = data.id_convenio;
+
+                // --- VALOR SENDO ATRIBUÍDO DE FORMA DIRETA ---
+                valorVendaInput.value = data.valor_requisicao;
+
+                numeroParcelasInput.value = data.qtd_parcela_requisicao;
+            } else {
+                alert('Requisição não encontrada.');
+                limparDadosRequisicaoCliente();
+            }
+        } catch (error) {
+            console.error('Erro na requisição da API de vendas:', error);
+            alert('Ocorreu um erro ao buscar os detalhes da requisição.');
+            limparDadosRequisicaoCliente();
+        }
+    }
+
+    numeroRequisicaoInput.addEventListener('change', function () {
+        const reqId = this.value.trim();
+        buscarDetalhesRequisicao(reqId);
+    });
+
+    {% if form.instance.pk %}
+        const initialReqId = numeroRequisicaoInput.value;
+        if (initialReqId) {
+            buscarDetalhesRequisicao(initialReqId);
+        }
+    {% endif %}
+
+    // FUNÇÃO DE SUBMIT REMOVIDA PARA TESTE
+    $('form').on('submit', function () {
+        const dataInput = $('#id_Data_venda');
+        const dataBr = dataInput.val();
+        if (dataBr.includes('/')) {
+            const [dia, mes, ano] = dataBr.split('/');
+            if (dia && mes && ano) {
+                dataInput.val(`${ano}-${mes}-${dia}`);
+            }
+        }
+
+        // Este código pega o valor mascarado (ex: "1.650,21") e converte para "1650.21" para o Django entender
+        const valorInput = $('#id_Valor_venda');
+        if (valorInput.val()) {
+             const valorLimpo = valorInput.val().replace(/\./g, '').replace(',', '.');
+             valorInput.val(valorLimpo);
+        }
+    });
+});
+</script>
+{% endblock %}
