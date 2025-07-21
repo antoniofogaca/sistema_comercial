@@ -1449,6 +1449,8 @@ def convenio_emissao_list(request):
 
     try:
         convenios_emissao = paginator.get_page(page_number)
+        # ⬇️ Calcule aqui, depois do filtro
+        total_emissoes = convenios_emissao_list.aggregate(Sum('VALOR'))['VALOR__sum'] or 0
     except EmptyPage:
         convenios_emissao = paginator.get_page(paginator.num_pages)
     except PageNotAnInteger:
@@ -1456,6 +1458,7 @@ def convenio_emissao_list(request):
 
     context = {
         'emissoes': convenios_emissao,
+        'total_emissoes': total_emissoes,  # 👈 Incluído aqui
         'search': search_query,
         'status_filter': status_filter,
         'sort_by': sort_by,
@@ -1732,9 +1735,6 @@ def venda_list(request):
             Q(Valor_venda__icontains=search_query)
         )
 
-    # ⬇️ Calcule aqui, depois do filtro
-    total_vendas = vendas_list.aggregate(Sum('Valor_venda'))['Valor_venda__sum'] or 0
-
     if sort_by:
         allowed_sort_fields = [
             'id', 'Data_venda', 'Hora_venda', 'Valor_venda', 'Numero_Parcelas',
@@ -1750,6 +1750,9 @@ def venda_list(request):
 
     try:
         vendas = paginator.get_page(page_number)
+        # ⬇️ Calcule aqui, depois do filtro
+        total_vendas = vendas_list.aggregate(Sum('Valor_venda'))['Valor_venda__sum'] or 0
+
     except EmptyPage:
         vendas = paginator.get_page(paginator.num_pages)
     except PageNotAnInteger:

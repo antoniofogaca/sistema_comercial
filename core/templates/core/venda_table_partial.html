@@ -41,13 +41,13 @@
         </tr>
         {% endfor %}
     </tbody>
-                {% if vendas %}
-                <tr>
-                    <td colspan="6" class="text-end font-weight-bold">Total das Vendas:</td>
-                    <td colspan="1"><strong>R$ {{ total_vendas|floatformat:2 }}</strong></td>
-                    <td colspan="2"></td>
-                </tr>
-            {% endif %}
+        {% if vendas %}
+            <tr>
+                <td colspan="6" class="text-end font-weight-bold">Total Geral das Vendas:</td>
+                <td colspan="1"><strong>R$ {{ total_vendas|floatformat:2 }}</strong></td>
+                <td colspan="2"></td>
+            </tr>
+        {% endif %}
 </table>
 
 <nav aria-label="Page navigation">

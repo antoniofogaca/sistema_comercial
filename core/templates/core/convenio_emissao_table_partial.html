@@ -45,6 +45,13 @@
         </tr>
         {% endfor %}
     </tbody>
+        {% if emissoes %}
+            <tr>
+                <td colspan="6" class="text-end font-weight-bold">Total Geral das Requisiçoes:</td>
+                <td colspan="1"><strong>R$ {{ total_emissoes|floatformat:2 }}</strong></td>
+                <td colspan="2"></td>
+            </tr>
+        {% endif %}
 </table>
 
 {# Paginação - Note que agora usa 'emissoes' #}
