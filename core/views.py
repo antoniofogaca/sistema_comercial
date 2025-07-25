@@ -4,6 +4,7 @@ from django.contrib.auth.models import User
 from django.shortcuts import render, redirect, get_object_or_404
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.db.models import Q
+from weasyprint import HTML, CSS
 from .models import Cliente, Empresa, Usuario, Setor, Categoria, Grupo, Ncm, Cfop, Cest, CstCson, Produto, \
     ConvenioAbertura, Convenio, ConvenioEmissao, ConvenioEmiDet, Venda
 from .forms import ClienteForm,EmpresaForm,UsuarioForm,SetorForm,CategoriaForm,GrupoForm,NcmForm,CfopForm,CestForm,CstCsonForm,ProdutoForm,ConvenioAberturaForm,ConvenioForm,ConvenioEmissaoForm,VendaForm
@@ -1900,3 +1901,59 @@ def search_requisicao_details(request):
     except Exception as e:
         print(f"Erro ao buscar detalhes da requisição: {e}")
         return JsonResponse({'error': f'Erro interno do servidor: {str(e)}'}, status=500)
+
+def print_convenio_emissao_requisition(request, pk):
+    """
+    Gera um PDF da requisição de compra a partir de um ConvenioEmissao.
+    """
+    convenio_emissao = get_object_or_404(ConvenioEmissao, pk=pk)
+    parcelas = ConvenioEmiDet.objects.filter(ID=convenio_emissao).order_by('N_PARCELA')
+
+    # Tentativa de obter a empresa associada ao convênio.
+    # Se você alterou Convenio.cd_loja para ForeignKey:
+    empresa = convenio_emissao.ID_CONVENIO.cd_loja
+    # Se cd_loja no Convenio ainda for IntegerField:
+    # try:
+    #     empresa = Empresa.objects.get(codigo_loja=convenio_emissao.ID_CONVENIO.cd_loja)
+    # except Empresa.DoesNotExist:
+    #     empresa = None # Ou trate como um erro, ou use dados fixos
+
+    # Você também pode pegar a empresa do usuário logado, se essa for a intenção.
+    # if request.user.is_authenticated and hasattr(request.user, 'usuario') and request.user.usuario.id_loja:
+    #     empresa = request.user.usuario.id_loja
+    # else:
+    #     empresa = None # Ou uma empresa padrão, se houver
+
+    context = {
+        'convenio_emissao': convenio_emissao,
+        'parcelas': parcelas,
+        'empresa': empresa, # Passa o objeto empresa para o template
+        'request_date': convenio_emissao.DATA_TRANSACAO,
+        'request_time': convenio_emissao.HORA_TRANSACAO,
+    }
+
+    template_path = 'core/requisicao_compra_pdf.html'
+    template = get_template(template_path)
+    html_content = template.render(context)
+
+    # Cria o objeto HTML
+    html = HTML(string=html_content, base_url=request.build_absolute_uri())
+
+    # Caminho para os arquivos estáticos (CSS, imagens)
+    # Certifique-se de que os arquivos CSS e de imagem sejam acessíveis
+    # No caso de WeasyPrint, o base_url ajuda a resolver paths relativos.
+    # Para CSS específicos de impressão, você pode carregar diretamente aqui.
+    # Exemplo:
+    # css_file_path = os.path.join(settings.STATIC_ROOT, 'css/print.css')
+    # if os.path.exists(css_file_path):
+    #     css = CSS(filename=css_file_path)
+    #     pdf_file = html.write_pdf(stylesheets=[css])
+    # else:
+    #     pdf_file = html.write_pdf()
+
+    # Gera o PDF
+    pdf_file = html.write_pdf()
+
+    response = HttpResponse(pdf_file, content_type='application/pdf')
+    response['Content-Disposition'] = f'inline; filename="requisicao_compra_{convenio_emissao.pk}.pdf"'
+    return response

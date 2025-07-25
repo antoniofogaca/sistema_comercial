@@ -543,7 +543,15 @@ class Convenio(models.Model):
     # Se 'cd_loja' for uma referência a outra tabela (como uma tabela de Lojas),
     # o ideal seria usar uma ForeignKey. Ex:
     # cd_loja = models.ForeignKey('Loja', on_delete=models.PROTECT, null=True, blank=True, verbose_name="Loja")
-    cd_loja          = models.IntegerField(null=True, blank=True, verbose_name="Código da Loja")
+    # cd_loja          = models.IntegerField(null=True, blank=True, verbose_name="Código da Loja")
+    # cd_loja deve ser uma ForeignKey para Empresa para facilitar a relação
+    cd_loja = models.ForeignKey(
+        'Empresa', # Referencia o modelo Empresa
+        on_delete=models.PROTECT, # Garante que não apague empresas associadas a convênios
+        null=True,
+        blank=True,
+        verbose_name="Loja Associada"
+    )
 
     nome_convenio    = models.CharField(max_length=100, verbose_name="Nome do Convênio", help_text="Nome de identificação do convênio.")
     cnpj             = models.CharField(max_length=18, unique=True, verbose_name="CNPJ", help_text="CNPJ do conveniado. Formato: XX.XXX.XXX/XXXX-XX")

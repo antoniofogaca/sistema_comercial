@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Requisição de Compra #{{ convenio_emissao.pk }}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            font-size: 10pt;
+            color: #333;
+        }
+        .container {
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+            border: 1px solid #ccc;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #000;
+            padding-bottom: 10px;
+        }
+        .header .logo {
+            max-width: 150px;
+            height: auto;
+        }
+        .header .company-info {
+            text-align: right;
+            font-size: 10pt;
+        }
+        .header .company-info h1 {
+            margin: 0;
+            font-size: 14pt;
+        }
+        .header .company-info p {
+            margin: 2px 0;
+        }
+        .section-title {
+            background-color: #f0f0f0;
+            padding: 5px 10px;
+            margin-top: 15px;
+            margin-bottom: 10px;
+            border-left: 5px solid #007bff;
+            font-weight: bold;
+        }
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        .info-item {
+            display: flex;
+            align-items: baseline;
+        }
+        .info-item label {
+            font-weight: bold;
+            margin-right: 5px;
+            white-space: nowrap;
+        }
+        .info-item span {
+            flex-grow: 1;
+            border-bottom: 1px dotted #ccc;
+            padding-bottom: 2px;
+        }
+        .info-block {
+            margin-bottom: 15px;
+        }
+        .info-block label {
+            font-weight: bold;
+            display: block;
+            margin-bottom: 5px;
+        }
+        .info-block span {
+            border-bottom: 1px dotted #ccc;
+            padding-bottom: 2px;
+            display: block;
+        }
+        .table-parcelas {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            margin-bottom: 20px;
+        }
+        .table-parcelas th, .table-parcelas td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        .table-parcelas th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 15px;
+            border-top: 1px solid #ccc;
+            font-size: 9pt;
+        }
+        .signature-line {
+            width: 250px;
+            border-top: 1px solid #000;
+            margin: 40px auto 10px auto;
+            padding-top: 5px;
+            text-align: center;
+        }
+
+        /* Flexbox fallback for grid */
+        .info-grid {
+            display: flex;
+            flex-wrap: wrap;
+        }
+        .info-grid .info-item {
+            width: 48%; /* Adjust as needed for spacing */
+            margin-right: 4%; /* Space between columns */
+            margin-bottom: 10px;
+        }
+        .info-grid .info-item:nth-child(2n) {
+            margin-right: 0; /* No right margin for every second item */
+        }
+        .info-grid .info-item:last-child {
+             margin-right: 0;
+        }
+
+        @page {
+            size: A4;
+            margin: 2cm;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div>
+                {% if empresa and empresa.logo %}
+                    <img src="{{ empresa.logo.url }}" alt="Logo da Empresa" class="logo">
+                {% else %}
+                    <p>SUA LOGO AQUI</p>
+                {% endif %}
+            </div>
+            <div class="company-info">
+                <h1>{{ empresa.nome_empresa|default:"Nome da Empresa" }}</h1>
+                <p>{{ empresa.razao_social|default:"Razão Social da Empresa Ltda." }}</p>
+                <p>CNPJ: {{ empresa.cnpj|default:"XX.XXX.XXX/XXXX-XX" }}</p>
+                <p>{{ empresa.logradouro|default:"Rua Exemplo, 123" }} - {{ empresa.bairro|default:"Bairro Exemplo" }}</p>
+                <p>{{ empresa.cidade|default:"Cidade" }}/{{ empresa.uf|default:"UF" }} - CEP: {{ empresa.cep|default:"XXXXX-XXX" }}</p>
+                <p>Telefone: {{ empresa.telefone|default:"(XX) XXXX-XXXX" }} | E-mail: {{ empresa.email|default:"email@empresa.com" }}</p>
+            </div>
+        </div>
+
+        <h2 style="text-align: center; margin-bottom: 20px;">REQUISIÇÃO DE COMPRA CONVÊNIO</h2>
+
+        <div class="section-title">DADOS DA REQUISIÇÃO</div>
+        <div class="info-grid">
+            <div class="info-item"><label>Nº da Requisição:</label><span>{{ convenio_emissao.pk }}</span></div>
+            <div class="info-item"><label>Data da Requisição:</label><span>{{ convenio_emissao.DATA_TRANSACAO|date:"d/m/Y" }}</span></div>
+            <div class="info-item"><label>Hora da Requisição:</label><span>{{ convenio_emissao.HORA_TRANSACAO|time:"H:i" }}</span></div>
+            <div class="info-item"><label>Mês de Referência:</label><span>{{ convenio_emissao.MES_REFERENCIA }}</span></div>
+            <div class="info-item"><label>Valor Total:</label><span>R$ {{ convenio_emissao.VALOR|floatformat:2|intcomma }}</span></div>
+            <div class="info-item"><label>Nº de Parcelas:</label><span>{{ convenio_emissao.QTD_PARCELA }}</span></div>
+        </div>
+
+        <div class="section-title">DADOS DO CLIENTE</div>
+        <div class="info-grid">
+            <div class="info-item"><label>Nome:</label><span>{{ convenio_emissao.ID_CLIENTE.nome_completo }}</span></div>
+            <div class="info-item"><label>CPF/CNPJ:</label><span>{{ convenio_emissao.ID_CLIENTE.cpf_cnpj }}</span></div>
+            <div class="info-item"><label>Telefone:</label><span>{{ convenio_emissao.ID_CLIENTE.telefone|default:"N/A" }}</span></div>
+            <div class="info-item"><label>Email:</label><span>{{ convenio_emissao.ID_CLIENTE.email|default:"N/A" }}</span></div>
+            <div class="info-block">
+                <label>Endereço:</label>
+                <span>
+                    {{ convenio_emissao.ID_CLIENTE.logradouro|default:"" }}
+                    {% if convenio_emissao.ID_CLIENTE.logradouro %}, {% endif %}
+                    {{ convenio_emissao.ID_CLIENTE.cidade|default:"" }} - {{ convenio_emissao.ID_CLIENTE.uf|default:"" }}
+                    {% if convenio_emissao.ID_CLIENTE.cep %}, CEP: {{ convenio_emissao.ID_CLIENTE.cep }}{% endif %}
+                </span>
+            </div>
+        </div>
+
+        <div class="section-title">DADOS DO CONVÊNIO</div>
+        <div class="info-grid">
+            <div class="info-item"><label>Nome Convênio:</label><span>{{ convenio_emissao.ID_CONVENIO.nome_convenio }}</span></div>
+            <div class="info-item"><label>CNPJ Convênio:</label><span>{{ convenio_emissao.ID_CONVENIO.cnpj }}</span></div>
+            <div class="info-item"><label>Contato:</label><span>{{ convenio_emissao.ID_CONVENIO.contato|default:"N/A" }}</span></div>
+            <div class="info-item"><label>Telefone Convênio:</label><span>{{ convenio_emissao.ID_CONVENIO.telefone|default:"N/A" }}</span></div>
+        </div>
+
+        <div class="section-title">DETALHES DAS PARCELAS</div>
+        <table class="table-parcelas">
+            <thead>
+                <tr>
+                    <th>Nº Parcela</th>
+                    <th>Valor Parcela</th>
+                    <th>Data Vencimento</th>
+                    <th>Data Emissão</th>
+                    <th>Status Pagamento</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for parcela in parcelas %}
+                <tr>
+                    <td>{{ parcela.N_PARCELA }}</td>
+                    <td>R$ {{ parcela.VALOR_PARCELA|floatformat:2|intcomma }}</td>
+                    <td>{{ parcela.DATA_VENCIMENTO|date:"d/m/Y" }}</td>
+                    <td>{{ parcela.DATA_EMISSAO|date:"d/m/Y H:i" }}</td>
+                    <td>{{ parcela.get_STATUS_PG_display }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" style="text-align: center;">Nenhuma parcela encontrada para esta emissão.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <div class="footer">
+            <p>____________________________________________</p>
+            <p>{{ convenio_emissao.ID_CLIENTE.nome_completo }}</p>
+            <p>Assinatura do Cliente</p>
+            <br>
+            <p>____________________________________________</p>
+            <p>{{ request.user.get_full_name|default:request.user.username }}</p>
+            <p>Assinatura do Operador</p>
+            <br>
+            <p>Documento gerado em {{ request_date|date:"d/m/Y" }} às {{ request_time|time:"H:i" }}</p>
+            <p>Sistema de Convênio - Todos os direitos reservados.</p>
+        </div>
+    </div>
+</body>
+</html>

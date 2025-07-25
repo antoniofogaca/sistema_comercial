@@ -35,6 +35,8 @@ urlpatterns = [
     path('convenios/emissao/editar/<int:pk>/', views.convenio_emissao_update, name='convenio_emissao_update'),
     path('convenios/emissao/excluir/<int:pk>/', views.convenio_emissao_delete, name='convenio_emissao_delete'),
     path('convenios/emissao/confirmar-exclusao/<int:pk>/', views.convenio_emissao_confirm_delete, name='convenio_emissao_confirm_delete'),
+    path('convenio-emissao/<int:pk>/print/', views.print_convenio_emissao_requisition, name='convenio_emissao_print'),
+    # NOVA URL
 
     # NOVAS URLs para Abertura de Convênio (Já estão boas)
     path('convenios/abertura/', views.convenio_abertura_list, name='convenio_abertura_list'),

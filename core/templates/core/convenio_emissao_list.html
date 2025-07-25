@@ -20,7 +20,7 @@
         <div class="row mb-3">
             <div class="col-md-6">
                 {# Updated placeholder for search #}
-                <input type="text" id="searchInputConvenioEmissao" class="form-control" placeholder="Buscar por CPF, Cliente, Convênio ou Mês" value="{{ search|default_if_none:'' }}">
+                <input type="text" id="searchInputConvenioEmissao" class="form-control" placeholder="Buscar por CPF, Cliente, Convênio ou Mês" value="{{ search|default_if_none:''}}">
             </div>
             {# NOVO FILTRO DE STATUS AQUI - Note: ConvenioEmissao model does not have 'cancelado' directly #}
             {# This filter will be less useful unless you filter by related Cliente/Convenio status #}
@@ -154,6 +154,16 @@
                 if (currentPerPage) params.per_page = currentPerPage;
 
                 fetchConvenioEmissoes(params); // Corrected function call
+            }
+            const printButton = e.target.closest('.print-requisition-btn');
+            if (printButton) { // Verifica se um botão com a classe foi encontrado
+                e.preventDefault();
+                const convenioEmissaoId = printButton.dataset.id; // Pega o ID do botão encontrado
+                if (convenioEmissaoId) { // Garante que o ID não está vazio/undefined
+                    window.open(`/convenio-emissao/${convenioEmissaoId}/print/`, '_blank'); // Abre em nova aba
+                } else {
+                    console.error("ID do Convênio Emitido não encontrado no botão de impressão.");
+                }
             }
         });
 
